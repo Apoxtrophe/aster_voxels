@@ -1,4 +1,5 @@
-//Screen
+use bevy::prelude::*;
+
 pub const SCREEN_WIDTH: f32 = 1920.0;
 pub const SCREEN_HEIGHT: f32 = 1080.0;
 
@@ -8,4 +9,4 @@ pub const PLAYER_SPRINT: f32 = 8.0;
 pub const MOUSE_SENSITIVITY:f32 = 0.1;
 
 //World
-pub const WORLD_SIZE: usize = 100; 
+pub const WORLD_SIZE: i32 = 10; 

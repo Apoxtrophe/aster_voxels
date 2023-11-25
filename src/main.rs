@@ -1,7 +1,11 @@
 mod config;
+mod voxels;
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use bevy_flycam::NoCameraPlayerPlugin;
 use config::*;
+
+mod voxel_structure;
+use voxel_structure::*;
 
 mod player;
 use player::*;
@@ -9,6 +13,7 @@ use bevy::prelude::*;
 
 use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution};
 use bevy::window::PrimaryWindow;
+use voxels::setup_voxel;
 
 
 fn main() {
@@ -17,6 +22,7 @@ fn main() {
         .add_plugins(AtmospherePlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
+        .add_systems(Startup, setup_voxel)
         .add_systems(Update, camera_rotation_system)
         .add_systems(Update, camera_movement_system)
         .run();
@@ -32,6 +38,8 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
+    // VOXEL
+
     // plane
     commands.spawn((
         PbrBundle {
