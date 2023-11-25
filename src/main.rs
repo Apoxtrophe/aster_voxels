@@ -1,4 +1,5 @@
 mod config;
+use bevy_atmosphere::plugin::AtmospherePlugin;
 use bevy_flycam::NoCameraPlayerPlugin;
 use config::*;
 
@@ -13,6 +14,7 @@ use bevy::window::PrimaryWindow;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(AtmospherePlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
         .add_systems(Update, camera_rotation_system)
