@@ -109,6 +109,7 @@ pub fn raycast(
         let ray = Ray3d::new(camera_position, camera_forward);
 
         // Cast the ray
-        raycast.debug_cast_ray(ray, &default(), &mut gizmos);
+        let intersect = raycast.debug_cast_ray(ray, &default(), &mut gizmos);
+        println!("{:?}", intersect)
     }
 }

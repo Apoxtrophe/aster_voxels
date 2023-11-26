@@ -56,9 +56,9 @@ fn setup(
     window.resolution = WindowResolution::new(SCREEN_WIDTH,SCREEN_HEIGHT);
     window.present_mode = PresentMode::AutoVsync;
     window.cursor.icon = CursorIcon::Crosshair;
-    window.cursor.grab_mode = CursorGrabMode::Locked;
-    window.mode = WindowMode::Fullscreen;
-    window.cursor.visible = false;
+    window.cursor.grab_mode = CursorGrabMode::None;
+    window.mode = WindowMode::Windowed;
+    window.cursor.visible = true;
 
     // Crosshair
     let texture_handle = asset_server.load("Crosshair.png");

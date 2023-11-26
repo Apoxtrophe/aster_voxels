@@ -17,16 +17,11 @@ pub fn voxel_startup(
     let mut voxel_world = VoxelWorld::new();
 
     // Add a Tile voxel
-    
-    for i in 0..STARTING_SIZE{
-        for j in 0..STARTING_SIZE{
-            voxel_world.set_voxel(
-                &mut commands,
-                IVec3::new(i, 0, j),
-                Voxel { voxel_type: VoxelType::Tile, is_on: false },
-                voxel_assets.voxel_mesh.clone(),
-                voxel_assets.tile_material.clone(),
-            );
-        }
-    }
+    voxel_world.set_voxel(
+        &mut commands,
+        IVec3::new(1, 2, 3),
+        Voxel { voxel_type: VoxelType::Tile, is_on: false },
+        voxel_assets.voxel_mesh.clone(),
+        voxel_assets.tile_material.clone(),
+    );
 }
