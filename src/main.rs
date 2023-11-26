@@ -1,17 +1,15 @@
 mod config;
 mod voxels;
 use bevy_atmosphere::plugin::AtmospherePlugin;
-use bevy_flycam::NoCameraPlayerPlugin;
 use config::*;
 
 mod voxel_structure;
-use voxel_structure::*;
 
 mod player;
 use player::*;
 use bevy::prelude::*;
 
-use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution};
+use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode};
 use bevy::window::PrimaryWindow;
 use voxels::setup_voxel;
 
@@ -38,21 +36,15 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    // VOXEL
-
-    // plane
-    commands.spawn((
-        PbrBundle {
-            mesh: meshes.add(shape::Plane::from_size(20.).into()),
-            material: materials.add(Color::rgb(0.8, 0.8, 0.8).into()),
+    //SUN
+    commands.spawn(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            // Adjust the color and intensity as needed
+            color: Color::WHITE, // Sunlight color
+            illuminance: 100000.0, // Sunlight intensity
             ..default()
         },
-        Ground,
-    ));
-
-    // light
-    commands.spawn(DirectionalLightBundle {
-        transform: Transform::from_translation(Vec3::ONE).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_4) * Quat::from_rotation_y(-std::f32::consts::FRAC_PI_4)),
         ..default()
     });
 
@@ -63,6 +55,7 @@ fn setup(
     window.present_mode = PresentMode::AutoVsync;
     window.cursor.icon = CursorIcon::Crosshair;
     window.cursor.grab_mode = CursorGrabMode::Locked;
+    window.mode = WindowMode::Fullscreen;
     window.cursor.visible = false;
 
     // Crosshair
