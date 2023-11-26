@@ -3,7 +3,6 @@ use config::*;
 use bevy::input::mouse::MouseMotion;
 
 use bevy::prelude::*;
-use bevy_flycam::{FlyCam, NoCameraPlayerPlugin, MovementSettings};
 use bevy_atmosphere::prelude::*;
 
 

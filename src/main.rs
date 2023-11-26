@@ -1,9 +1,10 @@
 mod config;
-mod voxels;
+mod voxel_init;
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use config::*;
 
 mod voxel_structure;
+mod voxel_assets;
 
 mod player;
 use player::*;
@@ -11,7 +12,7 @@ use bevy::prelude::*;
 
 use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode};
 use bevy::window::PrimaryWindow;
-use voxels::setup_voxel;
+use voxel_init::setup_voxel;
 
 
 fn main() {
