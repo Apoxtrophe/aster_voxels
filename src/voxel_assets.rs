@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy::render::mesh::Mesh;
 
+
+#[derive(Resource)]
 pub struct VoxelAssets {
     pub tile_material: Handle<StandardMaterial>,
     pub wire_material: Handle<StandardMaterial>,

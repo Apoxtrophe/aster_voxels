@@ -12,7 +12,7 @@ use bevy::prelude::*;
 
 use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode};
 use bevy::window::PrimaryWindow;
-use voxel_init::setup_voxel;
+use voxel_init::voxel_startup;
 
 
 fn main() {
@@ -21,9 +21,10 @@ fn main() {
         .add_plugins(AtmospherePlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
-        .add_systems(Startup, setup_voxel)
+        .add_systems(Startup, voxel_startup)
         .add_systems(Update, camera_rotation_system)
         .add_systems(Update, camera_movement_system)
+        .add_systems(Update, raycast)
         .run();
 }
 

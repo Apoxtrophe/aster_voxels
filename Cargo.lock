@@ -212,6 +212,7 @@ dependencies = [
  "bevy",
  "bevy_atmosphere",
  "bevy_flycam",
+ "bevy_mod_raycast",
 ]
 
 [[package]]
@@ -776,6 +777,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b596c41a56f2268ec7cde560edc588bc7b5886e4b49c8b27c4dcc9f7c743424c"
 dependencies = [
  "glam",
+]
+
+[[package]]
+name = "bevy_mod_raycast"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b127622dcbfd9e6a1661219af65965625901c2549b434f0c44c4460dd055dce"
+dependencies = [
+ "bevy_app",
+ "bevy_asset",
+ "bevy_derive",
+ "bevy_ecs",
+ "bevy_gizmos",
+ "bevy_math",
+ "bevy_reflect",
+ "bevy_render",
+ "bevy_sprite",
+ "bevy_transform",
+ "bevy_utils",
+ "bevy_window",
+ "crossbeam-channel",
 ]
 
 [[package]]

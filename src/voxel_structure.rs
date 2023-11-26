@@ -8,7 +8,7 @@ use bevy::pbr::StandardMaterial;
 use bevy::pbr::PbrBundle;
 use bevy::transform::components::Transform;
 use bevy::utils::default;
-
+use bevy::ecs::system::Resource;
 
 pub enum VoxelType {
     Air,
@@ -21,6 +21,8 @@ pub struct Voxel {
     pub is_on: bool,
 }
 
+
+#[derive(Resource)]
 pub struct VoxelWorld {
     pub voxels: HashMap<IVec3, Voxel>,
     entities: HashMap<IVec3, Entity>,

@@ -1,6 +1,15 @@
 use super::config;
 use config::*;
 use bevy::input::mouse::MouseMotion;
+use crate::voxel_structure::Voxel;
+use crate::voxel_structure::VoxelType;
+
+use crate::voxel_structure::VoxelWorld;
+use crate::voxel_assets::VoxelAssets;
+
+use bevy_mod_raycast::prelude::Raycast;
+use bevy_mod_raycast::prelude::Ray3d;
+
 
 use bevy::prelude::*;
 use bevy_atmosphere::prelude::*;
@@ -73,7 +82,7 @@ pub fn camera_rotation_system(
     mut query: Query<(&mut Transform, &mut CameraRotation), With<Camera>>,
 ) {
     for (mut transform, mut rotation) in query.iter_mut() {
-        for event in mouse_motion_events.iter() {
+        for event in mouse_motion_events.read() {
             rotation.yaw -= event.delta.x * MOUSE_SENSITIVITY; // Adjust sensitivity as needed
             rotation.pitch += event.delta.y * -MOUSE_SENSITIVITY; // Adjust sensitivity as needed
 
@@ -84,5 +93,22 @@ pub fn camera_rotation_system(
 
             transform.rotation = Quat::from_axis_angle(Vec3::Y, yaw_radians) * Quat::from_axis_angle(Vec3::X, pitch_radians);
         }
+    }
+}
+
+pub fn raycast(
+    mut raycast: Raycast, 
+    mut gizmos: Gizmos, 
+    query: Query<&Transform, With<Camera>>, // Query to get the camera's transform
+) {
+    if let Ok(camera_transform) = query.get_single() {
+        let camera_position = camera_transform.translation;
+        let camera_forward = camera_transform.forward();
+
+        // Cast the ray from the camera's position in the direction it's facing
+        let ray = Ray3d::new(camera_position, camera_forward);
+
+        // Cast the ray
+        raycast.debug_cast_ray(ray, &default(), &mut gizmos);
     }
 }
