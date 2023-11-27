@@ -1,13 +1,10 @@
 use super::config;
 use config::*;
 use bevy::input::mouse::MouseMotion;
-use crate::voxel_assets;
 use crate::voxel_structure::Voxel;
 use crate::voxel_structure::VoxelType;
 
 use crate::voxel_structure::VoxelWorld;
-
-use bevy_mod_raycast::prelude::IntersectionData;
 
 
 use bevy_mod_raycast::prelude::Raycast;
@@ -18,12 +15,9 @@ use bevy::prelude::*;
 use bevy_atmosphere::prelude::*;
 
 
-use super::voxel_structure::*;
 use super::voxel_assets::*;
-use super::config::*;
 
-use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
+
 
 
 pub fn create_player(mut commands: Commands) {
@@ -111,8 +105,8 @@ pub fn voxel_place_system(
     mut commands: Commands,
     mouse_input: Res<Input<MouseButton>>,
     query: Query<&Transform, With<Camera>>,
-    mut raycast: Raycast, 
-    mut gizmos: Gizmos, 
+    raycast: Raycast, 
+    gizmos: Gizmos, 
     mut voxel_world: ResMut<VoxelWorld>,
     voxel_assets: Res<VoxelAssets>,
 ) {

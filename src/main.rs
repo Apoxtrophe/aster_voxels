@@ -1,5 +1,4 @@
 mod config;
-mod voxel_init;
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use config::*;
 
@@ -12,12 +11,14 @@ use bevy::prelude::*;
 
 use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode};
 use bevy::window::PrimaryWindow;
-use voxel_init::voxel_startup;
 
 use crate::voxel_assets::VoxelAssets;
 use crate::voxel_structure::VoxelWorld;
 use crate::voxel_structure::Voxel;
 use crate::voxel_structure::VoxelType;
+use core::f32::consts::PI;
+use bevy::pbr::CascadeShadowConfigBuilder;
+
 
 
 
@@ -48,12 +49,23 @@ fn setup(
     //SUN
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            // Adjust the color and intensity as needed
-            color: Color::WHITE, // Sunlight color
-            illuminance: 100000.0, // Sunlight intensity
+            shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_4) * Quat::from_rotation_y(-std::f32::consts::FRAC_PI_4)),
+        transform: Transform {
+            translation: Vec3::new(10.0, 2.0,0.0),
+            rotation: Quat::from_rotation_x(-PI / 4.),
+            ..default()
+        },
+        // The default cascade config is designed to handle large scenes.
+        // As this example has a much smaller world, we can tighten the shadow
+        // bounds for better visual quality.
+        cascade_shadow_config: CascadeShadowConfigBuilder {
+            first_cascade_far_bound: 4.0,
+            maximum_distance: 1000.0,
+            ..default()
+        }
+        .into(),
         ..default()
     });
 
