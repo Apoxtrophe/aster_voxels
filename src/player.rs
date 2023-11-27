@@ -7,6 +7,9 @@ use crate::voxel_structure::VoxelType;
 use crate::voxel_structure::VoxelWorld;
 use crate::voxel_assets::VoxelAssets;
 
+use bevy_mod_raycast::prelude::IntersectionData;
+
+
 use bevy_mod_raycast::prelude::Raycast;
 use bevy_mod_raycast::prelude::Ray3d;
 
@@ -109,7 +112,8 @@ pub fn raycast(
         let ray = Ray3d::new(camera_position, camera_forward);
 
         // Cast the ray
-        let intersect = raycast.debug_cast_ray(ray, &default(), &mut gizmos);
-        println!("{:?}", intersect)
+        let intersect = raycast.debug_cast_ray(ray, &default(), &mut gizmos); // Modify this line to include max_distance
+        let popopa = intersect;
+        println!("{:?}", popopa);
     }
 }
