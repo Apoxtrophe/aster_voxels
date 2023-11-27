@@ -14,6 +14,13 @@ use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolu
 use bevy::window::PrimaryWindow;
 use voxel_init::voxel_startup;
 
+use crate::voxel_assets::VoxelAssets;
+use crate::voxel_structure::VoxelWorld;
+use crate::voxel_structure::Voxel;
+use crate::voxel_structure::VoxelType;
+
+
+
 
 fn main() {
     App::new()
@@ -21,10 +28,10 @@ fn main() {
         .add_plugins(AtmospherePlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
-        .add_systems(Startup, voxel_startup)
+        //.add_systems(Startup, voxel_startup)
         .add_systems(Update, camera_rotation_system)
         .add_systems(Update, camera_movement_system)
-        .add_systems(Update, raycast)
+        .add_systems(Update, voxel_place_system)
         .run();
 }
 
@@ -56,9 +63,9 @@ fn setup(
     window.resolution = WindowResolution::new(SCREEN_WIDTH,SCREEN_HEIGHT);
     window.present_mode = PresentMode::AutoVsync;
     window.cursor.icon = CursorIcon::Crosshair;
-    window.cursor.grab_mode = CursorGrabMode::None;
-    window.mode = WindowMode::Windowed;
-    window.cursor.visible = true;
+    window.cursor.grab_mode = CursorGrabMode::Locked;
+    window.mode = WindowMode::Fullscreen;
+    window.cursor.visible = false;
 
     // Crosshair
     let texture_handle = asset_server.load("Crosshair.png");
@@ -74,4 +81,23 @@ fn setup(
         },
         ..Default::default()
     });
+
+    // Create materials for tiles and wires
+    let voxel_assets = VoxelAssets::new(&mut materials, &mut meshes);
+
+    // Initialize the voxel world
+    let mut voxel_world = VoxelWorld::new();
+
+
+    voxel_world.set_voxel(
+        &mut commands,
+        IVec3::new(4, 6, 7),
+        Voxel { voxel_type: VoxelType::Wire, is_on: false },
+        voxel_assets.voxel_mesh.clone(),
+        voxel_assets.wire_material.clone(),
+    );
+
+    commands.insert_resource(voxel_world);
+
+    commands.insert_resource(voxel_assets);
 }

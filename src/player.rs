@@ -1,11 +1,11 @@
 use super::config;
 use config::*;
 use bevy::input::mouse::MouseMotion;
+use crate::voxel_assets;
 use crate::voxel_structure::Voxel;
 use crate::voxel_structure::VoxelType;
 
 use crate::voxel_structure::VoxelWorld;
-use crate::voxel_assets::VoxelAssets;
 
 use bevy_mod_raycast::prelude::IntersectionData;
 
@@ -16,6 +16,14 @@ use bevy_mod_raycast::prelude::Ray3d;
 
 use bevy::prelude::*;
 use bevy_atmosphere::prelude::*;
+
+
+use super::voxel_structure::*;
+use super::voxel_assets::*;
+use super::config::*;
+
+use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 
 
 pub fn create_player(mut commands: Commands) {
@@ -99,11 +107,39 @@ pub fn camera_rotation_system(
     }
 }
 
-pub fn raycast(
+pub fn voxel_place_system(
+    mut commands: Commands,
+    mouse_input: Res<Input<MouseButton>>,
+    query: Query<&Transform, With<Camera>>,
+    mut raycast: Raycast, 
+    mut gizmos: Gizmos, 
+    mut voxel_world: ResMut<VoxelWorld>,
+    voxel_assets: Res<VoxelAssets>,
+) {
+    let trinity = raycaster(raycast, gizmos, query);
+    let (valid, position, adjacent) = trinity;
+
+    if mouse_input.just_pressed(MouseButton::Left) && valid {
+        voxel_world.set_voxel(
+            &mut commands,
+            adjacent,
+            Voxel { voxel_type: VoxelType::Wire, is_on: false },
+            voxel_assets.voxel_mesh.clone(),
+            voxel_assets.wire_material.clone(),
+        );
+    }
+    if mouse_input.just_pressed(MouseButton::Right) && valid {
+        voxel_world.remove_voxel(&mut commands, &position)
+    }
+}
+
+
+
+pub fn raycaster(
     mut raycast: Raycast, 
     mut gizmos: Gizmos, 
     query: Query<&Transform, With<Camera>>, // Query to get the camera's transform
-) {
+)-> (bool, IVec3, IVec3) {
     if let Ok(camera_transform) = query.get_single() {
         let camera_position = camera_transform.translation;
         let camera_forward = camera_transform.forward();
@@ -121,15 +157,14 @@ pub fn raycast(
             vertex1 = vertex1 - normal*0.5;
             vertex2 = vertex2 - normal*0.5;
             vertex3 = vertex3 - normal*0.5;
-            let position = ((vertex1 + vertex2 + vertex3) * 0.33333).round();
-            println!("{}", position);
-
+            let position:IVec3 = ((vertex1 + vertex2 + vertex3) * 0.33333).round().as_ivec3();
             let valid: bool = distance < INTERACTION_DISTANCE;
 
-            let adjacent = position + normal;
+            let adjacent = position + normal.as_ivec3();
 
-            println!("Within distance:{} Position:{} Adjacent block: {}", valid, position, adjacent);
-
+            return (valid, position, adjacent);
+            //return (valid, position, adjacent);
         }
     }
+    (false, IVec3::ZERO, IVec3::ZERO)
 }
