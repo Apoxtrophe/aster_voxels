@@ -16,12 +16,11 @@ pub fn voxel_startup(
     // Initialize the voxel world
     let mut voxel_world = VoxelWorld::new();
 
-    // Add a Tile voxel
     voxel_world.set_voxel(
         &mut commands,
-        IVec3::new(1, 2, 3),
-        Voxel { voxel_type: VoxelType::Tile, is_on: false },
+        IVec3::new(4, 6, 7),
+        Voxel { voxel_type: VoxelType::Wire, is_on: false },
         voxel_assets.voxel_mesh.clone(),
-        voxel_assets.tile_material.clone(),
+        voxel_assets.wire_material.clone(),
     );
 }

@@ -12,4 +12,4 @@ pub const MOUSE_SENSITIVITY:f32 = 0.1;
 pub const STARTING_SIZE: i32 = 10;
 
 //Player Raycasting
-pub const DIST: Vec3 = Vec3::new(0.0, 0.0, -7.0);
+pub const INTERACTION_DISTANCE: f32 = 10.0;

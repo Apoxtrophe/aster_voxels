@@ -108,12 +108,28 @@ pub fn raycast(
         let camera_position = camera_transform.translation;
         let camera_forward = camera_transform.forward();
 
-        // Cast the ray from the camera's position in the direction it's facing
         let ray = Ray3d::new(camera_position, camera_forward);
 
-        // Cast the ray
         let intersect = raycast.debug_cast_ray(ray, &default(), &mut gizmos); // Modify this line to include max_distance
-        let popopa = intersect;
-        println!("{:?}", popopa);
+
+        for (_, intersection_data) in intersect {
+            let distance = intersection_data.distance();
+            let normal = intersection_data.normal();
+            let mut vertex1: Vec3 = intersection_data.triangle().unwrap().v0.into();
+            let mut vertex2: Vec3  = intersection_data.triangle().unwrap().v1.into();
+            let mut vertex3: Vec3  = intersection_data.triangle().unwrap().v2.into();
+            vertex1 = vertex1 - normal*0.5;
+            vertex2 = vertex2 - normal*0.5;
+            vertex3 = vertex3 - normal*0.5;
+            let position = ((vertex1 + vertex2 + vertex3) * 0.33333).round();
+            println!("{}", position);
+
+            let valid: bool = distance < INTERACTION_DISTANCE;
+
+            let adjacent = position + normal;
+
+            println!("Within distance:{} Position:{} Adjacent block: {}", valid, position, adjacent);
+
+        }
     }
 }
