@@ -21,9 +21,8 @@ fn main() {
         .add_plugins(AtmospherePlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
-        //.add_systems(Startup, voxel_startup)
-        .add_systems(Update, camera_rotation_system)
         .add_systems(Update, camera_movement_system)
+        .add_systems(Update, camera_rotation_system)
         .add_systems(Update, voxel_place_system)
         .run();
 }
@@ -38,6 +37,16 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
+    //Ground
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(shape::Plane::from_size(20.).into()),
+            material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
+            ..default()
+        },
+        Ground,
+    ));
+
     //SUN
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
@@ -67,8 +76,8 @@ fn setup(
     window.resolution = WindowResolution::new(SCREEN_WIDTH,SCREEN_HEIGHT);
     window.present_mode = PresentMode::AutoVsync;
     window.cursor.icon = CursorIcon::Crosshair;
-    window.cursor.grab_mode = CursorGrabMode::Locked;
-    window.mode = WindowMode::Fullscreen;
+    window.cursor.grab_mode = CursorGrabMode::None;
+    window.mode = WindowMode::Windowed;
     window.cursor.visible = false;
 
     // Crosshair
