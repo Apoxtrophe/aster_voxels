@@ -1,27 +1,19 @@
+// Importing necessary modules
 mod config;
-use bevy_atmosphere::plugin::AtmospherePlugin;
-use config::*;
-
 mod voxel_structure;
 mod voxel_assets;
-
 mod player;
-use player::*;
+
+// Using structs and enums directly from their modules
 use bevy::prelude::*;
-
-use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode};
-use bevy::window::PrimaryWindow;
-
-use crate::voxel_assets::VoxelAssets;
-use crate::voxel_structure::VoxelWorld;
-use crate::voxel_structure::Voxel;
-use crate::voxel_structure::VoxelType;
+use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode, PrimaryWindow};
+use bevy_atmosphere::plugin::AtmospherePlugin;
+use config::*;
+use player::*;
+use voxel_assets::VoxelAssets;
+use voxel_structure::{VoxelWorld, Voxel, VoxelType};
 use core::f32::consts::PI;
 use bevy::pbr::CascadeShadowConfigBuilder;
-
-
-
-
 
 fn main() {
     App::new()

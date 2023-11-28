@@ -1,14 +1,16 @@
 use std::collections::HashMap;
-use bevy::ecs::entity::Entity;
-use bevy::math::IVec3;
-use bevy::ecs::system::Commands;
-use bevy::asset::Handle;
-use bevy::render::mesh::Mesh;
-use bevy::pbr::StandardMaterial;
-use bevy::pbr::PbrBundle;
-use bevy::transform::components::Transform;
-use bevy::utils::default;
-use bevy::ecs::system::Resource;
+use bevy::{
+    asset::Handle,
+    ecs::{
+        entity::Entity,
+        system::{Commands, Resource},
+    },
+    math::IVec3,
+    pbr::{PbrBundle, StandardMaterial},
+    render::mesh::Mesh,
+    transform::components::Transform,
+    utils::default,
+};
 
 pub enum VoxelType {
     Air,

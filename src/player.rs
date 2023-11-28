@@ -1,24 +1,15 @@
-use super::config;
-use config::*;
-use bevy::input::mouse::MouseMotion;
-use crate::voxel_structure::Voxel;
-use crate::voxel_structure::VoxelType;
+// Importing modules from the current crate and super module
+use super::{config, voxel_assets::*};
+use crate::voxel_structure::{Voxel, VoxelType, VoxelWorld};
 
-use crate::voxel_structure::VoxelWorld;
-
-
-use bevy_mod_raycast::prelude::Raycast;
-use bevy_mod_raycast::prelude::Ray3d;
-
-
+// Using Bevy and other external crates
 use bevy::prelude::*;
+use bevy::input::mouse::MouseMotion;
 use bevy_atmosphere::prelude::*;
+use bevy_mod_raycast::prelude::{Raycast, Ray3d};
 
-
-use super::voxel_assets::*;
-
-
-
+// Using all items from the config module
+use config::*;
 
 pub fn create_player(mut commands: Commands) {
     
@@ -106,11 +97,11 @@ pub fn voxel_place_system(
     mouse_input: Res<Input<MouseButton>>,
     query: Query<&Transform, With<Camera>>,
     raycast: Raycast, 
-    gizmos: Gizmos, 
+    mut gizmos: Gizmos, 
     mut voxel_world: ResMut<VoxelWorld>,
     voxel_assets: Res<VoxelAssets>,
 ) {
-    let trinity = raycaster(raycast, gizmos, query);
+    let trinity = raycaster(raycast, query);
     let (valid, position, adjacent) = trinity;
 
     if mouse_input.just_pressed(MouseButton::Left) && valid {
@@ -125,13 +116,19 @@ pub fn voxel_place_system(
     if mouse_input.just_pressed(MouseButton::Right) && valid {
         voxel_world.remove_voxel(&mut commands, &position)
     }
+
+    if valid {
+        gizmos.cuboid(
+            Transform::from_translation(position.as_vec3()).with_scale(Vec3::splat(1.05)),
+            Color::BLACK,
+        );
+    } 
 }
 
 
 
 pub fn raycaster(
-    mut raycast: Raycast, 
-    mut gizmos: Gizmos, 
+    mut raycast: Raycast,  
     query: Query<&Transform, With<Camera>>, // Query to get the camera's transform
 )-> (bool, IVec3, IVec3) {
     if let Ok(camera_transform) = query.get_single() {
@@ -140,11 +137,11 @@ pub fn raycaster(
 
         let ray = Ray3d::new(camera_position, camera_forward);
 
-        let intersect = raycast.debug_cast_ray(ray, &default(), &mut gizmos); // Modify this line to include max_distance
+        let intersect = raycast.cast_ray(ray, &default()); // Modify this line to include max_distance
 
         for (_, intersection_data) in intersect {
             let distance = intersection_data.distance();
-            let normal = intersection_data.normal();
+            let normal = intersection_data.normal().round();
             let mut vertex1: Vec3 = intersection_data.triangle().unwrap().v0.into();
             let mut vertex2: Vec3  = intersection_data.triangle().unwrap().v1.into();
             let mut vertex3: Vec3  = intersection_data.triangle().unwrap().v2.into();
