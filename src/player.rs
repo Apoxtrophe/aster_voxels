@@ -1,10 +1,12 @@
 use super::config;
 use bevy::ecs::entity;
+use bevy::input::mouse::MouseWheel;
 use config::*;
 use bevy::input::mouse::MouseMotion;
 use crate::voxel_structure::Voxel;
 use crate::voxel_structure::VoxelType;
 use crate::voxel_structure::VoxelWorld;
+use crate::voxel_structure::VoxelSelector;
 use bevy_mod_raycast::prelude::Raycast;
 use bevy_mod_raycast::prelude::Ray3d;
 
@@ -72,18 +74,32 @@ pub fn voxel_place_system(
     gizmos: Gizmos, 
     mut voxel_world: ResMut<VoxelWorld>,
     voxel_assets: Res<VoxelAssets>,
+    voxel_selector: Res<VoxelSelector>,
 ) {
     let (valid, position, adjacent) = raycaster(raycast, gizmos, query);
 
+
+    if let Some(voxel) = voxel_world.get_voxel(position) {
+        println!("{:?}", voxel.voxel_type);
+    } else {
+        println!("No voxel found at the given position");
+    }
+
     if valid {
         if mouse_input.just_pressed(MouseButton::Left) {
+
+            let current_voxel_type = voxel_selector.current_voxel_type();
+
+            let material = get_material_for_voxel(current_voxel_type, &voxel_assets);
+
             voxel_world.set_voxel(
                 &mut commands,
                 adjacent,
-                Voxel { voxel_type: VoxelType::Wire, is_on: false },
+                Voxel { voxel_type: current_voxel_type, is_on: false },
                 voxel_assets.voxel_mesh.clone(),
-                voxel_assets.wire_material.clone(),
+                material,
             );
+            
         } else if mouse_input.just_pressed(MouseButton::Right) {
             voxel_world.remove_voxel(&mut commands, &position);
         }
@@ -98,7 +114,7 @@ pub fn raycaster(
     if let Ok(camera_transform) = query.get_single() {
         let ray = Ray3d::new(camera_transform.translation, camera_transform.forward());
 
-        if let Some((entity, intersection_data)) = raycast.cast_ray(ray, &default()).iter().next() {
+        if let Some((_, intersection_data)) = raycast.cast_ray(ray, &default()).iter().next() {
             let distance = intersection_data.distance();
             let normal = intersection_data.normal().round();
             let triangle = intersection_data.triangle().unwrap();
@@ -111,10 +127,35 @@ pub fn raycaster(
                     Color::BLACK,
                 );
             }
-            println!("Valid:{}, Position:{} Adjacent:{} Entity:{:?} Normal{}", valid, position, adjacent, entity, normal);
             return (valid, position, adjacent);
         }
     }
     
     (false, IVec3::ZERO, IVec3::ZERO)
+}
+
+pub fn voxel_scroll_system(
+    mut mouse_motion_events: EventReader<MouseWheel>,
+    mut voxel_selector: ResMut<VoxelSelector>,
+) {
+    for event in mouse_motion_events.read() {
+        if event.y > 0.0 {
+            voxel_selector.next();
+        } else if event.y <0.0 {
+            voxel_selector.previous();
+        }
+    }
+}
+
+fn get_material_for_voxel(voxel_type: VoxelType, voxel_assets: &Res<VoxelAssets>) -> Handle<StandardMaterial> {
+    match voxel_type {
+        VoxelType::Tile => voxel_assets.tile_material.clone(),
+        VoxelType::Wire => voxel_assets.wire_material.clone(),
+        VoxelType::Out => voxel_assets.out_material.clone(),
+        VoxelType::Not => voxel_assets.not_material.clone(),
+        VoxelType::And => voxel_assets.and_material.clone(),
+        VoxelType::Or => voxel_assets.or_material.clone(),
+        VoxelType::Xor => voxel_assets.xor_material.clone(),
+        VoxelType::Switch => voxel_assets.switch_material.clone(),
+    }
 }

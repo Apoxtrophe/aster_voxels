@@ -12,10 +12,16 @@ use bevy::{
     utils::default,
 };
 
+#[derive(Debug, Copy, Clone)]
 pub enum VoxelType {
-    Air,
     Tile,
     Wire,
+    Out,
+    Not,
+    And,
+    Or,
+    Xor,
+    Switch,
 }
 
 pub struct Voxel {
@@ -60,5 +66,41 @@ impl VoxelWorld {
             commands.entity(entity).despawn();
         }
         self.voxels.remove(position);
+    }
+}
+
+#[derive(Resource)]
+pub struct VoxelSelector {
+    pub current_index: usize,
+}
+
+impl VoxelSelector {
+    pub fn new() -> Self {
+        VoxelSelector { current_index: 0 }
+    }
+
+    pub fn next(&mut self) {
+        self.current_index = (self.current_index + 1) % 8;
+    }
+
+    pub fn previous(&mut self) {
+        if self.current_index == 0 {
+            self.current_index == 7;
+        } else {
+            self.current_index -= 1;
+        }
+    }
+
+    pub fn current_voxel_type(&self) -> VoxelType {
+        match self.current_index {
+            0 => VoxelType::Tile,
+            1 => VoxelType::Wire,
+            2 => VoxelType::Out,
+            3 => VoxelType::Not,
+            4 => VoxelType::And,
+            5 => VoxelType::Or,
+            6 => VoxelType::Xor,
+            _ => VoxelType::Switch,
+        }
     }
 }
