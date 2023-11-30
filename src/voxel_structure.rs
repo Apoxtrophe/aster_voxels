@@ -85,7 +85,7 @@ impl VoxelSelector {
 
     pub fn previous(&mut self) {
         if self.current_index == 0 {
-            self.current_index == 7;
+            self.current_index = 7;
         } else {
             self.current_index -= 1;
         }

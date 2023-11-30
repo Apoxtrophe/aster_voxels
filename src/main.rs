@@ -3,6 +3,9 @@ mod config;
 mod voxel_structure;
 mod voxel_assets;
 mod player;
+mod hotbar;
+use hotbar::*;
+
 
 // Using structs and enums directly from their modules
 use crate::voxel_structure::VoxelSelector;
@@ -12,9 +15,9 @@ use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolu
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use config::*;
 use crate::voxel_assets::VoxelAssets;
-
 use player::*;
 use voxel_structure::{VoxelWorld, Voxel, VoxelType};
+use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use core::f32::consts::PI;
 use bevy::pbr::CascadeShadowConfigBuilder;
 
@@ -22,12 +25,15 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(AtmospherePlugin)
+        .add_plugins(EguiPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
         .add_systems(Update, camera_movement_system)
         .add_systems(Update, camera_rotation_system)
         .add_systems(Update, voxel_place_system)
         .add_systems(Update, voxel_scroll_system)
+        .add_systems(Update, ui_system)
+        .add_systems(Update, ui_example_system)
         .run();
 }
 
@@ -80,7 +86,7 @@ fn setup(
     window.resolution = WindowResolution::new(SCREEN_WIDTH,SCREEN_HEIGHT);
     window.present_mode = PresentMode::AutoVsync;
     window.cursor.icon = CursorIcon::Crosshair;
-    window.cursor.grab_mode = CursorGrabMode::None;
+    window.cursor.grab_mode = CursorGrabMode::Locked;
     window.mode = WindowMode::Windowed;
     window.cursor.visible = true;
 
@@ -111,5 +117,9 @@ fn setup(
 
     commands.insert_resource(voxel_assets);
 
-    commands.insert_resource(VoxelSelector::new())
+    commands.insert_resource(VoxelSelector::new());
+
+    //Hotbar initialization
+    commands.insert_resource(OccupiedScreenSpace{bottom: 10.0});
+
 }
