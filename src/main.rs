@@ -3,8 +3,6 @@ mod config;
 mod voxel_structure;
 mod voxel_assets;
 mod player;
-mod hotbar;
-use hotbar::*;
 
 
 // Using structs and enums directly from their modules
@@ -32,8 +30,6 @@ fn main() {
         .add_systems(Update, camera_rotation_system)
         .add_systems(Update, voxel_place_system)
         .add_systems(Update, voxel_scroll_system)
-        .add_systems(Update, ui_system)
-        .add_systems(Update, ui_example_system)
         .run();
 }
 
@@ -120,6 +116,5 @@ fn setup(
     commands.insert_resource(VoxelSelector::new());
 
     //Hotbar initialization
-    commands.insert_resource(OccupiedScreenSpace{bottom: 10.0});
 
 }
