@@ -69,7 +69,7 @@ impl VoxelWorld {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Clone, Copy)]
 pub struct VoxelSelector {
     pub current_index: usize,
 }

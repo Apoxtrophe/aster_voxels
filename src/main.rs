@@ -3,8 +3,7 @@ mod config;
 mod voxel_structure;
 mod voxel_assets;
 mod player;
-
-
+mod voxel_lib;
 // Using structs and enums directly from their modules
 use crate::voxel_structure::VoxelSelector;
 
@@ -14,8 +13,8 @@ use bevy_atmosphere::plugin::AtmospherePlugin;
 use config::*;
 use crate::voxel_assets::VoxelAssets;
 use player::*;
-use voxel_structure::{VoxelWorld, Voxel, VoxelType};
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use voxel_structure::VoxelWorld;
+use bevy_egui::EguiPlugin;
 use core::f32::consts::PI;
 use bevy::pbr::CascadeShadowConfigBuilder;
 
@@ -26,10 +25,8 @@ fn main() {
         .add_plugins(EguiPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
-        .add_systems(Update, camera_movement_system)
-        .add_systems(Update, camera_rotation_system)
-        .add_systems(Update, voxel_place_system)
-        .add_systems(Update, voxel_scroll_system)
+        .add_systems(Update, camera_control_system)
+        .add_systems(Update, voxel_interaction_system)
         .run();
 }
 
@@ -107,7 +104,7 @@ fn setup(
     let voxel_assets = VoxelAssets::new(&mut materials, &mut meshes);
 
     // Initialize the voxel world
-    let mut voxel_world = VoxelWorld::new();
+    let voxel_world = VoxelWorld::new();
 
     commands.insert_resource(voxel_world);
 
