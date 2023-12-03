@@ -1,16 +1,15 @@
-use super::config;
-use bevy::input::mouse::MouseWheel;
-use config::*;
-use bevy::input::mouse::MouseMotion;
-use crate::voxel_structure::VoxelWorld;
-use crate::voxel_structure::VoxelSelector;
-use bevy_mod_raycast::prelude::Raycast;
-use super::voxel_lib::*;
-
+// Bevy-related imports
 use bevy::prelude::*;
+use bevy::input::mouse::{MouseMotion, MouseWheel};
+use bevy_mod_raycast::prelude::Raycast;
 use bevy_atmosphere::prelude::*;
 
+// Voxel assets and configuration
 use super::voxel_assets::*;
+use super::config::*;
+use super::voxel_lib::*;
+use super::voxel_structure::*;
+
 
 pub fn create_player(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
@@ -21,14 +20,13 @@ pub fn create_player(mut commands: Commands) {
     .insert(AtmosphereCamera::default());
 }
 
-
 #[derive(Component)]
 pub struct CameraRotation {
     pitch: f32,
     yaw: f32,
 }
 
-pub fn camera_control_system(
+pub fn player_system(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut mouse_motion_events: EventReader<MouseMotion>,

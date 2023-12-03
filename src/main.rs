@@ -25,7 +25,7 @@ fn main() {
         .add_plugins(EguiPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
-        .add_systems(Update, camera_control_system)
+        .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
         .run();
 }
