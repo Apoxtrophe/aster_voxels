@@ -18,6 +18,9 @@ use bevy_egui::EguiPlugin;
 use core::f32::consts::PI;
 use bevy::pbr::CascadeShadowConfigBuilder;
 
+mod debug;
+use debug::*;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -27,6 +30,7 @@ fn main() {
         .add_systems(Startup, create_player)
         .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
+        .add_systems(Update, ui_example_system)
         .run();
 }
 
@@ -98,8 +102,6 @@ fn setup(
         ..Default::default()
     });
 
-
-    //Intialize voxel stuff
     // Create materials for tiles and wires
     let voxel_assets = VoxelAssets::new(&mut materials, &mut meshes);
 
@@ -112,6 +114,9 @@ fn setup(
 
     commands.insert_resource(VoxelSelector::new());
 
-    //Hotbar initialization
+    commands.insert_resource(VoxelLookedAt{
+        position: None,
+        voxel_type: None,
+    })
 
 }

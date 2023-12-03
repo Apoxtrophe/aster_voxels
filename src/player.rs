@@ -3,13 +3,14 @@ use bevy::prelude::*;
 use bevy::input::mouse::{MouseMotion, MouseWheel};
 use bevy_mod_raycast::prelude::Raycast;
 use bevy_atmosphere::prelude::*;
+use bevy::prelude::*;
+use bevy_egui::{egui, EguiContexts, EguiPlugin};
 
 // Voxel assets and configuration
 use super::voxel_assets::*;
 use super::config::*;
 use super::voxel_lib::*;
 use super::voxel_structure::*;
-
 
 pub fn create_player(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
@@ -64,15 +65,57 @@ pub fn voxel_interaction_system(
     voxel_selector: ResMut<VoxelSelector>,
     mut commands: Commands,
     mut voxel_world: ResMut<VoxelWorld>,
+    mut voxel_look: ResMut<VoxelLookedAt>,
 ) {
         // Voxel Interaction
     let (valid, position, adjacent) = vox_raycast(raycast, gizmos, query);
 
     if valid {
+        let voxel = vox_get(&mut voxel_world, position);
+        if let Some(voxel_info) = voxel {
+            voxel_look.update(position, voxel_info.voxel_type);
+        }
         if mouse_input.just_pressed(MouseButton::Left) {
             vox_place(&mut commands, adjacent, &voxel_assets, &mut voxel_world, &voxel_selector)
         } else if mouse_input.just_pressed(MouseButton::Right) {
             vox_delete(&mut commands, &mut voxel_world, position)
-        }
+        }  
+    } else {
+        voxel_look.clear();
     }
+}
+
+#[derive(Resource, Debug)]
+pub struct VoxelLookedAt {
+    pub position: Option<IVec3>,
+    pub voxel_type: Option<VoxelType>,
+}
+
+impl VoxelLookedAt {
+    pub fn update(&mut self, position: IVec3, voxel_type: VoxelType) {
+        self.position = Some(position);
+        self.voxel_type = Some(voxel_type);
+    }
+
+    pub fn clear(&mut self) {
+        self.position = None;
+        self.voxel_type = None;
+    }
+}
+
+pub fn ui_example_system(
+    mut contexts: EguiContexts,
+    voxel_look: Res<VoxelLookedAt>,
+) {
+    egui::Window::new("Debug").show(contexts.ctx_mut(), |ui| {
+        match (voxel_look.position, voxel_look.voxel_type) {
+            (Some(position), Some(voxel_type)) => {
+                ui.label(format!("Position: {:?}", position));
+                ui.label(format!("Voxel Type: {:?}", voxel_type));
+            }
+            _ => {
+                ui.label("No voxel currently looked at");
+            }
+        }
+    });
 }
