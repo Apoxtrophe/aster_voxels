@@ -103,11 +103,14 @@ impl VoxelLookedAt {
     }
 }
 
-pub fn ui_example_system(
+pub fn ui_DEBUG(
     mut contexts: EguiContexts,
     voxel_look: Res<VoxelLookedAt>,
+    voxel_selector: ResMut<VoxelSelector>,
 ) {
     egui::Window::new("Debug").show(contexts.ctx_mut(), |ui| {
+        let voxel_type = voxel_selector.current_voxel_type();
+        ui.label(format!("Selected Voxel: {:?}", voxel_type));
         match (voxel_look.position, voxel_look.voxel_type) {
             (Some(position), Some(voxel_type)) => {
                 ui.label(format!("Position: {:?}", position));

@@ -30,7 +30,7 @@ fn main() {
         .add_systems(Startup, create_player)
         .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
-        .add_systems(Update, ui_example_system)
+        .add_systems(Update, ui_DEBUG)
         .run();
 }
 
