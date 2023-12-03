@@ -6,6 +6,7 @@ mod player;
 mod voxel_lib;
 // Using structs and enums directly from their modules
 use crate::voxel_structure::VoxelSelector;
+use bevy::pbr::NotShadowCaster;
 
 use bevy::prelude::*;
 use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode, PrimaryWindow};
@@ -47,8 +48,8 @@ fn setup(
     //Ground
     commands.spawn((
         PbrBundle {
-            mesh: meshes.add(shape::Plane::from_size(20.).into()),
-            material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
+            mesh: meshes.add(shape::Plane::from_size(200.).into()),
+            material: materials.add(Color::rgb(0.1, 0.3, 0.1).into()),
             ..default()
         },
         Ground,
@@ -57,7 +58,7 @@ fn setup(
     //SUN
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            shadows_enabled: true,
+            shadows_enabled: false,
             ..default()
         },
         transform: Transform {

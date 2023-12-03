@@ -15,22 +15,34 @@ pub struct VoxelAssets {
     // Add more materials or meshes as needed
 }
 
+fn create_material_with_color(
+    color: Color, 
+) -> StandardMaterial {
+    StandardMaterial {
+        base_color: color,
+        reflectance: 0.5,
+        metallic: 0.5,
+        perceptual_roughness: 0.5,
+        // Add other shared properties here
+        ..default()
+    }
+}
+
 impl VoxelAssets {
     pub fn new(
         materials: &mut ResMut<Assets<StandardMaterial>>,
         meshes: &mut ResMut<Assets<Mesh>>,
     ) -> Self {
         VoxelAssets {
-            tile_material: materials.add(Color::hex("808080").unwrap().into()), 
-            wire_material: materials.add(Color::hex("800000").unwrap().into()),
-            out_material: materials.add(Color::hex("FFFF00").unwrap().into()),
-            not_material: materials.add(Color::hex("FFA500").unwrap().into()),
-            and_material: materials.add(Color::hex("FF0000").unwrap().into()),
-            or_material: materials.add(Color::hex("00FFFF").unwrap().into()),
-            xor_material: materials.add(Color::hex("0000FF").unwrap().into()),
-            switch_material: materials.add(Color::hex("00FF00").unwrap().into()),
+            tile_material: materials.add(create_material_with_color(Color::hex("808080").unwrap())), 
+            wire_material: materials.add(create_material_with_color(Color::hex("800000").unwrap())),
+            out_material: materials.add(create_material_with_color(Color::hex("FF4500").unwrap())),
+            not_material: materials.add(create_material_with_color(Color::hex("FFA500").unwrap())),
+            and_material: materials.add(create_material_with_color(Color::hex("FF69B4").unwrap())),
+            or_material: materials.add(create_material_with_color(Color::hex("00FFFF").unwrap())),
+            xor_material: materials.add(create_material_with_color(Color::hex("0000FF").unwrap())),
+            switch_material: materials.add(create_material_with_color(Color::hex("32CD32").unwrap())),
             voxel_mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })), 
         }
     }
 }
-
