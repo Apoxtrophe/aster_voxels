@@ -6,7 +6,6 @@ mod player;
 mod voxel_lib;
 // Using structs and enums directly from their modules
 use crate::voxel_structure::VoxelSelector;
-use bevy::pbr::NotShadowCaster;
 
 use bevy::prelude::*;
 use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode, PrimaryWindow};
@@ -31,7 +30,7 @@ fn main() {
         .add_systems(Startup, create_player)
         .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
-        .add_systems(Update, ui_DEBUG)
+        .add_systems(Update, ui_debug)
         .run();
 }
 

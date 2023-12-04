@@ -3,8 +3,7 @@ use bevy::prelude::*;
 use bevy::input::mouse::{MouseMotion, MouseWheel};
 use bevy_mod_raycast::prelude::Raycast;
 use bevy_atmosphere::prelude::*;
-use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use crate::VoxelLookedAt;
 
 // Voxel assets and configuration
 use super::voxel_assets::*;
@@ -83,42 +82,4 @@ pub fn voxel_interaction_system(
     } else {
         voxel_look.clear();
     }
-}
-
-#[derive(Resource, Debug)]
-pub struct VoxelLookedAt {
-    pub position: Option<IVec3>,
-    pub voxel_type: Option<VoxelType>,
-}
-
-impl VoxelLookedAt {
-    pub fn update(&mut self, position: IVec3, voxel_type: VoxelType) {
-        self.position = Some(position);
-        self.voxel_type = Some(voxel_type);
-    }
-
-    pub fn clear(&mut self) {
-        self.position = None;
-        self.voxel_type = None;
-    }
-}
-
-pub fn ui_DEBUG(
-    mut contexts: EguiContexts,
-    voxel_look: Res<VoxelLookedAt>,
-    voxel_selector: ResMut<VoxelSelector>,
-) {
-    egui::Window::new("Debug").show(contexts.ctx_mut(), |ui| {
-        let voxel_type = voxel_selector.current_voxel_type();
-        ui.label(format!("Selected Voxel: {:?}", voxel_type));
-        match (voxel_look.position, voxel_look.voxel_type) {
-            (Some(position), Some(voxel_type)) => {
-                ui.label(format!("Position: {:?}", position));
-                ui.label(format!("Voxel Type: {:?}", voxel_type));
-            }
-            _ => {
-                ui.label("No voxel currently looked at");
-            }
-        }
-    });
 }
