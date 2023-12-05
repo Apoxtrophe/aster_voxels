@@ -12,12 +12,37 @@ use bevy::input::mouse::MouseWheel;
 
 use bevy::prelude::*;
 
+#[derive(Resource)]
+pub struct VoxelState {
+    pub position: IVec3,
+    pub adjacent: IVec3,
+    pub voxel_type: Option<VoxelType>,
+    pub in_range: bool,
+    pub is_on: Option<bool>,
+    pub selected: Option<VoxelType>,
+}
+
+impl VoxelState {
+    pub fn new() -> Self {
+        VoxelState {
+            position: IVec3::ZERO,
+            adjacent: IVec3::ZERO,
+            voxel_type: None, 
+            in_range: false,
+            is_on: None,
+            selected: None,
+        }
+    }
+}
 
 pub fn vox_raycast(
     mut raycast: Raycast, 
     mut gizmos: Gizmos, 
     query: Query<&Transform, With<Camera>>,
-) -> (bool, IVec3, IVec3) {
+    mut voxel_state: ResMut<VoxelState>,
+    voxel_selector: ResMut<VoxelSelector>,
+    voxel_world: Res<VoxelWorld>,
+) {
     if let Ok(camera_transform ) = query.get_single() {
         let ray = Ray3d::new(camera_transform.translation, camera_transform.forward());
 
@@ -26,20 +51,30 @@ pub fn vox_raycast(
             let normal = intersection_data.normal().round();
             let triangle = intersection_data.triangle().unwrap();
             let position = ((Vec3::from(triangle.v0) + Vec3::from(triangle.v1) + Vec3::from(triangle.v2)) / 3.0 - normal * 0.5).round().as_ivec3();
-            let valid = distance < INTERACTION_DISTANCE;
+            let in_range = distance < INTERACTION_DISTANCE;
             let adjacent = position + normal.as_ivec3();
-            if valid {
+            if in_range {
                 gizmos.cuboid(
                     Transform::from_translation(position.as_vec3()).with_scale(Vec3::splat(1.)),
                     Color::BLACK,
                 );
             }
-            println!("valid: {} position: {} adjacent: {}", valid, position, adjacent);
-            return (valid, position, adjacent);
+            println!("valid: {} position: {} adjacent: {}", in_range, position, adjacent);
+            //return (valid, position, adjacent); 
+            voxel_state.in_range = in_range;
+            voxel_state.position = position;
+            voxel_state.adjacent = adjacent;
+            voxel_state.selected = Some(voxel_selector.current_voxel_type());
+            if let Some(voxel) = voxel_world.get_voxel(position) {
+                voxel_state.voxel_type = Some(voxel.voxel_type);
+                voxel_state.is_on = Some(voxel.is_on);
+            } else {
+                voxel_state.voxel_type = None; // Replace VoxelType::Default with your default type
+                voxel_state.is_on = None;
+            }
+       
         }
     }
-    
-    (false, IVec3::ZERO, IVec3::ZERO)
 }
 
 pub fn vox_material(voxel_type: VoxelType, voxel_assets: &Res<VoxelAssets>) -> Handle<StandardMaterial> {
@@ -54,6 +89,20 @@ pub fn vox_material(voxel_type: VoxelType, voxel_assets: &Res<VoxelAssets>) -> H
         VoxelType::Switch => voxel_assets.switch_material.clone(),
     }
 }
+
+pub fn vox_scroll_selection(
+    mut mouse_wheel_events: EventReader<MouseWheel>,
+    voxel_selector: &mut ResMut<VoxelSelector>,
+) {
+    for event in mouse_wheel_events.read() {
+        if event.y > 0.0 {
+            voxel_selector.next();
+        } else if event.y <0.0 {
+            voxel_selector.previous();
+        }
+    }
+}
+
 
 pub fn vox_place(
     
@@ -73,32 +122,4 @@ pub fn vox_place(
         voxel_assets.voxel_mesh.clone(),
         material,
     );
-}
-
-pub fn vox_delete(
-    commands: &mut Commands,
-    voxel_world: &mut ResMut<VoxelWorld>,
-    position: IVec3,
-) {
-    voxel_world.remove_voxel(commands, &position)
-}
-
-pub fn vox_get<'a>(
-    voxel_world: &'a mut ResMut<VoxelWorld>,
-    position: IVec3,
-) -> Option<&'a Voxel> {
-    voxel_world.get_voxel(position)
-}
-
-pub fn vox_scroll_selection(
-    mut mouse_wheel_events: EventReader<MouseWheel>,
-    voxel_selector: &mut ResMut<VoxelSelector>,
-) {
-    for event in mouse_wheel_events.read() {
-        if event.y > 0.0 {
-            voxel_selector.next();
-        } else if event.y <0.0 {
-            voxel_selector.previous();
-        }
-    }
 }

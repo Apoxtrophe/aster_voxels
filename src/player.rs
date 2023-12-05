@@ -1,9 +1,7 @@
 // Bevy-related imports
 use bevy::prelude::*;
 use bevy::input::mouse::{MouseMotion, MouseWheel};
-use bevy_mod_raycast::prelude::Raycast;
 use bevy_atmosphere::prelude::*;
-use crate::VoxelLookedAt;
 
 // Voxel assets and configuration
 use super::voxel_assets::*;
@@ -56,30 +54,18 @@ pub fn player_system(
 }
 
 pub fn voxel_interaction_system(
-    raycast: Raycast, 
-    gizmos: Gizmos, 
-    query: Query<&Transform, With<Camera>>,
     mouse_input: Res<Input<MouseButton>>,
     voxel_assets: Res<VoxelAssets>,
     voxel_selector: ResMut<VoxelSelector>,
     mut commands: Commands,
     mut voxel_world: ResMut<VoxelWorld>,
-    mut voxel_look: ResMut<VoxelLookedAt>,
+    voxel_state: ResMut<VoxelState>,
 ) {
-        // Voxel Interaction
-    let (valid, position, adjacent) = vox_raycast(raycast, gizmos, query);
-
-    if valid {
-        let voxel = vox_get(&mut voxel_world, position);
-        if let Some(voxel_info) = voxel {
-            voxel_look.update(position, voxel_info.voxel_type);
-        }
+    if voxel_state.in_range{
         if mouse_input.just_pressed(MouseButton::Left) {
-            vox_place(&mut commands, adjacent, &voxel_assets, &mut voxel_world, &voxel_selector)
+            vox_place(&mut commands, voxel_state.adjacent, &voxel_assets, &mut voxel_world, &voxel_selector)
         } else if mouse_input.just_pressed(MouseButton::Right) {
-            vox_delete(&mut commands, &mut voxel_world, position)
+            voxel_world.remove_voxel(&mut commands, &voxel_state.position)
         }  
-    } else {
-        voxel_look.clear();
     }
 }

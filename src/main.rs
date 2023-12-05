@@ -11,6 +11,7 @@ use bevy::prelude::*;
 use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode, PrimaryWindow};
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use config::*;
+use voxel_lib::{VoxelState, vox_raycast};
 use crate::voxel_assets::VoxelAssets;
 use player::*;
 use voxel_structure::VoxelWorld;
@@ -30,6 +31,7 @@ fn main() {
         .add_systems(Startup, create_player)
         .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
+        .add_systems(Update, vox_raycast)
         .add_systems(Update, ui_debug)
         .run();
 }
@@ -114,10 +116,6 @@ fn setup(
 
     commands.insert_resource(VoxelSelector::new());
 
-    commands.insert_resource(VoxelLookedAt{
-        position: None,
-        voxel_type: None,
-        voxel_state: false,
-    })
+    commands.insert_resource(VoxelState::new());
 
 }
