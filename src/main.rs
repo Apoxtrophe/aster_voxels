@@ -85,7 +85,7 @@ fn setup(
     window.cursor.icon = CursorIcon::Crosshair;
     window.cursor.grab_mode = CursorGrabMode::Locked;
     window.mode = WindowMode::Windowed;
-    window.cursor.visible = true;
+    window.cursor.visible = false;
 
     // Crosshair
     let texture_handle = asset_server.load("Crosshair.png");
@@ -117,6 +117,7 @@ fn setup(
     commands.insert_resource(VoxelLookedAt{
         position: None,
         voxel_type: None,
+        voxel_state: false,
     })
 
 }

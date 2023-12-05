@@ -34,6 +34,7 @@ pub fn vox_raycast(
                     Color::BLACK,
                 );
             }
+            println!("valid: {} position: {} adjacent: {}", valid, position, adjacent);
             return (valid, position, adjacent);
         }
     }

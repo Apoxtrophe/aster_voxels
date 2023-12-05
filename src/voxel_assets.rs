@@ -24,7 +24,6 @@ fn create_material_with_color(
         reflectance: 0.5,
         metallic: 0.5,
         perceptual_roughness: 0.5,
-        emissive: color,
         // Add other shared properties here
         ..default()
     }
