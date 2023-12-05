@@ -1,48 +1,21 @@
-use std::collections::HashMap;
 use bevy::{
     asset::Handle,
-    ecs::{
-        entity::Entity,
-        system::{Commands, Resource},
-    },
+    ecs::system::Commands,
     math::IVec3,
     pbr::{PbrBundle, StandardMaterial},
     render::mesh::Mesh,
     transform::components::Transform,
-    utils::default,
+    utils::{default, hashbrown},
 };
 
-#[derive(Debug, Copy, Clone)]
-pub enum VoxelType {
-    Tile,
-    Wire,
-    Out,
-    Not,
-    And,
-    Or,
-    Xor,
-    Switch,
-}
-
-#[derive(Debug)]
-
-pub struct Voxel {
-    pub voxel_type: VoxelType,
-    pub is_on: bool,
-}
-
-
-#[derive(Resource)]
-pub struct VoxelWorld {
-    pub voxels: HashMap<IVec3, Voxel>,
-    entities: HashMap<IVec3, Entity>,
-}
+use super::voxel_resources::*;
+use hashbrown::HashMap as HashbrownMap;
 
 impl VoxelWorld {
     pub fn new() -> Self {
         VoxelWorld { 
-            voxels: HashMap::new(),
-            entities: HashMap::new(), // Initialize the entities HashMap
+            voxels: HashbrownMap::new(),
+            entities: HashbrownMap::new(), // Initialize the entities HashMap
         }
     }
 
@@ -69,11 +42,6 @@ impl VoxelWorld {
         }
         self.voxels.remove(position);
     }
-}
-
-#[derive(Resource, Clone, Copy)]
-pub struct VoxelSelector {
-    pub current_index: usize,
 }
 
 impl VoxelSelector {

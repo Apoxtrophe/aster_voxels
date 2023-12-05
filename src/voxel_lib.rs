@@ -1,26 +1,15 @@
 use super::config;
 use config::*;
-use crate::voxel_structure::VoxelType;
 use crate::VoxelAssets;
 
 use bevy_mod_raycast::prelude::Raycast;
 use bevy_mod_raycast::prelude::Ray3d;
 use crate::VoxelWorld;
 use crate::VoxelSelector;
-use crate::voxel_structure::Voxel;
 use bevy::input::mouse::MouseWheel;
+use super::voxel_resources::*;
 
 use bevy::prelude::*;
-
-#[derive(Resource)]
-pub struct VoxelState {
-    pub position: IVec3,
-    pub adjacent: IVec3,
-    pub voxel_type: Option<VoxelType>,
-    pub in_range: bool,
-    pub is_on: Option<bool>,
-    pub selected: Option<VoxelType>,
-}
 
 impl VoxelState {
     pub fn new() -> Self {
@@ -103,15 +92,12 @@ pub fn vox_scroll_selection(
     }
 }
 
-
 pub fn vox_place(
-    
     commands: &mut Commands,
     adjacent: IVec3,
     voxel_assets: &Res<VoxelAssets>,
     voxel_world: &mut ResMut<VoxelWorld>,
     voxel_selector: &ResMut<VoxelSelector>,
-
 ) {
     let current_voxel_type = voxel_selector.current_voxel_type();
     let material = vox_material(current_voxel_type, voxel_assets);

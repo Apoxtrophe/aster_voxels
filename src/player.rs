@@ -2,12 +2,11 @@
 use bevy::prelude::*;
 use bevy::input::mouse::{MouseMotion, MouseWheel};
 use bevy_atmosphere::prelude::*;
-
+use super::voxel_resources::*;
 // Voxel assets and configuration
-use super::voxel_assets::*;
+
 use super::config::*;
 use super::voxel_lib::*;
-use super::voxel_structure::*;
 
 pub fn create_player(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
@@ -16,12 +15,6 @@ pub fn create_player(mut commands: Commands) {
     })  
     .insert(CameraRotation { pitch: 0.0, yaw: 0.0 })
     .insert(AtmosphereCamera::default());
-}
-
-#[derive(Component)]
-pub struct CameraRotation {
-    pitch: f32,
-    yaw: f32,
 }
 
 pub fn player_system(

@@ -4,17 +4,15 @@ mod voxel_structure;
 mod voxel_assets;
 mod player;
 mod voxel_lib;
+mod voxel_resources;
 // Using structs and enums directly from their modules
-use crate::voxel_structure::VoxelSelector;
-
+use voxel_resources::*;
 use bevy::prelude::*;
 use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode, PrimaryWindow};
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use config::*;
-use voxel_lib::{VoxelState, vox_raycast};
-use crate::voxel_assets::VoxelAssets;
+use voxel_lib::vox_raycast;
 use player::*;
-use voxel_structure::VoxelWorld;
 use bevy_egui::EguiPlugin;
 use core::f32::consts::PI;
 use bevy::pbr::CascadeShadowConfigBuilder;
@@ -35,9 +33,6 @@ fn main() {
         .add_systems(Update, ui_debug)
         .run();
 }
-
-#[derive(Component)]
-struct Ground;
 
 fn setup(
     mut commands: Commands,

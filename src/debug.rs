@@ -1,6 +1,6 @@
 use bevy::ecs::system::Res;
 use bevy_egui::{EguiContexts, egui};
-use crate::voxel_lib::VoxelState;
+use super::voxel_resources::*;
 
 pub fn ui_debug(
     mut contexts: EguiContexts,

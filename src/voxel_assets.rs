@@ -1,19 +1,6 @@
 use bevy::prelude::*;
 use bevy::render::mesh::Mesh;
-
-#[derive(Resource)]
-pub struct VoxelAssets {
-    pub tile_material: Handle<StandardMaterial>,
-    pub wire_material: Handle<StandardMaterial>,
-    pub out_material: Handle<StandardMaterial>,
-    pub not_material: Handle<StandardMaterial>,
-    pub and_material: Handle<StandardMaterial>,
-    pub or_material: Handle<StandardMaterial>,
-    pub xor_material: Handle<StandardMaterial>,
-    pub switch_material: Handle<StandardMaterial>,
-    pub voxel_mesh: Handle<Mesh>,
-    // Add more materials or meshes as needed
-}
+use super::voxel_resources::*;
 
 fn create_material_with_color(
     color: Color, 
