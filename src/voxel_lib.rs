@@ -48,8 +48,7 @@ pub fn vox_raycast(
                     Color::BLACK,
                 );
             }
-            println!("valid: {} position: {} adjacent: {}", in_range, position, adjacent);
-            //return (valid, position, adjacent); 
+            //Updates all 6 values of the voxels
             voxel_state.in_range = in_range;
             voxel_state.position = position;
             voxel_state.adjacent = adjacent;
