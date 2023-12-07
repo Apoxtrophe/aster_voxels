@@ -1,7 +1,7 @@
 // Importing necessary modules
 mod config;
 mod voxel_structure;
-mod voxel_assets;
+mod voxel_graphics;
 mod player;
 mod voxel_lib;
 mod voxel_resources;
