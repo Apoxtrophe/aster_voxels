@@ -26,8 +26,7 @@ pub enum VoxelType {
     Switch,
 }
 
-#[derive(Debug)]
-
+#[derive(Component, Debug, Clone, Copy)]
 pub struct Voxel {
     pub voxel_type: VoxelType,
     pub is_on: bool,

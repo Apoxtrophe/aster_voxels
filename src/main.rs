@@ -5,6 +5,9 @@ mod voxel_graphics;
 mod player;
 mod voxel_lib;
 mod voxel_resources;
+mod voxel_simulation;
+use bevy::time::common_conditions::on_timer;
+use voxel_simulation::*;
 // Using structs and enums directly from their modules
 use voxel_resources::*;
 use bevy::prelude::*;
@@ -15,8 +18,9 @@ use voxel_lib::vox_raycast;
 use player::*;
 use bevy_egui::EguiPlugin;
 use core::f32::consts::PI;
+use std::time::Duration;
 use bevy::pbr::CascadeShadowConfigBuilder;
-
+use voxel_graphics::*;
 mod debug;
 use debug::*;
 
@@ -31,6 +35,11 @@ fn main() {
         .add_systems(Update, voxel_interaction_system)
         .add_systems(Update, vox_raycast)
         .add_systems(Update, ui_debug)
+        .add_systems(Update, debug_one)
+        .add_systems(Update, debug_two)
+        //.add_systems(Update, update_voxel_state)
+        //.add_systems(Update, update_voxel_emissiveness)
+        
         .run();
 }
 
@@ -45,7 +54,7 @@ fn setup(
     commands.spawn((
         PbrBundle {
             mesh: meshes.add(shape::Plane::from_size(200.).into()),
-            material: materials.add(Color::rgb(0.1, 0.3, 0.1).into()),
+            material: materials.add(Color::rgb(0.1, 0.2, 0.1).into()),
             ..default()
         },
         Ground,

@@ -30,11 +30,13 @@ impl VoxelWorld {
     pub fn set_voxel(&mut self, commands: &mut Commands, position: IVec3, voxel: Voxel, mesh: Handle<Mesh>, material: Handle<StandardMaterial>) {
         // Create the entity for the new voxel
         let entity = commands.spawn(PbrBundle {
-            mesh,
-            material,
+            mesh: mesh.clone(),
+            material: material.clone(),
             transform: Transform::from_translation(position.as_vec3()),
             ..default()
-        }).id();
+        })
+        .insert(voxel) // Attach the Voxel component
+        .id();
 
         self.voxels.insert(position, voxel);
         self.entities.insert(position, entity);

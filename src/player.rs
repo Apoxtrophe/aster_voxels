@@ -59,8 +59,11 @@ pub fn voxel_interaction_system(
         let is_control = keyboard_input.pressed(KeyCode::ControlLeft);
         if is_control && mouse_input.just_pressed(MouseButton::Left){
             if let Some(voxel) = voxel_world.get_voxel_mut(voxel_state.position){
+                
                 if voxel.voxel_type == VoxelType::Switch{
                     voxel.is_on = !voxel.is_on;
+                    
+                    //println!("Toggled switch voxel to {:?} -- {:?}", voxel.is_on, voxel.voxel_type); // Debug print      
                 }
             }
         } else if mouse_input.just_pressed(MouseButton::Left) {
