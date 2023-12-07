@@ -14,7 +14,7 @@ use bevy::render::mesh::Mesh;
 pub struct Ground;
 
 //Used in Voxel Structure
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum VoxelType {
     Tile,
     Wire,

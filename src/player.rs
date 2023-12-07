@@ -53,9 +53,17 @@ pub fn voxel_interaction_system(
     mut commands: Commands,
     mut voxel_world: ResMut<VoxelWorld>,
     voxel_state: ResMut<VoxelState>,
+    keyboard_input: Res<Input<KeyCode>>,
 ) {
     if voxel_state.in_range{
-        if mouse_input.just_pressed(MouseButton::Left) {
+        let is_control = keyboard_input.pressed(KeyCode::ControlLeft);
+        if is_control && mouse_input.just_pressed(MouseButton::Left){
+            if let Some(voxel) = voxel_world.get_voxel_mut(voxel_state.position){
+                if voxel.voxel_type == VoxelType::Switch{
+                    voxel.is_on = !voxel.is_on;
+                }
+            }
+        } else if mouse_input.just_pressed(MouseButton::Left) {
             vox_place(&mut commands, voxel_state.adjacent, &voxel_assets, &mut voxel_world, &voxel_selector)
         } else if mouse_input.just_pressed(MouseButton::Right) {
             voxel_world.remove_voxel(&mut commands, &voxel_state.position)

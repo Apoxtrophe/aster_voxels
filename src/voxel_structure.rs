@@ -23,6 +23,10 @@ impl VoxelWorld {
         self.voxels.get(&position)
     }
 
+    pub fn get_voxel_mut(&mut self, position: IVec3) -> Option<&mut Voxel> {
+        self.voxels.get_mut(&position)
+    }
+
     pub fn set_voxel(&mut self, commands: &mut Commands, position: IVec3, voxel: Voxel, mesh: Handle<Mesh>, material: Handle<StandardMaterial>) {
         // Create the entity for the new voxel
         let entity = commands.spawn(PbrBundle {
