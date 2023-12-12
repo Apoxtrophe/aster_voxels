@@ -1,10 +1,10 @@
 use bevy::ecs::system::Res;
 use bevy_egui::{EguiContexts, egui};
-use super::voxel_resources::*;
+use crate::v_lib::VoxelInfo;
 
 pub fn ui_debug(
     mut contexts: EguiContexts,
-    voxel_state: Res<VoxelState>,
+    voxel_state: Res<VoxelInfo>,
 ) {
     egui::Window::new("Debug").show(contexts.ctx_mut(), |ui| {
         ui.label(format!("Position: {:?}", voxel_state.position));

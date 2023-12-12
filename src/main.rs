@@ -1,28 +1,34 @@
 // Importing necessary modules
-mod config;
-mod voxel_structure;
-mod voxel_graphics;
-mod player;
-mod voxel_lib;
-mod voxel_resources;
-mod voxel_simulation;
-use bevy::time::common_conditions::on_timer;
-use voxel_simulation::*;
+mod v_config;
+mod v_structure;
+mod v_graphics;
+mod v_player;
+mod v_lib;
+mod v_simulation;
+mod V_selector;
+
+
 // Using structs and enums directly from their modules
-use voxel_resources::*;
 use bevy::prelude::*;
 use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode, PrimaryWindow};
 use bevy_atmosphere::plugin::AtmospherePlugin;
-use config::*;
-use voxel_lib::vox_raycast;
-use player::*;
+use v_config::*;
+use v_lib::{VoxelInfo, update_info};
+use v_player::*;
 use bevy_egui::EguiPlugin;
+use v_structure::VoxelWorld;
 use core::f32::consts::PI;
-use std::time::Duration;
+
 use bevy::pbr::CascadeShadowConfigBuilder;
-use voxel_graphics::*;
-mod debug;
-use debug::*;
+use v_graphics::*;
+mod v_debug;
+use v_debug::*;
+mod v_selector;
+use v_selector::*;
+
+#[derive(Component)]
+pub struct Ground;
+
 
 fn main() {
     App::new()
@@ -33,13 +39,8 @@ fn main() {
         .add_systems(Startup, create_player)
         .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
-        .add_systems(Update, vox_raycast)
+        .add_systems(Update, update_info)
         .add_systems(Update, ui_debug)
-        .add_systems(Update, debug_one)
-        .add_systems(Update, debug_two)
-        //.add_systems(Update, update_voxel_state)
-        //.add_systems(Update, update_voxel_emissiveness)
-        
         .run();
 }
 
@@ -112,14 +113,12 @@ fn setup(
     let voxel_assets = VoxelAssets::new(&mut materials, &mut meshes);
 
     // Initialize the voxel world
-    let voxel_world = VoxelWorld::new();
-
-    commands.insert_resource(voxel_world);
+    commands.insert_resource(VoxelWorld::new());
 
     commands.insert_resource(voxel_assets);
 
     commands.insert_resource(VoxelSelector::new());
 
-    commands.insert_resource(VoxelState::new());
+    commands.insert_resource(VoxelInfo::new());
 
 }

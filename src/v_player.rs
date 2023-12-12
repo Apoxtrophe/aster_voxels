@@ -1,12 +1,22 @@
 // Bevy-related imports
 use bevy::prelude::*;
+
 use bevy::input::mouse::{MouseMotion, MouseWheel};
 use bevy_atmosphere::prelude::*;
-use super::voxel_resources::*;
+use crate::v_selector::vox_scroll_selection;
+use crate::v_graphics::VoxelAssets;
+use crate::v_selector::VoxelSelector;
+use crate::v_structure::{VoxelWorld, TypeVoxel, PositionVoxel, StateVoxel};
 // Voxel assets and configuration
 
-use super::config::*;
-use super::voxel_lib::*;
+use super::v_config::*;
+use super::v_lib::*;
+
+#[derive(Component)]
+pub struct CameraRotation {
+    pub pitch: f32,
+    pub yaw: f32,
+}
 
 pub fn create_player(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
@@ -52,24 +62,16 @@ pub fn voxel_interaction_system(
     voxel_selector: ResMut<VoxelSelector>,
     mut commands: Commands,
     mut voxel_world: ResMut<VoxelWorld>,
-    voxel_state: ResMut<VoxelState>,
+    voxel_info: ResMut<VoxelInfo>,
     keyboard_input: Res<Input<KeyCode>>,
+    remove_query: Query<Entity, With<PositionVoxel>>,
+    mut get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
 ) {
-    if voxel_state.in_range{
-        let is_control = keyboard_input.pressed(KeyCode::ControlLeft);
-        if is_control && mouse_input.just_pressed(MouseButton::Left){
-            if let Some(voxel) = voxel_world.get_voxel_mut(voxel_state.position){
-                
-                if voxel.voxel_type == VoxelType::Switch{
-                    voxel.is_on = !voxel.is_on;
-                    
-                    //println!("Toggled switch voxel to {:?} -- {:?}", voxel.is_on, voxel.voxel_type); // Debug print      
-                }
-            }
-        } else if mouse_input.just_pressed(MouseButton::Left) {
-            vox_place(&mut commands, voxel_state.adjacent, &voxel_assets, &mut voxel_world, &voxel_selector)
+    if voxel_info.in_range{
+        if mouse_input.just_pressed(MouseButton::Left) {
+            voxel_world.place(&mut commands, voxel_info.adjacent, &voxel_selector, &voxel_assets)
         } else if mouse_input.just_pressed(MouseButton::Right) {
-            voxel_world.remove_voxel(&mut commands, &voxel_state.position)
+            voxel_world.remove(&mut commands, voxel_info.position, remove_query);
         }  
     }
 }
