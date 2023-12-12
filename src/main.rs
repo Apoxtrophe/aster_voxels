@@ -41,6 +41,7 @@ fn main() {
         .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
         .add_systems(Update, ui_debug)
+        .add_systems(Update, update_voxel_emissive)
         .run();
 }
 
