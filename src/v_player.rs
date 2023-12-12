@@ -6,7 +6,7 @@ use bevy_atmosphere::prelude::*;
 use crate::v_selector::vox_scroll_selection;
 use crate::v_graphics::VoxelAssets;
 use crate::v_selector::VoxelSelector;
-use crate::v_structure::{VoxelWorld, TypeVoxel, PositionVoxel, StateVoxel};
+use crate::v_structure::{Voxel, TypeVoxel, PositionVoxel, StateVoxel};
 // Voxel assets and configuration
 
 use super::v_config::*;
@@ -61,17 +61,27 @@ pub fn voxel_interaction_system(
     voxel_assets: Res<VoxelAssets>,
     voxel_selector: ResMut<VoxelSelector>,
     mut commands: Commands,
-    mut voxel_world: ResMut<VoxelWorld>,
-    voxel_info: ResMut<VoxelInfo>,
+    mut voxel: ResMut<Voxel>,
+    voxel_info: Res<VoxelInfo>,
     keyboard_input: Res<Input<KeyCode>>,
-    remove_query: Query<Entity, With<PositionVoxel>>,
-    mut get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
+    remove_query: Query<(Entity, &PositionVoxel)>,
+    state_query: Query<(Entity, &PositionVoxel, &mut StateVoxel)>,
 ) {
     if voxel_info.in_range{
         if mouse_input.just_pressed(MouseButton::Left) {
-            voxel_world.place(&mut commands, voxel_info.adjacent, &voxel_selector, &voxel_assets)
+            if keyboard_input.pressed(KeyCode::ControlLeft){
+               if let Some(state) = voxel_info.is_on{
+                if let Some(voxel_type) = voxel_info.voxel_type{
+                    if voxel_type == TypeVoxel::Switch{
+                        voxel.set_state(&mut commands, voxel_info.position, !state, state_query);
+                    }
+                }
+               }
+            } else {
+                voxel.place(&mut commands, voxel_info.adjacent, &voxel_selector, &voxel_assets)
+            }
         } else if mouse_input.just_pressed(MouseButton::Right) {
-            voxel_world.remove(&mut commands, voxel_info.position, remove_query);
+            voxel.remove(&mut commands, voxel_info.position, remove_query);
         }  
     }
 }

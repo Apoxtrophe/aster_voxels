@@ -16,7 +16,7 @@ use v_config::*;
 use v_lib::{VoxelInfo, update_info};
 use v_player::*;
 use bevy_egui::EguiPlugin;
-use v_structure::VoxelWorld;
+use v_structure::Voxel;
 use core::f32::consts::PI;
 
 use bevy::pbr::CascadeShadowConfigBuilder;
@@ -37,9 +37,9 @@ fn main() {
         .add_plugins(EguiPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
+        .add_systems(Update, update_info)
         .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
-        .add_systems(Update, update_info)
         .add_systems(Update, ui_debug)
         .run();
 }
@@ -113,7 +113,7 @@ fn setup(
     let voxel_assets = VoxelAssets::new(&mut materials, &mut meshes);
 
     // Initialize the voxel world
-    commands.insert_resource(VoxelWorld::new());
+    commands.insert_resource(Voxel::new());
 
     commands.insert_resource(voxel_assets);
 

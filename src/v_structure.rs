@@ -18,7 +18,7 @@ pub struct PositionVoxel(
     pub IVec3
 );
 
-#[derive(Component, Debug, Clone, Copy)]
+#[derive(Component, Debug, Clone, Copy, PartialEq)]
 pub enum TypeVoxel {
     Tile, Wire, Out, Not, And, Or, Xor, Switch,
 }
@@ -30,20 +30,19 @@ pub struct StateVoxel(
 
 
 #[derive(Resource)]
-pub struct VoxelWorld;
+pub struct Voxel;
 
-impl VoxelWorld {
+impl Voxel {
     pub fn new() -> Self {
-        VoxelWorld
+        Voxel
     }
 
     pub fn get(
-        &mut self,
-        commands: &mut Commands,
+        &self,
         position: IVec3,
-        mut get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
+        get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
     ) -> Option<(TypeVoxel, StateVoxel)> {
-        for (entity, voxel_position, voxel_type, voxel_state) in get_query.iter_mut() {
+        for (_, voxel_position, voxel_type, voxel_state) in get_query.iter() {
             if voxel_position.0 == position {
                 return Some((*voxel_type, *voxel_state));
             }
@@ -51,20 +50,22 @@ impl VoxelWorld {
         None
     }
 
-    pub fn get_mut(
+    pub fn set_state(
         &mut self,
         commands: &mut Commands,
         position: IVec3,
         new_state: bool,
-        mut get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
-    ) -> Option<(TypeVoxel, StateVoxel)> {
-        for (entity, voxel_position, voxel_type, voxel_state) in get_query.iter_mut() {
+        mut state_query: Query<(Entity, &PositionVoxel, &mut StateVoxel)>,
+    ) {
+        for (entity, voxel_position, mut voxel_state) in state_query.iter_mut() {
             if voxel_position.0 == position {
+                // Update the state of the voxel
+                *voxel_state = StateVoxel(new_state);
+                // Reflect this change in the ECS by using commands
                 commands.entity(entity).insert(StateVoxel(new_state));
-                return Some((*voxel_type, *voxel_state));
+                // No return needed, as we are just setting the state
             }
         }
-        None
     }
 
     pub fn place(
@@ -93,14 +94,17 @@ impl VoxelWorld {
 
     pub fn remove(
         &mut self,
-         commands: &mut Commands,
-          position: IVec3,
-          query: Query<Entity, With<PositionVoxel>>,
-        ) {
-        for entity in query.iter() {
-            commands.entity(entity).despawn();
+        commands: &mut Commands,
+        position: IVec3,
+        query: Query<(Entity, &PositionVoxel)>, // Include the PositionVoxel component in the query
+    ) {
+        for (entity, voxel_position) in query.iter() {
+            // Check if the voxel's position matches the target position
+            if voxel_position.0 == position {
+                // Despawn the entity if the positions match
+                commands.entity(entity).despawn();
+            }
         }
     }
-     
 }
 
