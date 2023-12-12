@@ -65,14 +65,17 @@ impl Voxel {
         position: IVec3,
         voxel_selector: &ResMut<VoxelSelector>,
         voxel_assets: &Res<VoxelAssets>,
-        materials: &mut ResMut<Assets<StandardMaterial>>, // Add this parameter
+        mut materials: ResMut<Assets<StandardMaterial>>, // Mutable borrow of materials
     ) {
         let voxel_type = voxel_selector.current_voxel_type();
         let material_handle = vox_material(voxel_type, voxel_assets);
-
-        // Clone the material to create a unique instance for this voxel
-        let material_instance = materials.add(materials.get(&material_handle).unwrap().clone());
-
+    
+        // First, clone the material (immutable borrow)
+        let material_clone = materials.get(&material_handle).unwrap().clone();
+    
+        // Then, add the cloned material to the assets (mutable borrow)
+        let material_instance = materials.add(material_clone);
+    
         commands.spawn(PbrBundle {
             mesh: voxel_assets.voxel_mesh.clone(),
             material: material_instance, // Use the cloned material instance
@@ -83,6 +86,7 @@ impl Voxel {
         .insert(voxel_type)
         .insert(StateVoxel(false));
     }
+      
 
     pub fn remove(
         &mut self,
