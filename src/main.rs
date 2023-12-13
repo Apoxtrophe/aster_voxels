@@ -6,6 +6,7 @@ mod v_player;
 mod v_lib;
 mod v_simulation;
 mod V_selector;
+mod v_colormap;
 
 
 // Using structs and enums directly from their modules

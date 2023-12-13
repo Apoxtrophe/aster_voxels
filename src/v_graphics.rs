@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::render::mesh::Mesh;
 
-use crate::v_structure::{StateVoxel, Voxel};
+use crate::v_structure::StateVoxel;
 
 fn create_material_with_color(color: Color) -> StandardMaterial {
     StandardMaterial {
@@ -52,10 +52,10 @@ pub fn update_voxel_emissive(
     mut query: Query<(&StateVoxel, &mut Handle<StandardMaterial>)>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    for (state, mut material_handle) in query.iter_mut() {
+    for (state, material_handle) in query.iter_mut() {
         if let Some(material) = materials.get_mut(&*material_handle) {
             material.emissive = if state.0 {
-                Color::WHITE // Or any other color to indicate it's on
+                material.base_color // Use the base color as the emissive color
             } else {
                 Color::BLACK // Non-emissive state
             };

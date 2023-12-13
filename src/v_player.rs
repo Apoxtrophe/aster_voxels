@@ -66,8 +66,9 @@ pub fn voxel_interaction_system(
     keyboard_input: Res<Input<KeyCode>>,
     remove_query: Query<(Entity, &PositionVoxel)>,
     state_query: Query<(Entity, &PositionVoxel, &mut StateVoxel)>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    //Placing, removing, and altering state on mouse click
     if voxel_info.in_range{
         if mouse_input.just_pressed(MouseButton::Left) {
             if keyboard_input.pressed(KeyCode::ControlLeft){
