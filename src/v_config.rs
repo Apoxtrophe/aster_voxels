@@ -9,3 +9,6 @@ pub const MOUSE_SENSITIVITY:f32 = 0.05;
 
 //Player Raycasting
 pub const INTERACTION_DISTANCE: f32 = 10.0;
+
+// Simulation Settings
+pub const LogicRate: f64 = 1.0;

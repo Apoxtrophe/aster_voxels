@@ -6,7 +6,6 @@ mod v_player;
 mod v_lib;
 mod v_simulation;
 mod V_selector;
-mod v_colormap;
 
 
 // Using structs and enums directly from their modules
@@ -17,6 +16,7 @@ use v_config::*;
 use v_lib::{VoxelInfo, update_info};
 use v_player::*;
 use bevy_egui::EguiPlugin;
+use v_simulation::{SimulationTickrate, tickrate_system};
 use v_structure::Voxel;
 use core::f32::consts::PI;
 
@@ -43,6 +43,7 @@ fn main() {
         .add_systems(Update, voxel_interaction_system)
         .add_systems(Update, ui_debug)
         .add_systems(Update, update_voxel_emissive)
+        .add_systems(Update, tickrate_system)
         .run();
 }
 
@@ -123,4 +124,5 @@ fn setup(
 
     commands.insert_resource(VoxelInfo::new());
 
+    commands.insert_resource(SimulationTickrate::new(LogicRate));
 }
