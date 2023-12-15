@@ -6,7 +6,7 @@ use bevy::{
 
 use bevy::ecs::component::Component;
 
-use crate::{v_selector::VoxelSelector, v_graphics::VoxelAssets, V_selector::vox_material};
+use crate::{v_selector::VoxelSelector, v_graphics::VoxelAssets, v_selector::vox_material};
 use bevy::ecs::system::Resource;
 use bevy::ecs::system::Query;
 use bevy::ecs::query::With;

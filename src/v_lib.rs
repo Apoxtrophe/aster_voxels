@@ -1,7 +1,7 @@
-use bevy::{prelude::*, input::mouse::MouseWheel, transform::commands};
+use bevy::prelude::*;
 use bevy_mod_raycast::{immediate::Raycast, primitives::Ray3d};
 
-use crate::{v_structure::{TypeVoxel, Voxel, PositionVoxel, StateVoxel}, v_selector::VoxelSelector, v_graphics::VoxelAssets};
+use crate::{v_structure::{TypeVoxel, Voxel, PositionVoxel, StateVoxel}, v_selector::VoxelSelector};
 use super::v_config::*;
 
 #[derive(Resource)]
@@ -27,11 +27,15 @@ impl VoxelInfo {
     }
 }
 
+pub enum RaycastingError {
+    NoIntersection,
+}
+
 pub fn raycasting(
     mut raycast: Raycast,
     query: Query<&Transform, With<Camera>>,
-    mut gizmos: Gizmos, 
-) -> Option<(IVec3, IVec3, bool)> {
+    mut gizmos: Gizmos,
+) -> Result<(IVec3, IVec3, bool), RaycastingError> {
     if let Ok(camera_transform) = query.get_single() {
         let ray = Ray3d::new(camera_transform.translation, camera_transform.forward());
         if let Some((_, intersection_data)) = raycast.cast_ray(ray, &default()).iter().next() {
@@ -39,20 +43,20 @@ pub fn raycasting(
             let normal = intersection_data.normal().round();
             let triangle = intersection_data.triangle().unwrap();
             let position = ((Vec3::from(triangle.v0) + Vec3::from(triangle.v1) + Vec3::from(triangle.v2)) / 3.0 - normal * 0.5).round().as_ivec3();
-            let in_range = distance < INTERACTION_DISTANCE;
-            let adjacent = position + normal.as_ivec3();
+            let is_in_range = distance < INTERACTION_DISTANCE;
+            let adjacent_position = position + normal.as_ivec3();
 
-            //Neat lil gizmo
-            if in_range{
+            // Neat lil gizmo
+            if is_in_range {
                 gizmos.cuboid(
                     Transform::from_translation(position.as_vec3()).with_scale(Vec3::splat(1.02)),
                     Color::BLACK,
                 );
             }
-            return Some((position, adjacent, in_range));
+            return Ok((position, adjacent_position, is_in_range));
         }
     }
-    None
+    Err(RaycastingError::NoIntersection)
 }
 
 pub fn update_info(
@@ -62,21 +66,25 @@ pub fn update_info(
     voxel: ResMut<Voxel>,
     get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
     voxel_selector: ResMut<VoxelSelector>,
-    gizmos: Gizmos, 
+    mut gizmos: Gizmos,
 ) {
     voxel_info.selected = Some(voxel_selector.current_voxel_type());
-    if let Some((position, adjacent, in_range)) = raycasting(raycast, query, gizmos){
+    if let Ok((position, adjacent_position, is_in_range)) = raycasting(raycast, query, gizmos) {
         voxel_info.position = position;
-        voxel_info.adjacent = adjacent;
-        voxel_info.in_range = in_range;
-        if let Some((voxel_type, voxel_state)) = voxel.get(position, get_query){
+        voxel_info.adjacent = adjacent_position;
+        voxel_info.in_range = is_in_range;
+        if let Some((voxel_type, voxel_state)) = voxel.get(position, get_query) {
             voxel_info.is_on = Some(voxel_state.0);
             voxel_info.voxel_type = Some(voxel_type);
         } else {
-            // Handle the case where no voxel is found at the position
-            voxel_info.is_on = None;
-            voxel_info.voxel_type = None;
+            handle_no_voxel_found(&mut voxel_info);
         }
+    } else {
+        handle_no_voxel_found(&mut voxel_info);
     }
+}
 
+fn handle_no_voxel_found(voxel_info: &mut VoxelInfo) {
+    voxel_info.is_on = None;
+    voxel_info.voxel_type = None;
 }

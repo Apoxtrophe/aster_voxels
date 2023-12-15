@@ -11,4 +11,4 @@ pub const MOUSE_SENSITIVITY:f32 = 0.05;
 pub const INTERACTION_DISTANCE: f32 = 10.0;
 
 // Simulation Settings
-pub const LogicRate: f64 = 1.0;
+pub const LOGIC_RATE: f32 = 1.0;
