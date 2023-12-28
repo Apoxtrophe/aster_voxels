@@ -123,5 +123,5 @@ fn setup(
 
     commands.insert_resource(VoxelInfo::new());
 
-    commands.insert_resource(MyTimer(Timer::new(Duration::from_secs(1), TimerMode::Repeating)));
+    commands.insert_resource(MyTimer(Timer::new(Duration::from_secs(LOGIC_RATE), TimerMode::Repeating)));
 }

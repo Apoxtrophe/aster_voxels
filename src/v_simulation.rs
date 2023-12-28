@@ -1,41 +1,94 @@
 use bevy::prelude::*;
-use std::time::Duration;
-
 use crate::v_structure::{PositionVoxel, TypeVoxel, StateVoxel};
+use std::collections::HashSet;
+use bevy::math::IVec3;
 
 #[derive(Resource)]
 pub struct MyTimer(pub Timer);
 
-// Logic system that operates on a tick rate
 pub fn logic_operation_system(
     time: Res<Time>, 
     mut timer: ResMut<MyTimer>,
     mut voxel_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
 ) {
     if timer.0.tick(time.delta()).just_finished() {
-        // Collect data
         let mut changes = Vec::new();
+        let mut visited = HashSet::new(); 
+
         for (entity, position_voxel, type_voxel, state_voxel) in voxel_query.iter() {
-            if let TypeVoxel::Out = type_voxel {
-                let is_on = process_out_logic(position_voxel.0, &voxel_query);
-                changes.push((entity, is_on));
+            match type_voxel {
+                TypeVoxel::Out => {
+                    let is_on = process_out_logic(position_voxel.0, &voxel_query);
+                    changes.push((entity, is_on));
+                    if is_on {
+                        println!("Starting propagation from: {:?}", position_voxel.0); // Debug print
+                        dfs_propagate(position_voxel.0, &voxel_query, &mut visited, &mut changes);
+                    }
+                },
+                // Add other voxel types here if needed
+                _ => (),
             }
         }
+        apply_changes(&mut voxel_query, changes)
+    }
+}
 
-        // Apply changes
-        for (entity, new_state) in changes {
-            if let Ok(mut state_voxel) = voxel_query.get_component_mut::<StateVoxel>(entity) {
-                state_voxel.0 = new_state;
+fn dfs_propagate(
+    current_position: IVec3,
+    voxel_query: &Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
+    visited: &mut HashSet<IVec3>,
+    changes: &mut Vec<(Entity, bool)>
+) {
+    // Check if the current voxel is already visited
+    if visited.contains(&current_position) {
+        println!("Visited: {:?}", current_position); // Debug print
+        return;
+    }
+
+    // Mark the current voxel as visited
+    visited.insert(current_position);
+
+    // Iterate over adjacent positions
+    for adj_pos in get_adjacent_positions(current_position).iter() {
+        // Find adjacent wire voxels and propagate the state
+        for (entity, pos_voxel, type_voxel, _) in voxel_query.iter() {
+            if *pos_voxel == PositionVoxel(*adj_pos) && matches!(type_voxel, TypeVoxel::Wire) {
+                println!("Propagating to: {:?}", adj_pos); // Debug print
+
+                // Add the adjacent wire voxel to the changes vector
+                changes.push((entity, true));
+
+                // Recursively call dfs_propagate to continue the propagation
+                dfs_propagate(*adj_pos, voxel_query, visited, changes);
             }
         }
-
-        println!("Tick!");
     }
 }
 
 
 
-fn get_adjacent_positions(position: IVec3) -> Vec<IVec3> {
+fn process_out_logic(
+    position: IVec3,
+    voxel_query: &Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>
+) -> bool {
+    get_adjacent_positions(position).iter()
+        .any(|adj_pos| voxel_query.iter()
+            .any(|(_, pos_voxel, type_voxel, state_voxel)| 
+                *adj_pos == pos_voxel.0 && !matches!(type_voxel, TypeVoxel::Tile | TypeVoxel::Out) && state_voxel.0))
+}
+
+fn apply_changes(
+    voxel_query: &mut Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
+    changes: Vec<(Entity, bool)>
+) {
+    for (entity, new_state) in changes {
+        if let Ok(mut state_voxel) = voxel_query.get_component_mut::<StateVoxel>(entity) {
+            state_voxel.0 = new_state;
+        }
+    }
+}
+
+pub fn get_adjacent_positions(position: IVec3) -> Vec<IVec3> {
     vec![
         position + IVec3::new(1, 0, 0),
         position + IVec3::new(-1, 0, 0),
@@ -44,22 +97,4 @@ fn get_adjacent_positions(position: IVec3) -> Vec<IVec3> {
         position + IVec3::new(0, 0, 1),
         position + IVec3::new(0, 0, -1),
     ]
-}
-
-fn process_out_logic(
-    position: IVec3,
-    voxel_query: &Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>
-) -> bool {
-    let adjacent_positions = get_adjacent_positions(position);
-
-    for (_, pos_voxel, type_voxel, state_voxel) in voxel_query.iter() {
-        if adjacent_positions.contains(&pos_voxel.0) {
-            match type_voxel {
-                TypeVoxel::Tile | TypeVoxel::Wire | TypeVoxel::Out => continue,
-                _ => if state_voxel.0 { return true; }
-            }
-        }
-    }
-
-    false
 }

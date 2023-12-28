@@ -9,9 +9,8 @@ use bevy::ecs::component::Component;
 use crate::{v_selector::VoxelSelector, v_graphics::VoxelAssets, v_selector::vox_material};
 use bevy::ecs::system::Resource;
 use bevy::ecs::system::Query;
-use bevy::ecs::query::With;
 
-#[derive(Component, Debug, Clone, Copy)]
+#[derive(Component, Debug, Clone, Copy, PartialEq)]
 pub struct PositionVoxel(pub IVec3);
 
 #[derive(Component, Debug, Clone, Copy, PartialEq)]

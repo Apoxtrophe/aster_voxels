@@ -66,7 +66,7 @@ pub fn update_info(
     voxel: ResMut<Voxel>,
     get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
     voxel_selector: ResMut<VoxelSelector>,
-    mut gizmos: Gizmos,
+    gizmos: Gizmos,
 ) {
     voxel_info.selected = Some(voxel_selector.current_voxel_type());
     if let Ok((position, adjacent_position, is_in_range)) = raycasting(raycast, query, gizmos) {
@@ -88,3 +88,4 @@ fn handle_no_voxel_found(voxel_info: &mut VoxelInfo) {
     voxel_info.is_on = None;
     voxel_info.voxel_type = None;
 }
+
