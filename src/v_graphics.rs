@@ -6,9 +6,9 @@ use crate::v_structure::StateVoxel;
 fn create_material_with_color(color: Color) -> StandardMaterial {
     StandardMaterial {
         base_color: color,
-        reflectance: 0.5,
-        metallic: 0.5,
-        perceptual_roughness: 0.5,
+        reflectance: 0.0,
+        metallic: 0.99,
+        perceptual_roughness: 0.99,
         emissive: Color::BLACK, // Default non-emissive state
         // Add other shared properties here
         ..default()
@@ -22,13 +22,13 @@ impl VoxelAssets {
     ) -> Self {
         VoxelAssets {
             tile_material: materials.add(create_material_with_color(Color::hex("808080").unwrap())), 
-            wire_material: materials.add(create_material_with_color(Color::hex("800000").unwrap())),
-            out_material: materials.add(create_material_with_color(Color::hex("FF4500").unwrap())),
-            not_material: materials.add(create_material_with_color(Color::hex("FFA500").unwrap())),
-            and_material: materials.add(create_material_with_color(Color::hex("FF69B4").unwrap())),
-            or_material: materials.add(create_material_with_color(Color::hex("00FFFF").unwrap())),
-            xor_material: materials.add(create_material_with_color(Color::hex("0000FF").unwrap())),
-            switch_material: materials.add(create_material_with_color(Color::hex("32CD32").unwrap())),
+            wire_material: materials.add(create_material_with_color(Color::hex("36454F").unwrap())),
+            out_material: materials.add(create_material_with_color(Color::hex("CC5500").unwrap())),
+            not_material: materials.add(create_material_with_color(Color::hex("654321").unwrap())),
+            and_material: materials.add(create_material_with_color(Color::hex("800020").unwrap())),
+            or_material: materials.add(create_material_with_color(Color::hex("008080").unwrap())),
+            xor_material: materials.add(create_material_with_color(Color::hex("003366").unwrap())),
+            switch_material: materials.add(create_material_with_color(Color::hex("0B6623").unwrap())),
             voxel_mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })), 
         }
     }

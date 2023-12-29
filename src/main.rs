@@ -52,6 +52,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    mut ambient_light: ResMut<AmbientLight>
 ) {
     //Ground
     commands.spawn((
@@ -60,13 +61,14 @@ fn setup(
             material: materials.add(Color::rgb(0.1, 0.2, 0.1).into()),
             ..default()
         },
+        
         Ground,
     ));
 
     //SUN
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            shadows_enabled: false,
+            shadows_enabled: true,
             ..default()
         },
         transform: Transform {
@@ -85,7 +87,11 @@ fn setup(
         .into(),
         ..default()
     });
+    // Ambient lighting
+    ambient_light.color = Color::WHITE;
+    ambient_light.brightness = 0.3; // Adjust the brightness as needed
 
+    
     // Window settings
     let mut window = windows.single_mut();
     window.title = "Logica".to_string();
