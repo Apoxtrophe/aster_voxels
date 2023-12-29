@@ -118,7 +118,8 @@ fn setup(
     });
 
     // Create materials for tiles and wires
-    let voxel_assets = VoxelAssets::new(&mut materials, &mut meshes);
+    let voxel_assets = VoxelAssets::new(asset_server, &mut meshes);
+
 
     // Initialize the voxel world
     commands.insert_resource(Voxel::new());

@@ -67,6 +67,7 @@ pub fn voxel_interaction_system(
     remove_query: Query<(Entity, &PositionVoxel)>,
     state_query: Query<(Entity, &PositionVoxel, &mut StateVoxel)>,
     materials: ResMut<Assets<StandardMaterial>>,
+    meshes: ResMut<Assets<Mesh>>,
 ) {
     //Placing, removing, and altering state on mouse click
     if voxel_info.in_range{
@@ -80,7 +81,7 @@ pub fn voxel_interaction_system(
                 }
                }
             } else {
-                voxel.place(&mut commands, voxel_info.adjacent, &voxel_selector, &voxel_assets, materials)
+                voxel.place(&mut commands, voxel_info.adjacent, &voxel_selector, &voxel_assets, materials, meshes)
             }
         } else if mouse_input.just_pressed(MouseButton::Right) {
             voxel.remove(&mut commands, voxel_info.position, remove_query);

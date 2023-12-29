@@ -1,52 +1,130 @@
-use bevy::prelude::*;
-use bevy::render::mesh::Mesh;
 
-use crate::v_structure::StateVoxel;
+use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
+use bevy::render::mesh::{Mesh, Indices};
 
-fn create_material_with_color(color: Color) -> StandardMaterial {
-    StandardMaterial {
-        base_color: color,
-        reflectance: 0.0,
-        metallic: 0.99,
-        perceptual_roughness: 0.99,
-        emissive: Color::BLACK, // Default non-emissive state
-        // Add other shared properties here
-        ..default()
-    }
+
+use crate::v_structure::{StateVoxel, TypeVoxel};
+use bevy::asset::AssetServer;
+
+#[derive(Resource)]
+pub struct VoxelAssets {
+    pub texture_atlas: Handle<Image>,  // Handle to the texture atlas
+    pub voxel_mesh: Handle<Mesh>,        // General voxel mesh
+    // Add more materials or meshes as needed
 }
 
 impl VoxelAssets {
     pub fn new(
-        materials: &mut ResMut<Assets<StandardMaterial>>,
+        asset_server: Res<AssetServer>,
         meshes: &mut ResMut<Assets<Mesh>>,
     ) -> Self {
         VoxelAssets {
-            tile_material: materials.add(create_material_with_color(Color::hex("808080").unwrap())), 
-            wire_material: materials.add(create_material_with_color(Color::hex("36454F").unwrap())),
-            out_material: materials.add(create_material_with_color(Color::hex("CC5500").unwrap())),
-            not_material: materials.add(create_material_with_color(Color::hex("654321").unwrap())),
-            and_material: materials.add(create_material_with_color(Color::hex("800020").unwrap())),
-            or_material: materials.add(create_material_with_color(Color::hex("008080").unwrap())),
-            xor_material: materials.add(create_material_with_color(Color::hex("003366").unwrap())),
-            switch_material: materials.add(create_material_with_color(Color::hex("0B6623").unwrap())),
-            voxel_mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })), 
+            texture_atlas: asset_server.load("TexturePack/Textures.png"),
+            voxel_mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
         }
+    }
+    pub fn atlas_material(&self, materials: &mut ResMut<Assets<StandardMaterial>>) -> Handle<StandardMaterial> {
+        materials.add(StandardMaterial {
+            base_color_texture: Some(self.texture_atlas.clone()),
+            ..default()
+        })
+    }
+    pub fn create_voxel_mesh(&self, voxel_type: TypeVoxel, meshes: &mut ResMut<Assets<Mesh>>) -> Handle<Mesh> {
+        let uv_coordinates = match voxel_type {
+            TypeVoxel::Tile => calculate_uv_coordinates(0),
+            TypeVoxel::Wire => calculate_uv_coordinates(1),
+            TypeVoxel::Out => calculate_uv_coordinates(2),
+            // ... other cases ...
+            _ => calculate_uv_coordinates(0), // Default case
+        };
+
+    // Example positions for a unit cube. You'll need to adjust these based on your specific mesh.
+    let positions = vec![
+        // top (facing towards +y)
+        [-0.5, 0.5, -0.5], // vertex with index 0
+        [0.5, 0.5, -0.5], // vertex with index 1
+        [0.5, 0.5, 0.5], // etc. until 23
+        [-0.5, 0.5, 0.5],
+        // bottom   (-y)
+        [-0.5, -0.5, -0.5],
+        [0.5, -0.5, -0.5],
+        [0.5, -0.5, 0.5],
+        [-0.5, -0.5, 0.5],
+        // right    (+x)
+        [0.5, -0.5, -0.5],
+        [0.5, -0.5, 0.5],
+        [0.5, 0.5, 0.5], // This vertex is at the same position as vertex with index 2, but they'll have different UV and normal
+        [0.5, 0.5, -0.5],
+        // left     (-x)
+        [-0.5, -0.5, -0.5],
+        [-0.5, -0.5, 0.5],
+        [-0.5, 0.5, 0.5],
+        [-0.5, 0.5, -0.5],
+        // back     (+z)
+        [-0.5, -0.5, 0.5],
+        [-0.5, 0.5, 0.5],
+        [0.5, 0.5, 0.5],
+        [0.5, -0.5, 0.5],
+        // forward  (-z)
+        [-0.5, -0.5, -0.5],
+        [-0.5, 0.5, -0.5],
+        [0.5, 0.5, -0.5],
+        [0.5, -0.5, -0.5],
+    ];
+
+    // Calculate normals for each vertex
+    // Normals are usually unit vectors perpendicular to the surface
+    let normals = vec![
+        // Normals for the top side (towards +y)
+        [0.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0],
+        // Normals for the bottom side (towards -y)
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        // Normals for the right side (towards +x)
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        // Normals for the left side (towards -x)
+        [-1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        // Normals for the back side (towards +z)
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        // Normals for the forward side (towards -z)
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+    ];
+
+    let mesh = Mesh::new(PrimitiveTopology::TriangleList)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv_coordinates)
+        .with_indices(Some(Indices::U32(vec![
+            0,3,1 , 1,3,2, // triangles making up the top (+y) facing side.
+            4,5,7 , 5,6,7, // bottom (-y)
+            8,11,9 , 9,11,10, // right (+x)
+            12,13,15 , 13,14,15, // left (-x)
+            16,19,17 , 17,19,18, // back (+z)
+            20,21,23 , 21,22,23, // forward (-z)
+        ])));
+
+    meshes.add(mesh) // Add the mesh to the asset system and return the handle
     }
 }
 
-#[derive(Resource)]
-pub struct VoxelAssets {
-    pub tile_material: Handle<StandardMaterial>,
-    pub wire_material: Handle<StandardMaterial>,
-    pub out_material: Handle<StandardMaterial>,
-    pub not_material: Handle<StandardMaterial>,
-    pub and_material: Handle<StandardMaterial>,
-    pub or_material: Handle<StandardMaterial>,
-    pub xor_material: Handle<StandardMaterial>,
-    pub switch_material: Handle<StandardMaterial>,
-    pub voxel_mesh: Handle<Mesh>,
-    // Add more materials or meshes as needed
-}
+
 
 pub fn update_voxel_emissive(
     mut query: Query<(&StateVoxel, &mut Handle<StandardMaterial>)>,
@@ -61,4 +139,26 @@ pub fn update_voxel_emissive(
             };
         }
     }
+}
+
+fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
+    let atlas_width = 8.0; // Total number of textures in atlas horizontally
+    let texture_size = 1.0 / atlas_width;
+
+    let left = texture_index as f32 * texture_size;
+    let right = left + texture_size;
+    let top = 0.0;
+    let bottom = 1.0;
+
+    // Assuming a simple cube where each face uses the same part of the texture
+    vec![
+        // UVs for each face of the cube
+        [left, top], [right, top], [right, bottom], [left, bottom],
+        // Repeat this for each of the 6 faces of the cube
+        [left, top], [right, top], [right, bottom], [left, bottom],
+        [left, top], [right, top], [right, bottom], [left, bottom],
+        [left, top], [right, top], [right, bottom], [left, bottom],
+        [left, top], [right, top], [right, bottom], [left, bottom],
+        [left, top], [right, top], [right, bottom], [left, bottom],
+    ]
 }

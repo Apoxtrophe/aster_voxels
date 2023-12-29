@@ -12,6 +12,3 @@ pub const INTERACTION_DISTANCE: f32 = 10.0;
 
 // Simulation Settings
 pub const LOGIC_RATE: u64 = 1;
-
-// World Settings 
-pub const WORLD_SIZE: i32 = 100;

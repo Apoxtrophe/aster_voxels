@@ -1,6 +1,6 @@
-use bevy::{ecs::{system::{Resource, ResMut, Res}, event::EventReader}, input::mouse::MouseWheel, pbr::StandardMaterial, asset::Handle};
+use bevy::{ecs::{system::{ResMut, Resource}, event::EventReader}, input::mouse::MouseWheel};
 
-use crate::{v_structure::TypeVoxel, v_graphics::VoxelAssets};
+use crate::v_structure::TypeVoxel;
 
 
 #[derive(Resource, Clone, Copy)]
@@ -36,19 +36,6 @@ impl VoxelSelector {
             6 => TypeVoxel::Xor,
             _ => TypeVoxel::Switch,
         }
-    }
-}
-
-pub fn vox_material(voxel_type: TypeVoxel, voxel_assets: &Res<VoxelAssets>) -> Handle<StandardMaterial> {
-    match voxel_type {
-        TypeVoxel::Tile => voxel_assets.tile_material.clone(),
-        TypeVoxel::Wire => voxel_assets.wire_material.clone(),
-        TypeVoxel::Out => voxel_assets.out_material.clone(),
-        TypeVoxel::Not => voxel_assets.not_material.clone(),
-        TypeVoxel::And => voxel_assets.and_material.clone(),
-        TypeVoxel::Or => voxel_assets.or_material.clone(),
-        TypeVoxel::Xor => voxel_assets.xor_material.clone(),
-        TypeVoxel::Switch => voxel_assets.switch_material.clone(),
     }
 }
 

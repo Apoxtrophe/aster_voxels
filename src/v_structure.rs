@@ -1,12 +1,12 @@
 use bevy::{
     ecs::{system::{Commands, ResMut, Res}, entity::Entity},
     math::IVec3,
-    transform::components::Transform, pbr::{PbrBundle, StandardMaterial}, asset::Assets,
+    transform::components::Transform, pbr::{PbrBundle, StandardMaterial}, asset::Assets, render::mesh::Mesh,
 };
 
 use bevy::ecs::component::Component;
 
-use crate::{v_selector::VoxelSelector, v_graphics::VoxelAssets, v_selector::vox_material};
+use crate::{v_selector::VoxelSelector, v_graphics::VoxelAssets};
 use bevy::ecs::system::Resource;
 use bevy::ecs::system::Query;
 
@@ -64,20 +64,18 @@ impl Voxel {
         position: IVec3,
         voxel_selector: &ResMut<VoxelSelector>,
         voxel_assets: &Res<VoxelAssets>,
-        mut materials: ResMut<Assets<StandardMaterial>>, // Mutable borrow of materials
+        mut materials: ResMut<Assets<StandardMaterial>>,
+        mut meshes: ResMut<Assets<Mesh>>,
     ) {
         let voxel_type = voxel_selector.current_voxel_type();
-        let material_handle = vox_material(voxel_type, voxel_assets);
+        let voxel_mesh_handle = voxel_assets.create_voxel_mesh(voxel_type, &mut meshes);
     
-        // First, clone the material (immutable borrow)
-        let material_clone = materials.get(&material_handle).unwrap().clone();
-    
-        // Then, add the cloned material to the assets (mutable borrow)
-        let material_instance = materials.add(material_clone);
+        // Use the atlas material
+        let atlas_material = voxel_assets.atlas_material(&mut materials);
     
         commands.spawn(PbrBundle {
-            mesh: voxel_assets.voxel_mesh.clone(),
-            material: material_instance, // Use the cloned material instance
+            mesh: voxel_mesh_handle,  // Use the UV mapped mesh
+            material: atlas_material, // Use the atlas material
             transform: Transform::from_translation(position.as_vec3()),
             ..Default::default()
         })
@@ -85,7 +83,6 @@ impl Voxel {
         .insert(voxel_type)
         .insert(StateVoxel(false));
     }
-      
 
     pub fn remove(
         &mut self,
