@@ -1,7 +1,8 @@
 
+use bevy::render::render_resource::{SamplerDescriptor, FilterMode};
+use bevy::render::texture::ImageSampler;
 use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
 use bevy::render::mesh::{Mesh, Indices};
-
 
 use crate::v_structure::{StateVoxel, TypeVoxel};
 use bevy::asset::AssetServer;
@@ -17,25 +18,35 @@ impl VoxelAssets {
     pub fn new(
         asset_server: Res<AssetServer>,
         meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<StandardMaterial>>,
     ) -> Self {
-        VoxelAssets {
-            texture_atlas: asset_server.load("TexturePack/Textures.png"),
+        let texture_handle: Handle<Image> = asset_server.load("TexturePack/Textures.png");
+
+        let voxel_assets = VoxelAssets {
+            texture_atlas: texture_handle.clone(),
             voxel_mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-        }
+        };
+
+        voxel_assets
     }
+
     pub fn atlas_material(&self, materials: &mut ResMut<Assets<StandardMaterial>>) -> Handle<StandardMaterial> {
         materials.add(StandardMaterial {
             base_color_texture: Some(self.texture_atlas.clone()),
             ..default()
         })
     }
+
     pub fn create_voxel_mesh(&self, voxel_type: TypeVoxel, meshes: &mut ResMut<Assets<Mesh>>) -> Handle<Mesh> {
         let uv_coordinates = match voxel_type {
             TypeVoxel::Tile => calculate_uv_coordinates(0),
             TypeVoxel::Wire => calculate_uv_coordinates(1),
             TypeVoxel::Out => calculate_uv_coordinates(2),
-            // ... other cases ...
-            _ => calculate_uv_coordinates(0), // Default case
+            TypeVoxel::Switch => calculate_uv_coordinates(3),
+            TypeVoxel::And => calculate_uv_coordinates(4),
+            TypeVoxel::Or => calculate_uv_coordinates(5),
+            TypeVoxel::Xor => calculate_uv_coordinates(6),
+            TypeVoxel::Not => calculate_uv_coordinates(7),
         };
 
     // Example positions for a unit cube. You'll need to adjust these based on your specific mesh.

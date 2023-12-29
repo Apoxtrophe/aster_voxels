@@ -20,6 +20,7 @@ use v_structure::Voxel;
 use core::f32::consts::PI;
 use std::time::Duration;
 use bevy::pbr::CascadeShadowConfigBuilder;
+
 use v_graphics::*;
 mod v_debug;
 use v_debug::*;
@@ -52,8 +53,11 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
-    mut ambient_light: ResMut<AmbientLight>
+    mut ambient_light: ResMut<AmbientLight>,
+    mut texture_events: EventReader<AssetEvent<Image>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
+
     //Ground
     commands.spawn((
         PbrBundle {
@@ -118,7 +122,7 @@ fn setup(
     });
 
     // Create materials for tiles and wires
-    let voxel_assets = VoxelAssets::new(asset_server, &mut meshes);
+    let voxel_assets = VoxelAssets::new(asset_server, &mut meshes, &mut materials);
 
 
     // Initialize the voxel world
