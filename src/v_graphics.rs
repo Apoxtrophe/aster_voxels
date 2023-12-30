@@ -35,6 +35,10 @@ impl VoxelAssets {
     ) -> Handle<StandardMaterial> {
         materials.add(StandardMaterial {
             base_color_texture: Some(self.texture_atlas.clone()),
+            perceptual_roughness: 1.0,
+            metallic: 1.0,
+            emissive: Color::BLACK,
+            reflectance: 0.0,
             ..default()
         })
     }
@@ -148,7 +152,7 @@ pub fn update_voxel_emissive(
     for (state, material_handle) in query.iter_mut() {
         if let Some(material) = materials.get_mut(&*material_handle) {
             material.emissive = if state.0 {
-                material.base_color // Use the base color as the emissive color
+                Color::DARK_GRAY // Use the base color as the emissive color
             } else {
                 Color::BLACK // Non-emissive state
             };

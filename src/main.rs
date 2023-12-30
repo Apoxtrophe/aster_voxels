@@ -57,12 +57,19 @@ fn setup(
     mut texture_events: EventReader<AssetEvent<Image>>,
     mut images: ResMut<Assets<Image>>,
 ) {
-    //Ground
+    let ground_material = materials.add(StandardMaterial {
+        base_color: Color::rgb(0.1, 0.2, 0.1),
+        perceptual_roughness: 0.95, // Adjust this value to make the ground appear rougher
+        metallic: 0.0,
+        ..Default::default()
+    });
+
+    // Spawn the ground entity with the rough material
     commands.spawn((
         PbrBundle {
             mesh: meshes.add(shape::Plane::from_size(200.).into()),
-            material: materials.add(Color::rgb(0.1, 0.2, 0.1).into()),
-            ..default()
+            material: ground_material,
+            ..Default::default()
         },
         Ground,
     ));
