@@ -6,6 +6,7 @@ mod v_player;
 mod v_simulation;
 mod v_structure;
 
+use bevy::ecs::system::RunSystemOnce;
 // Using structs and enums directly from their modules
 use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
@@ -14,7 +15,9 @@ use bevy::window::{
 };
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use bevy_egui::EguiPlugin;
+use v_bench::benchmark;
 use core::f32::consts::PI;
+use std::iter::Once;
 use std::time::Duration;
 use v_config::*;
 use v_lib::{update_info, VoxelInfo};
@@ -27,6 +30,7 @@ mod v_debug;
 use v_debug::*;
 mod v_selector;
 use v_selector::*;
+mod v_bench;
 
 #[derive(Component)]
 pub struct Ground;
@@ -44,6 +48,7 @@ fn main() {
         .add_systems(Update, ui_debug)
         .add_systems(Update, update_voxel_emissive)
         .add_systems(Update, logic_operation_system)
+        .add_systems(Update, benchmark)
         .run();
 }
 
@@ -54,8 +59,6 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut ambient_light: ResMut<AmbientLight>,
-    mut texture_events: EventReader<AssetEvent<Image>>,
-    mut images: ResMut<Assets<Image>>,
 ) {
     let ground_material = materials.add(StandardMaterial {
         base_color: Color::rgb(0.1, 0.2, 0.1),
@@ -142,7 +145,7 @@ fn setup(
     commands.insert_resource(VoxelInfo::new());
 
     commands.insert_resource(MyTimer(Timer::new(
-        Duration::from_secs(LOGIC_RATE),
+        Duration::from_millis(LOGIC_RATE),
         TimerMode::Repeating,
     )));
 }

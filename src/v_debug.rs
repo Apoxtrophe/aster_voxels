@@ -1,5 +1,5 @@
-use crate::v_lib::VoxelInfo;
-use bevy::ecs::system::Res;
+use crate::{v_lib::VoxelInfo, v_structure::{PositionVoxel, Voxel}};
+use bevy::{ecs::{system::{Res, Resource, Query, ResMut}, query::With}, diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin}, time::Time};
 use bevy_egui::{egui, EguiContexts};
 
 pub fn ui_debug(mut contexts: EguiContexts, voxel_state: Res<VoxelInfo>) {
@@ -12,3 +12,4 @@ pub fn ui_debug(mut contexts: EguiContexts, voxel_state: Res<VoxelInfo>) {
         ui.label(format!("Selected voxel type: {:?}", voxel_state.selected));
     });
 }
+
