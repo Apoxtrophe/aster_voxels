@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 use bevy_mod_raycast::{immediate::Raycast, primitives::Ray3d};
 
-use crate::{v_structure::{TypeVoxel, Voxel, PositionVoxel, StateVoxel}, v_selector::VoxelSelector};
 use super::v_config::*;
+use crate::{
+    v_selector::VoxelSelector,
+    v_structure::{PositionVoxel, StateVoxel, TypeVoxel, Voxel},
+};
 
 #[derive(Resource)]
 pub struct VoxelInfo {
@@ -20,7 +23,7 @@ impl VoxelInfo {
             position: IVec3::ZERO,
             adjacent: IVec3::ZERO,
             in_range: false,
-            voxel_type: None, 
+            voxel_type: None,
             is_on: None,
             selected: None,
         }
@@ -42,7 +45,12 @@ pub fn raycasting(
             let distance = intersection_data.distance();
             let normal = intersection_data.normal().round();
             let triangle = intersection_data.triangle().unwrap();
-            let position = ((Vec3::from(triangle.v0) + Vec3::from(triangle.v1) + Vec3::from(triangle.v2)) / 3.0 - normal * 0.5).round().as_ivec3();
+            let position =
+                ((Vec3::from(triangle.v0) + Vec3::from(triangle.v1) + Vec3::from(triangle.v2))
+                    / 3.0
+                    - normal * 0.5)
+                    .round()
+                    .as_ivec3();
             let is_in_range = distance < INTERACTION_DISTANCE;
             let adjacent_position = position + normal.as_ivec3();
 
@@ -88,4 +96,3 @@ fn handle_no_voxel_found(voxel_info: &mut VoxelInfo) {
     voxel_info.is_on = None;
     voxel_info.voxel_type = None;
 }
-

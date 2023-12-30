@@ -1,20 +1,35 @@
 use bevy::{
-    ecs::{system::{Commands, ResMut, Res}, entity::Entity},
+    asset::Assets,
+    ecs::{
+        entity::Entity,
+        system::{Commands, Res, ResMut},
+    },
     math::IVec3,
-    transform::components::Transform, pbr::{PbrBundle, StandardMaterial}, asset::Assets, render::mesh::Mesh,
+    pbr::{PbrBundle, StandardMaterial},
+    render::mesh::Mesh,
+    transform::components::Transform,
 };
 
 use bevy::ecs::component::Component;
 
-use crate::{v_selector::VoxelSelector, v_graphics::VoxelAssets};
-use bevy::ecs::system::Resource;
+use crate::{v_graphics::VoxelAssets, v_selector::VoxelSelector};
 use bevy::ecs::system::Query;
+use bevy::ecs::system::Resource;
 
 #[derive(Component, Debug, Clone, Copy, PartialEq)]
 pub struct PositionVoxel(pub IVec3);
 
 #[derive(Component, Debug, Clone, Copy, PartialEq)]
-pub enum TypeVoxel {Tile, Wire, Out, Not, And, Or, Xor, Switch,}
+pub enum TypeVoxel {
+    Tile,
+    Wire,
+    Out,
+    Not,
+    And,
+    Or,
+    Xor,
+    Switch,
+}
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct StateVoxel(pub bool);
@@ -69,19 +84,20 @@ impl Voxel {
     ) {
         let voxel_type = voxel_selector.current_voxel_type();
         let voxel_mesh_handle = voxel_assets.create_voxel_mesh(voxel_type, &mut meshes);
-    
+
         // Use the atlas material
         let atlas_material = voxel_assets.atlas_material(&mut materials);
-    
-        commands.spawn(PbrBundle {
-            mesh: voxel_mesh_handle,  // Use the UV mapped mesh
-            material: atlas_material, // Use the atlas material
-            transform: Transform::from_translation(position.as_vec3()),
-            ..Default::default()
-        })
-        .insert(PositionVoxel(position))
-        .insert(voxel_type)
-        .insert(StateVoxel(false));
+
+        commands
+            .spawn(PbrBundle {
+                mesh: voxel_mesh_handle,  // Use the UV mapped mesh
+                material: atlas_material, // Use the atlas material
+                transform: Transform::from_translation(position.as_vec3()),
+                ..Default::default()
+            })
+            .insert(PositionVoxel(position))
+            .insert(voxel_type)
+            .insert(StateVoxel(false));
     }
 
     pub fn remove(
@@ -99,4 +115,3 @@ impl Voxel {
         }
     }
 }
-

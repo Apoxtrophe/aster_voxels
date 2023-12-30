@@ -1,7 +1,12 @@
-use bevy::{ecs::{system::{ResMut, Resource}, event::EventReader}, input::mouse::MouseWheel};
+use bevy::{
+    ecs::{
+        event::EventReader,
+        system::{ResMut, Resource},
+    },
+    input::mouse::MouseWheel,
+};
 
 use crate::v_structure::TypeVoxel;
-
 
 #[derive(Resource, Clone, Copy)]
 pub struct VoxelSelector {
@@ -46,7 +51,7 @@ pub fn vox_scroll_selection(
     for event in mouse_wheel_events.read() {
         if event.y > 0.0 {
             voxel_selector.next();
-        } else if event.y <0.0 {
+        } else if event.y < 0.0 {
             voxel_selector.previous();
         }
     }

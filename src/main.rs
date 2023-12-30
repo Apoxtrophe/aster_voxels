@@ -1,25 +1,26 @@
 // Importing necessary modules
 mod v_config;
-mod v_structure;
 mod v_graphics;
-mod v_player;
 mod v_lib;
+mod v_player;
 mod v_simulation;
-
+mod v_structure;
 
 // Using structs and enums directly from their modules
+use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
-use bevy::window::{Window, PresentMode, CursorIcon, CursorGrabMode, WindowResolution, WindowMode, PrimaryWindow};
+use bevy::window::{
+    CursorGrabMode, CursorIcon, PresentMode, PrimaryWindow, Window, WindowMode, WindowResolution,
+};
 use bevy_atmosphere::plugin::AtmospherePlugin;
-use v_config::*;
-use v_lib::{VoxelInfo, update_info};
-use v_player::*;
 use bevy_egui::EguiPlugin;
-use v_simulation::{MyTimer, logic_operation_system};
-use v_structure::Voxel;
 use core::f32::consts::PI;
 use std::time::Duration;
-use bevy::pbr::CascadeShadowConfigBuilder;
+use v_config::*;
+use v_lib::{update_info, VoxelInfo};
+use v_player::*;
+use v_simulation::{logic_operation_system, MyTimer};
+use v_structure::Voxel;
 
 use v_graphics::*;
 mod v_debug;
@@ -30,10 +31,9 @@ use v_selector::*;
 #[derive(Component)]
 pub struct Ground;
 
-
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(AtmospherePlugin)
         .add_plugins(EguiPlugin)
         .add_systems(Startup, setup)
@@ -57,7 +57,6 @@ fn setup(
     mut texture_events: EventReader<AssetEvent<Image>>,
     mut images: ResMut<Assets<Image>>,
 ) {
-
     //Ground
     commands.spawn((
         PbrBundle {
@@ -65,7 +64,6 @@ fn setup(
             material: materials.add(Color::rgb(0.1, 0.2, 0.1).into()),
             ..default()
         },
-        
         Ground,
     ));
 
@@ -76,7 +74,7 @@ fn setup(
             ..default()
         },
         transform: Transform {
-            translation: Vec3::new(10.0, 2.0,0.0),
+            translation: Vec3::new(10.0, 2.0, 0.0),
             rotation: Quat::from_rotation_x(-PI / 4.),
             ..default()
         },
@@ -95,11 +93,10 @@ fn setup(
     ambient_light.color = Color::WHITE;
     ambient_light.brightness = 0.3; // Adjust the brightness as needed
 
-    
     // Window settings
     let mut window = windows.single_mut();
     window.title = "Logica".to_string();
-    window.resolution = WindowResolution::new(SCREEN_WIDTH,SCREEN_HEIGHT);
+    window.resolution = WindowResolution::new(SCREEN_WIDTH, SCREEN_HEIGHT);
     window.present_mode = PresentMode::AutoVsync;
     window.cursor.icon = CursorIcon::Crosshair;
     window.cursor.grab_mode = CursorGrabMode::Locked;
@@ -110,7 +107,11 @@ fn setup(
     let texture_handle = asset_server.load("Crosshair.png");
     let cloned_handle = texture_handle.clone();
     commands.spawn(ImageBundle {
-        image: UiImage { texture: (cloned_handle), flip_x: (false), flip_y: (false)},
+        image: UiImage {
+            texture: (cloned_handle),
+            flip_x: (false),
+            flip_y: (false),
+        },
         style: Style {
             align_self: AlignSelf::Center,
             position_type: PositionType::Absolute,
@@ -124,7 +125,6 @@ fn setup(
     // Create materials for tiles and wires
     let voxel_assets = VoxelAssets::new(asset_server, &mut meshes, &mut materials);
 
-
     // Initialize the voxel world
     commands.insert_resource(Voxel::new());
 
@@ -134,5 +134,8 @@ fn setup(
 
     commands.insert_resource(VoxelInfo::new());
 
-    commands.insert_resource(MyTimer(Timer::new(Duration::from_secs(LOGIC_RATE), TimerMode::Repeating)));
+    commands.insert_resource(MyTimer(Timer::new(
+        Duration::from_secs(LOGIC_RATE),
+        TimerMode::Repeating,
+    )));
 }

@@ -1,12 +1,12 @@
 // Bevy-related imports
 use bevy::prelude::*;
 
+use crate::v_graphics::VoxelAssets;
+use crate::v_selector::vox_scroll_selection;
+use crate::v_selector::VoxelSelector;
+use crate::v_structure::{PositionVoxel, StateVoxel, TypeVoxel, Voxel};
 use bevy::input::mouse::{MouseMotion, MouseWheel};
 use bevy_atmosphere::prelude::*;
-use crate::v_selector::vox_scroll_selection;
-use crate::v_graphics::VoxelAssets;
-use crate::v_selector::VoxelSelector;
-use crate::v_structure::{Voxel, TypeVoxel, PositionVoxel, StateVoxel};
 // Voxel assets and configuration
 
 use super::v_config::*;
@@ -19,12 +19,16 @@ pub struct CameraRotation {
 }
 
 pub fn create_player(mut commands: Commands) {
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(15.0, 5.0, 15.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..Default::default()
-    })  
-    .insert(CameraRotation { pitch: 0.0, yaw: 0.0 })
-    .insert(AtmosphereCamera::default());
+    commands
+        .spawn(Camera3dBundle {
+            transform: Transform::from_xyz(15.0, 5.0, 15.0).looking_at(Vec3::ZERO, Vec3::Y),
+            ..Default::default()
+        })
+        .insert(CameraRotation {
+            pitch: 0.0,
+            yaw: 0.0,
+        })
+        .insert(AtmosphereCamera::default());
 }
 
 pub fn player_system(
@@ -39,17 +43,32 @@ pub fn player_system(
         // Handle Camera Rotation
         for event in mouse_motion_events.read() {
             rotation.yaw -= event.delta.x * MOUSE_SENSITIVITY;
-            rotation.pitch = (rotation.pitch - event.delta.y * MOUSE_SENSITIVITY).clamp(-89.9, 89.9);
-            transform.rotation = Quat::from_euler(EulerRot::YXZ, rotation.yaw.to_radians(), rotation.pitch.to_radians(), 0.0);
+            rotation.pitch =
+                (rotation.pitch - event.delta.y * MOUSE_SENSITIVITY).clamp(-89.9, 89.9);
+            transform.rotation = Quat::from_euler(
+                EulerRot::YXZ,
+                rotation.yaw.to_radians(),
+                rotation.pitch.to_radians(),
+                0.0,
+            );
         }
 
         // Handle Camera Movement
-        let direction = transform.forward() * (keyboard_input.pressed(KeyCode::W) as i32 as f32 - keyboard_input.pressed(KeyCode::S) as i32 as f32)
-                      + transform.right() * (keyboard_input.pressed(KeyCode::D) as i32 as f32 - keyboard_input.pressed(KeyCode::A) as i32 as f32)
-                      + Vec3::Y * keyboard_input.pressed(KeyCode::Space) as i32 as f32;
+        let direction = transform.forward()
+            * (keyboard_input.pressed(KeyCode::W) as i32 as f32
+                - keyboard_input.pressed(KeyCode::S) as i32 as f32)
+            + transform.right()
+                * (keyboard_input.pressed(KeyCode::D) as i32 as f32
+                    - keyboard_input.pressed(KeyCode::A) as i32 as f32)
+            + Vec3::Y * keyboard_input.pressed(KeyCode::Space) as i32 as f32;
 
         if direction.length_squared() > 0.0 {
-            transform.translation += time.delta_seconds() * ((if keyboard_input.pressed(KeyCode::ShiftLeft) { PLAYER_SPRINT } else { PLAYER_SPEED }) * direction.normalize());
+            transform.translation += time.delta_seconds()
+                * ((if keyboard_input.pressed(KeyCode::ShiftLeft) {
+                    PLAYER_SPRINT
+                } else {
+                    PLAYER_SPEED
+                }) * direction.normalize());
         }
     }
     // Selection of current voxel type
@@ -70,21 +89,33 @@ pub fn voxel_interaction_system(
     meshes: ResMut<Assets<Mesh>>,
 ) {
     //Placing, removing, and altering state on mouse click
-    if voxel_info.in_range{
+    if voxel_info.in_range {
         if mouse_input.just_pressed(MouseButton::Left) {
-            if keyboard_input.pressed(KeyCode::ControlLeft){
-               if let Some(state) = voxel_info.is_on{
-                if let Some(voxel_type) = voxel_info.voxel_type{
-                    if voxel_type == TypeVoxel::Switch{
-                        voxel.set_state(&mut commands, voxel_info.position, !state, state_query);
+            if keyboard_input.pressed(KeyCode::ControlLeft) {
+                if let Some(state) = voxel_info.is_on {
+                    if let Some(voxel_type) = voxel_info.voxel_type {
+                        if voxel_type == TypeVoxel::Switch {
+                            voxel.set_state(
+                                &mut commands,
+                                voxel_info.position,
+                                !state,
+                                state_query,
+                            );
+                        }
                     }
                 }
-               }
             } else {
-                voxel.place(&mut commands, voxel_info.adjacent, &voxel_selector, &voxel_assets, materials, meshes)
+                voxel.place(
+                    &mut commands,
+                    voxel_info.adjacent,
+                    &voxel_selector,
+                    &voxel_assets,
+                    materials,
+                    meshes,
+                )
             }
         } else if mouse_input.just_pressed(MouseButton::Right) {
             voxel.remove(&mut commands, voxel_info.position, remove_query);
-        }  
+        }
     }
 }
