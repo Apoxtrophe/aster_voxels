@@ -46,28 +46,19 @@ fn process_logic_gate(
     voxel_type: TypeVoxel,
     voxel_query: &Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
 ) -> bool {
+    // Collect all nearby wire voxels first
     let adjacent_positions = get_adjacent_positions(position);
-    let mut active_inputs = 0;
-    let mut total_inputs = 0;
+    let mut nearby_wires = Vec::new();
 
-    for adj_pos in adjacent_positions.iter() {
-        if let Some((_, state_voxel)) =
-            voxel_query
-                .iter()
-                .find_map(|(_, pos_voxel, type_voxel, state_voxel)| {
-                    if *adj_pos == pos_voxel.0 && matches!(type_voxel, TypeVoxel::Wire) {
-                        Some((type_voxel, state_voxel))
-                    } else {
-                        None
-                    }
-                })
-        {
-            total_inputs += 1;
-            if state_voxel.0 {
-                active_inputs += 1;
-            }
+    for (_, pos_voxel, type_voxel, state_voxel) in voxel_query.iter() {
+        if matches!(type_voxel, TypeVoxel::Wire) && adjacent_positions.contains(&pos_voxel.0) {
+            nearby_wires.push((pos_voxel.0, state_voxel.0));
         }
     }
+
+    // Process logic based on the collected wire voxels
+    let active_inputs = nearby_wires.iter().filter(|(_, state)| *state).count();
+    let total_inputs = nearby_wires.len();
 
     match voxel_type {
         TypeVoxel::And => active_inputs == total_inputs && total_inputs > 0,
@@ -130,8 +121,15 @@ fn apply_changes(
     voxel_query: &mut Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
     changes: Vec<(Entity, bool)>,
 ) {
+    // Use a HashMap to store the state changes for each entity
+    let mut change_map: HashMap<Entity, bool> = HashMap::new();
     for (entity, new_state) in changes {
-        if let Ok(mut state_voxel) = voxel_query.get_component_mut::<StateVoxel>(entity) {
+        change_map.insert(entity, new_state);
+    }
+
+    // Apply changes in a single pass
+    for (entity, _, _, mut state_voxel) in voxel_query.iter_mut() {
+        if let Some(&new_state) = change_map.get(&entity) {
             state_voxel.0 = new_state;
         }
     }
