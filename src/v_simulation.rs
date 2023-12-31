@@ -1,7 +1,7 @@
 use crate::v_structure::{PositionVoxel, StateVoxel, TypeVoxel};
 use bevy::math::IVec3;
 use bevy::prelude::*;
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 
 #[derive(Resource)]
 pub struct MyTimer(pub Timer);
@@ -112,17 +112,17 @@ fn process_out_logic(
     position: IVec3,
     voxel_query: &Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
 ) -> bool {
+    // Create a HashMap for quick lookups
+    let mut position_state_map = HashMap::new();
+    for (_, pos_voxel, type_voxel, state_voxel) in voxel_query.iter() {
+        if !matches!(type_voxel, TypeVoxel::Tile | TypeVoxel::Wire | TypeVoxel::Out) {
+            position_state_map.insert(pos_voxel.0, state_voxel.0);
+        }
+    }
+
+    // Check adjacent positions using the HashMap
     get_adjacent_positions(position).iter().any(|adj_pos| {
-        voxel_query
-            .iter()
-            .any(|(_, pos_voxel, type_voxel, state_voxel)| {
-                *adj_pos == pos_voxel.0
-                    && !matches!(
-                        type_voxel,
-                        TypeVoxel::Tile | TypeVoxel::Wire | TypeVoxel::Out
-                    )
-                    && state_voxel.0
-            })
+        *position_state_map.get(adj_pos).unwrap_or(&false)
     })
 }
 
