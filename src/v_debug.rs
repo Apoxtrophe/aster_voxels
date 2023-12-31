@@ -20,6 +20,9 @@ pub fn ui_debug(
             ui.label("Average frame time: Calculating...");
         }
         ui.label(format!("FPS: {:?} /s", performance_metrics.fps));
+        ui.label(format!("CPU usage: {:?} %", performance_metrics.cpu_usage));
+        ui.label(format!("Memory usage: {:?} GB", performance_metrics.memory_usage / 1073741824));
+        ui.label(format!("Voxel count: {:?}", performance_metrics.entity_count));
     });
 }
 
