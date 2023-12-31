@@ -6,7 +6,7 @@ mod v_player;
 mod v_simulation;
 mod v_structure;
 
-use bevy::ecs::system::RunSystemOnce;
+
 // Using structs and enums directly from their modules
 use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
@@ -15,9 +15,8 @@ use bevy::window::{
 };
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use bevy_egui::EguiPlugin;
-use v_bench::benchmark;
 use core::f32::consts::PI;
-use std::iter::Once;
+
 use std::time::Duration;
 use v_config::*;
 use v_lib::{update_info, VoxelInfo};
@@ -31,6 +30,7 @@ use v_debug::*;
 mod v_selector;
 use v_selector::*;
 mod v_bench;
+use v_bench::*;
 
 #[derive(Component)]
 pub struct Ground;

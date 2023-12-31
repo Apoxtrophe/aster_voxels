@@ -1,7 +1,6 @@
 // Bevy-related imports
 use bevy::prelude::*;
 
-use crate::v_bench::benchmark;
 use crate::v_graphics::VoxelAssets;
 use crate::v_selector::vox_scroll_selection;
 use crate::v_selector::VoxelSelector;

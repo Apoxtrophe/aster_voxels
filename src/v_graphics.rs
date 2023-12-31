@@ -1,6 +1,5 @@
 use bevy::render::mesh::{Indices, Mesh};
-use bevy::render::render_resource::{FilterMode, SamplerDescriptor};
-use bevy::render::texture::ImageSampler;
+
 use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
 
 use crate::v_structure::{StateVoxel, TypeVoxel};
