@@ -16,12 +16,12 @@ pub fn benchmark(
 ) {
 
     if marker.is_none() && BENCHMARKING {
-        let mut voxel_type = TypeVoxel::Wire;
+        let mut voxel_type = TypeVoxel::Xor;
         let voxel_mesh_handle = voxel_assets.create_voxel_mesh(voxel_type, &mut meshes);
         let atlas_material = voxel_assets.atlas_material(&mut materials);
-        for j in 0..3 {
-            for i in 0..10 {
-                let position = IVec3::new(i, j * 2, 0);
+        for j in 0..100{
+            for i in 0..50 {
+                let position = IVec3::new(i, 1, j);
     
                 commands
                     .spawn(PbrBundle {
@@ -35,7 +35,6 @@ pub fn benchmark(
                     .insert(StateVoxel(false));
             }
         }
-        
         commands.insert_resource(OneTime);
     }
 

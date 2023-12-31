@@ -137,8 +137,8 @@ fn apply_changes(
     }
 }
 
-pub fn get_adjacent_positions(position: IVec3) -> Vec<IVec3> {
-    vec![
+pub fn get_adjacent_positions(position: IVec3) -> [IVec3; 6] {
+    [
         position + IVec3::new(1, 0, 0),
         position + IVec3::new(-1, 0, 0),
         position + IVec3::new(0, 1, 0),

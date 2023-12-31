@@ -17,6 +17,7 @@ use bevy::window::{
 };
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use bevy_egui::EguiPlugin;
+use v_bench::benchmark;
 use v_performance::{ PerformanceMetrics, performance_metrics_system};
 use core::f32::consts::PI;
 
@@ -51,7 +52,7 @@ fn main() {
         .add_systems(Update, ui_debug)
         .add_systems(Update, update_voxel_emissive)
         .add_systems(Update, logic_operation_system)
-        //.add_systems(Update, benchmark)
+        .add_systems(Update, benchmark)
         .run();
 }
 
