@@ -5,8 +5,10 @@ mod v_lib;
 mod v_player;
 mod v_simulation;
 mod v_structure;
+mod v_performance;
 
 
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 // Using structs and enums directly from their modules
 use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
@@ -15,6 +17,7 @@ use bevy::window::{
 };
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use bevy_egui::EguiPlugin;
+use v_performance::{ PerformanceMetrics, performance_metrics_system};
 use core::f32::consts::PI;
 
 use std::time::Duration;
@@ -30,7 +33,6 @@ use v_debug::*;
 mod v_selector;
 use v_selector::*;
 mod v_bench;
-use v_bench::*;
 
 #[derive(Component)]
 pub struct Ground;
@@ -45,10 +47,11 @@ fn main() {
         .add_systems(Update, update_info)
         .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
+        .add_systems(Update, performance_metrics_system)
         .add_systems(Update, ui_debug)
         .add_systems(Update, update_voxel_emissive)
         .add_systems(Update, logic_operation_system)
-        .add_systems(Update, benchmark)
+        //.add_systems(Update, benchmark)
         .run();
 }
 
@@ -112,6 +115,7 @@ fn setup(
     window.cursor.grab_mode = CursorGrabMode::Locked;
     window.mode = WindowMode::Windowed;
     window.cursor.visible = false;
+    window.decorations = true;
 
     // Crosshair
     let texture_handle = asset_server.load("Crosshair.png");
@@ -148,4 +152,6 @@ fn setup(
         Duration::from_millis(LOGIC_RATE),
         TimerMode::Repeating,
     )));
+
+    commands.insert_resource(PerformanceMetrics::new());
 }
