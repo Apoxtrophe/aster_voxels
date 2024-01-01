@@ -1,4 +1,4 @@
-Logica: Voxel-based Logic Simulation Game
+#Logica: Voxel-based Logic Simulation Game
 Logica is a voxel-based simulation game leveraging the Bevy engine in Rust, focusing on logic operations and interactive environment manipulation. This project blends the elements of construction, puzzle-solving, and real-time logic simulation in a 3D world.
 
 Features
