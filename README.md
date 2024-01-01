@@ -1,28 +1,26 @@
-#Logica: Voxel-based Logic Simulation Game
-Logica is a voxel-based simulation game leveraging the Bevy engine in Rust, focusing on logic operations and interactive environment manipulation. This project blends the elements of construction, puzzle-solving, and real-time logic simulation in a 3D world.
+# Logica: Voxel-based Logic Simulation Game
+Logica is an innovative, realtime voxel-based boolean logic simulation game developed using Rust and the Bevy engine. It combines the principles of boolean logic with the creative freedom of voxel-based gameplay, offering a unique platform for simulation and exploration.
+![LogicaBigSplash](https://github.com/Apoxtrophe/aster_voxels/assets/23144326/1fc4317a-eb29-4fb8-99dd-83c1b0399e20)
 
-Features
-Logic Operations with Voxels: Utilize voxels to build and simulate logic circuits. Supports gates like AND, OR, XOR, and NOT.
+# Current Features
+**Interactive Player Control:** Engage with voxel-based circuits through intuitive player controls, including interactive Switch voxels for dynamic gameplay.
 
-Interactive Voxel Environment: Players can interact with voxels in real-time, enabling the creation, modification, and removal of elements in the game world.
+**Realtime Voxel Manipulation:** Experience the freedom of creating, modifying, and destroying voxels in real-time, enabling seamless construction and experimentation.
 
-Dynamic Player-Controlled Camera: Incorporates a player-controlled camera system, allowing for 360-degree exploration and interaction.
+**Advanced Boolean Logic:**  Implement complex boolean logic with AND, OR, NOT, XOR gates, and more to come, facilitating the creation of intricate logic circuits and systems.
 
-Real-Time Logic Processing: The game's engine processes logic operations in real-time, reflecting immediate changes in the game world based on player actions and logic gate configurations.
+**Efficient Signal Propagation:** Enjoy immediate signal transmission along wires, ensuring synchronized and efficient operation of your circuits without delays.
 
-Player Interaction Systems: Includes systems for voxel placement/removal, state alteration, and player movement, enhancing the strategic gameplay experience.
+**Open Sandbox World:** Explore an open-world environment adorned with meticulously crafted pixel-art graphics and an immersive skybox.
 
-Enhanced Visuals and Atmosphere: Features dynamic lighting and atmospheric effects, creating an immersive visual experience.
+**Performance Optimization Tools:** Utilize a suite of performance metrics, debugging tools, and benchmarking utilities to enhance and streamline your gameplay experience.
 
-Performance Metrics and Debugging Tools: Equipped with modules for performance tracking and debugging, ensuring optimal gameplay and development.
+**Deterministic Voxel Components:** Benefit from simple, deterministic voxel components that behave consistently, allowing for precise and predictable constructions.
 
-Technical Highlights
-Rust Programming Language: Developed using Rust, ensuring memory safety and efficient performance.
+# Current Gameplay Opportunities
 
-Bevy Engine: Utilizes the Bevy game engine, capitalizing on its ECS architecture and parallel processing capabilities.
+**Complex Circuit Creation:** Logica is equipped with all the necessary tools to build advanced logic circuits, calculators, computers, and more, using digital logic principles.
 
-Voxel-Based Mechanics: Employs a voxel grid system for environment construction and logic simulation.
+**Expanding Feature Set:** The game is continuously evolving, with many more features and enhancements planned for future updates.
 
-Interactive Logic Gates: Logic gates within the game are not static but can be interacted with and altered during gameplay.
-
-Complex Game Mechanics: The mechanics involve various systems handling voxel states, player inputs, and real-time updates.
+> Made by Astoria (Apoxtrophe)
