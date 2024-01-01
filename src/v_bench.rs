@@ -20,7 +20,7 @@ pub fn benchmark(
         let voxel_mesh_handle = voxel_assets.create_voxel_mesh(voxel_type, &mut meshes);
         let atlas_material = voxel_assets.atlas_material(&mut materials);
         for j in 0..100{
-            for i in 0..50 {
+            for i in 0..100 {
                 let position = IVec3::new(i, 1, j);
     
                 commands
