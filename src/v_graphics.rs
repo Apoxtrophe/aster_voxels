@@ -16,7 +16,6 @@ impl VoxelAssets {
     pub fn new(
         asset_server: Res<AssetServer>,
         meshes: &mut ResMut<Assets<Mesh>>,
-        materials: &mut ResMut<Assets<StandardMaterial>>,
     ) -> Self {
         let texture_handle: Handle<Image> = asset_server.load("TexturePack/Textures.png");
 

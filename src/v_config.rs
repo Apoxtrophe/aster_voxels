@@ -21,3 +21,8 @@ pub const BENCHMARK_SIZE: i32 = 100;
 
 // Performance Metrics
 pub const ONE_SECOND: Duration = Duration::from_secs(1);
+
+// World Generation
+pub const WORLD_SIZE: i32 = 100;
+pub const UV_MULTIPLIER: f32 = 2.0;
+pub const SUBDIVISIONS: u32 = 0;

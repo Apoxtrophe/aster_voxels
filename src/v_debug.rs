@@ -1,10 +1,11 @@
 use crate::{v_lib::VoxelInfo, v_performance::PerformanceMetrics};
-use bevy::{ecs::system::{Res, Resource, ResMut}, diagnostic::Diagnostics};
+use bevy::
+    ecs::system::Res
+;
 use bevy_egui::{egui, EguiContexts};
 
-
 pub fn ui_debug(
-    mut contexts: EguiContexts, 
+    mut contexts: EguiContexts,
     voxel_state: Res<VoxelInfo>,
     performance_metrics: Res<PerformanceMetrics>,
 ) {
@@ -21,9 +22,13 @@ pub fn ui_debug(
         }
         ui.label(format!("FPS: {:?} /s", performance_metrics.fps));
         ui.label(format!("CPU usage: {:?} %", performance_metrics.cpu_usage));
-        ui.label(format!("Memory usage: {:?} GB", performance_metrics.memory_usage / 1073741824));
-        ui.label(format!("Voxel count: {:?}", performance_metrics.entity_count));
+        ui.label(format!(
+            "Memory usage: {:?} GB",
+            performance_metrics.memory_usage / 1073741824
+        ));
+        ui.label(format!(
+            "Voxel count: {:?}",
+            performance_metrics.entity_count
+        ));
     });
 }
-
-

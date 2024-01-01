@@ -2,13 +2,11 @@
 mod v_config;
 mod v_graphics;
 mod v_lib;
+mod v_performance;
 mod v_player;
 mod v_simulation;
 mod v_structure;
-mod v_performance;
 
-
-use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 // Using structs and enums directly from their modules
 use bevy::pbr::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
@@ -17,9 +15,10 @@ use bevy::window::{
 };
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use bevy_egui::EguiPlugin;
-use v_bench::benchmark;
-use v_performance::{ PerformanceMetrics, performance_metrics_system};
+use v_worldgen::worldgen;
 use core::f32::consts::PI;
+use v_bench::benchmark;
+use v_performance::{performance_metrics_system, PerformanceMetrics};
 
 use std::time::Duration;
 use v_config::*;
@@ -34,9 +33,10 @@ use v_debug::*;
 mod v_selector;
 use v_selector::*;
 mod v_bench;
+mod v_worldgen;
 
-#[derive(Component)]
-pub struct Ground;
+
+
 
 fn main() {
     App::new()
@@ -45,6 +45,7 @@ fn main() {
         .add_plugins(EguiPlugin)
         .add_systems(Startup, setup)
         .add_systems(Startup, create_player)
+        .add_systems(Startup, worldgen)
         .add_systems(Update, update_info)
         .add_systems(Update, player_system)
         .add_systems(Update, voxel_interaction_system)
@@ -64,23 +65,6 @@ fn setup(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut ambient_light: ResMut<AmbientLight>,
 ) {
-    let ground_material = materials.add(StandardMaterial {
-        base_color: Color::rgb(0.1, 0.2, 0.1),
-        perceptual_roughness: 0.95, // Adjust this value to make the ground appear rougher
-        metallic: 0.0,
-        ..Default::default()
-    });
-
-    // Spawn the ground entity with the rough material
-    commands.spawn((
-        PbrBundle {
-            mesh: meshes.add(shape::Plane::from_size(200.).into()),
-            material: ground_material,
-            ..Default::default()
-        },
-        Ground,
-    ));
-
     //SUN
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
@@ -105,7 +89,7 @@ fn setup(
     });
     // Ambient lighting
     ambient_light.color = Color::WHITE;
-    ambient_light.brightness = 0.3; // Adjust the brightness as needed
+    ambient_light.brightness = 0.8; // Adjust the brightness as needed
 
     // Window settings
     let mut window = windows.single_mut();
@@ -117,6 +101,7 @@ fn setup(
     window.mode = WindowMode::Windowed;
     window.cursor.visible = false;
     window.decorations = true;
+    window.window_theme = Some(bevy::window::WindowTheme::Dark);
 
     // Crosshair
     let texture_handle = asset_server.load("Crosshair.png");
@@ -138,7 +123,7 @@ fn setup(
     });
 
     // Create materials for tiles and wires
-    let voxel_assets = VoxelAssets::new(asset_server, &mut meshes, &mut materials);
+    let voxel_assets = VoxelAssets::new(asset_server, &mut meshes);
 
     // Initialize the voxel world
     commands.insert_resource(Voxel::new());

@@ -1,7 +1,9 @@
-use bevy::ecs::system::Res;
 use bevy::prelude::*;
-use std::{time::{Duration, Instant}, collections::VecDeque};
-use sysinfo::{System};
+use std::{
+    collections::VecDeque,
+    time::{Duration, Instant},
+};
+
 
 use crate::v_config::ONE_SECOND;
 
@@ -16,8 +18,6 @@ pub struct PerformanceMetrics {
     pub memory_usage: u64,
     pub entity_count: usize,
 }
-
-
 
 impl PerformanceMetrics {
     pub fn new() -> Self {
@@ -39,9 +39,13 @@ impl PerformanceMetrics {
 
         self.frame_times.push_back(frame_time);
 
-        let one_second_ago = now - ONE_SECOND; 
+        let one_second_ago = now - ONE_SECOND;
 
-        while self.frame_times.front().map_or(false, |&t| self.last_update - t < one_second_ago) {
+        while self
+            .frame_times
+            .front()
+            .map_or(false, |&t| self.last_update - t < one_second_ago)
+        {
             self.frame_times.pop_front();
         }
 
@@ -62,7 +66,6 @@ impl PerformanceMetrics {
             self.last_cpu_update = now;
             self.memory_usage = self.system.used_memory();
         }
-        
     }
 
     pub fn average_frame_time(&self) -> Option<Duration> {
@@ -77,7 +80,6 @@ impl PerformanceMetrics {
 }
 
 pub fn performance_metrics_system(
-    time: Res<Time>, 
     mut metrics: ResMut<PerformanceMetrics>,
     entities: Query<Entity>,
 ) {

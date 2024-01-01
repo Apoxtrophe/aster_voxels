@@ -1,7 +1,7 @@
 use crate::v_structure::{PositionVoxel, StateVoxel, TypeVoxel};
 use bevy::math::IVec3;
 use bevy::prelude::*;
-use std::collections::{HashSet, HashMap};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Resource)]
 pub struct MyTimer(pub Timer);
@@ -15,13 +15,12 @@ pub fn logic_operation_system(
         let mut changes = Vec::new();
         let mut visited = HashSet::new();
 
-
         let mut voxel_map: HashMap<IVec3, (Entity, TypeVoxel, StateVoxel)> = HashMap::new();
         for (entity, position_voxel, type_voxel, state_voxel) in voxel_query.iter() {
             voxel_map.insert(position_voxel.0, (entity, *type_voxel, *state_voxel));
         }
 
-        for (entity, position_voxel, type_voxel, state_voxel) in voxel_query.iter() {
+        for (entity, position_voxel, type_voxel, _) in voxel_query.iter() {
             match type_voxel {
                 TypeVoxel::Out => {
                     let is_on = process_out_logic(position_voxel.0, &voxel_map);
@@ -112,7 +111,11 @@ fn process_out_logic(
     get_adjacent_positions(position).iter().any(|adj_pos| {
         if let Some((_, type_voxel, state_voxel)) = voxel_map.get(adj_pos) {
             match type_voxel {
-                TypeVoxel::And | TypeVoxel::Or | TypeVoxel::Xor | TypeVoxel::Not | TypeVoxel::Switch => state_voxel.0,
+                TypeVoxel::And
+                | TypeVoxel::Or
+                | TypeVoxel::Xor
+                | TypeVoxel::Not
+                | TypeVoxel::Switch => state_voxel.0,
                 _ => false,
             }
         } else {
