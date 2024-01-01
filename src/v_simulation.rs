@@ -15,10 +15,16 @@ pub fn logic_operation_system(
         let mut changes = Vec::new();
         let mut visited = HashSet::new();
 
+
+        let mut voxel_map: HashMap<IVec3, (Entity, TypeVoxel, StateVoxel)> = HashMap::new();
+        for (entity, position_voxel, type_voxel, state_voxel) in voxel_query.iter() {
+            voxel_map.insert(position_voxel.0, (entity, *type_voxel, *state_voxel));
+        }
+
         for (entity, position_voxel, type_voxel, state_voxel) in voxel_query.iter() {
             match type_voxel {
                 TypeVoxel::Out => {
-                    let is_on = process_out_logic(position_voxel.0, &voxel_query);
+                    let is_on = process_out_logic(position_voxel.0, &voxel_map);
                     changes.push((entity, is_on));
                     dfs_propagate(
                         position_voxel.0,
@@ -30,7 +36,7 @@ pub fn logic_operation_system(
                 }
                 TypeVoxel::And | TypeVoxel::Or | TypeVoxel::Xor | TypeVoxel::Not => {
                     // Update state of logic gates without propagation
-                    let is_on = process_logic_gate(position_voxel.0, *type_voxel, &voxel_query);
+                    let is_on = process_logic_gate(position_voxel.0, *type_voxel, &voxel_map);
                     changes.push((entity, is_on));
                 }
                 // Add other voxel types here if needed
@@ -44,28 +50,27 @@ pub fn logic_operation_system(
 fn process_logic_gate(
     position: IVec3,
     voxel_type: TypeVoxel,
-    voxel_query: &Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
+    voxel_map: &HashMap<IVec3, (Entity, TypeVoxel, StateVoxel)>,
 ) -> bool {
-    // Collect all nearby wire voxels first
     let adjacent_positions = get_adjacent_positions(position);
-    let mut nearby_wires = Vec::new();
+    let mut active_inputs = 0;
+    let mut total_inputs = 0;
 
-    for (_, pos_voxel, type_voxel, state_voxel) in voxel_query.iter() {
-        if matches!(type_voxel, TypeVoxel::Wire) && adjacent_positions.contains(&pos_voxel.0) {
-            nearby_wires.push((pos_voxel.0, state_voxel.0));
+    for adj_pos in adjacent_positions.iter() {
+        if let Some((_, TypeVoxel::Wire, state_voxel)) = voxel_map.get(adj_pos) {
+            total_inputs += 1;
+            if state_voxel.0 {
+                active_inputs += 1;
+            }
         }
     }
-
-    // Process logic based on the collected wire voxels
-    let active_inputs = nearby_wires.iter().filter(|(_, state)| *state).count();
-    let total_inputs = nearby_wires.len();
 
     match voxel_type {
         TypeVoxel::And => active_inputs == total_inputs && total_inputs > 0,
         TypeVoxel::Or => active_inputs > 0,
         TypeVoxel::Xor => active_inputs == 1,
         TypeVoxel::Not => total_inputs == 1 && active_inputs == 0,
-        _ => false, // Default case for other types of voxels
+        _ => false,
     }
 }
 
@@ -101,19 +106,18 @@ fn dfs_propagate(
 
 fn process_out_logic(
     position: IVec3,
-    voxel_query: &Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
+    voxel_map: &HashMap<IVec3, (Entity, TypeVoxel, StateVoxel)>,
 ) -> bool {
-    // Create a HashMap for quick lookups
-    let mut position_state_map = HashMap::new();
-    for (_, pos_voxel, type_voxel, state_voxel) in voxel_query.iter() {
-        if !matches!(type_voxel, TypeVoxel::Tile | TypeVoxel::Wire | TypeVoxel::Out) {
-            position_state_map.insert(pos_voxel.0, state_voxel.0);
-        }
-    }
-
-    // Check adjacent positions using the HashMap
+    // Only logic gates and switches should be able to turn on 'Out' voxels
     get_adjacent_positions(position).iter().any(|adj_pos| {
-        *position_state_map.get(adj_pos).unwrap_or(&false)
+        if let Some((_, type_voxel, state_voxel)) = voxel_map.get(adj_pos) {
+            match type_voxel {
+                TypeVoxel::And | TypeVoxel::Or | TypeVoxel::Xor | TypeVoxel::Not | TypeVoxel::Switch => state_voxel.0,
+                _ => false,
+            }
+        } else {
+            false
+        }
     })
 }
 

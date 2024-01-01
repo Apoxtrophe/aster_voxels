@@ -16,7 +16,7 @@ pub const INTERACTION_DISTANCE: f32 = 10.0;
 pub const LOGIC_RATE: u64 = 100;
 
 // Benchmarking
-pub const BENCHMARKING: bool = false;
+pub const BENCHMARKING: bool = true;
 
 // Performance Metrics
 pub const ONE_SECOND: Duration = Duration::from_secs(1);
