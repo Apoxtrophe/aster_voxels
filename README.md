@@ -1,6 +1,9 @@
 # Logica: Voxel-based Logic Simulation Game
 > Made by Astoria (Apoxtrophe)
-> 
+
+**Join the discord!
+https://discord.gg/PN8EKU2X**
+
 Logica is an innovative, realtime voxel-based boolean logic simulation game developed using Rust and the Bevy engine. It combines the principles of boolean logic with the creative freedom of voxel-based gameplay, offering a unique platform for simulation and exploration.
 ![LogicaBigSplash](https://github.com/Apoxtrophe/aster_voxels/assets/23144326/1fc4317a-eb29-4fb8-99dd-83c1b0399e20)
 
@@ -31,37 +34,37 @@ Logica is an innovative, realtime voxel-based boolean logic simulation game deve
 
 
 # TODO
-Better player movement (minecraft like) with iterpolated slowdown
+**Better player movement (minecraft like) with iterpolated slowdown**
 
-Hotbar for logic components
+**Hotbar for logic components**
 
-World Saving / Loading
+**World Saving / Loading**
 
-Json file for configuration settings
+**Json file for configuration settings**
 
-In-Game menu
+**In-Game menu**
 
-Home screen 
+**Home screen**
 
-Tiled ground with texture
+**Tiled ground with texture**
 
-Better cursor texture
+**Better cursor texture**
 
-Unlock the cursor upon pressing a key
+**Unlock the cursor upon pressing a key**
 
-Latch components and various auxilary logic components such as screen and busses(maybe). 
+**Latch components and various auxilary logic components such as screen and busses(maybe)**
 
-Sound effects for the player (walking, placing, destructing and etc)
+**Sound effects for the player (walking, placing, destructing and etc)**
 
-Sounds effects for the logic components (probably making a hum corresponding to the amount of state changes, or on wires nearby)
+**Sounds effects for the logic components (probably making a hum corresponding to the amount of state changes, or on wires nearby)**
 
 ## Visual Enhancements
-  Improved shadow calculation and display
+  **Improved shadow calculation and display**
   
-  Ambient occlusion
+  **Ambient occlusion**
   
-  Normal maps
+  **Normal maps**
   
-  Ambient lighting
+  **Ambient lighting**
 
-  Better visualization of state for voxel components
+  **Better visualization of state for voxel components**
