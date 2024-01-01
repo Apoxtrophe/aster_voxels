@@ -130,8 +130,8 @@ fn setup(
         style: Style {
             align_self: AlignSelf::Center,
             position_type: PositionType::Absolute,
-            left: Val::Px((SCREEN_WIDTH / 2.0) - 250.0),
-            top: Val::Px((SCREEN_HEIGHT / 2.0) - 250.0),
+            left: Val::Px((SCREEN_WIDTH / 2.0) - 32.0),
+            top: Val::Px((SCREEN_HEIGHT / 2.0) - 32.0),
             ..Default::default()
         },
         ..Default::default()

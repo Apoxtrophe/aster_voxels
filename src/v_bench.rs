@@ -1,6 +1,6 @@
 use bevy::{ecs::system::{Commands, Res, ResMut, Resource}, pbr::{StandardMaterial, PbrBundle}, asset::Assets, render::mesh::Mesh, math::IVec3, transform::components::Transform};
 
-use crate::{v_graphics::VoxelAssets, v_structure::{TypeVoxel, StateVoxel, PositionVoxel}, v_config::BENCHMARKING};
+use crate::{v_graphics::VoxelAssets, v_structure::{TypeVoxel, StateVoxel, PositionVoxel}, v_config::{BENCHMARKING, BENCHMARK_SIZE}};
 
 
 
@@ -19,8 +19,8 @@ pub fn benchmark(
         let mut voxel_type = TypeVoxel::Xor;
         let voxel_mesh_handle = voxel_assets.create_voxel_mesh(voxel_type, &mut meshes);
         let atlas_material = voxel_assets.atlas_material(&mut materials);
-        for j in 0..100{
-            for i in 0..100 {
+        for j in 0..BENCHMARK_SIZE{
+            for i in 0..BENCHMARK_SIZE {
                 let position = IVec3::new(i, 1, j);
     
                 commands
