@@ -1,4 +1,6 @@
 # Logica: Voxel-based Logic Simulation Game
+> Made by Astoria (Apoxtrophe)
+> 
 Logica is an innovative, realtime voxel-based boolean logic simulation game developed using Rust and the Bevy engine. It combines the principles of boolean logic with the creative freedom of voxel-based gameplay, offering a unique platform for simulation and exploration.
 ![LogicaBigSplash](https://github.com/Apoxtrophe/aster_voxels/assets/23144326/1fc4317a-eb29-4fb8-99dd-83c1b0399e20)
 
@@ -23,4 +25,43 @@ Logica is an innovative, realtime voxel-based boolean logic simulation game deve
 
 **Expanding Feature Set:** The game is continuously evolving, with many more features and enhancements planned for future updates.
 
-> Made by Astoria (Apoxtrophe)
+
+
+
+
+
+# TODO
+Better player movement (minecraft like) with iterpolated slowdown
+
+Hotbar for logic components
+
+World Saving / Loading
+
+Json file for configuration settings
+
+In-Game menu
+
+Home screen 
+
+Tiled ground with texture
+
+Better cursor texture
+
+Unlock the cursor upon pressing a key
+
+Latch components and various auxilary logic components such as screen and busses(maybe). 
+
+Sound effects for the player (walking, placing, destructing and etc)
+
+Sounds effects for the logic components (probably making a hum corresponding to the amount of state changes, or on wires nearby)
+
+## Visual Enhancements
+  Improved shadow calculation and display
+  
+  Ambient occlusion
+  
+  Normal maps
+  
+  Ambient lighting
+
+  Better visualization of state for voxel components
