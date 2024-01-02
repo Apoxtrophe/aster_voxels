@@ -1,35 +1,19 @@
 // Bevy-related imports
 use bevy::prelude::*;
 
+use crate::v_components::CameraRotation;
+use crate::v_components::PositionVoxel;
+use crate::v_components::StateVoxel;
+use crate::v_components::TypeVoxel;
 use crate::v_graphics::VoxelAssets;
 use crate::v_selector::vox_scroll_selection;
 use crate::v_selector::VoxelSelector;
-use crate::v_structure::{PositionVoxel, StateVoxel, TypeVoxel, Voxel};
+use crate::v_structure::Voxel;
 use bevy::input::mouse::{MouseMotion, MouseWheel};
-use bevy_atmosphere::prelude::*;
 // Voxel assets and configuration
 
 use super::v_config::*;
 use super::v_lib::*;
-
-#[derive(Component)]
-pub struct CameraRotation {
-    pub pitch: f32,
-    pub yaw: f32,
-}
-
-pub fn create_player(mut commands: Commands) {
-    commands
-        .spawn(Camera3dBundle {
-            transform: Transform::from_xyz(15.0, 5.0, 15.0).looking_at(Vec3::ZERO, Vec3::Y),
-            ..Default::default()
-        })
-        .insert(CameraRotation {
-            pitch: 0.0,
-            yaw: 0.0,
-        })
-        .insert(AtmosphereCamera::default());
-}
 
 pub fn player_system(
     time: Res<Time>,

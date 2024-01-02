@@ -6,7 +6,7 @@ use bevy::{
     input::mouse::MouseWheel,
 };
 
-use crate::v_structure::TypeVoxel;
+use crate::v_components::TypeVoxel;
 
 #[derive(Resource, Clone, Copy)]
 pub struct VoxelSelector {

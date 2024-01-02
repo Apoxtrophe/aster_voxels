@@ -1,7 +1,9 @@
-use crate::v_structure::{PositionVoxel, StateVoxel, TypeVoxel};
+
 use bevy::math::IVec3;
 use bevy::prelude::*;
 use std::collections::{HashMap, HashSet};
+
+use crate::v_components::{PositionVoxel, TypeVoxel, StateVoxel};
 
 #[derive(Resource)]
 pub struct MyTimer(pub Timer);

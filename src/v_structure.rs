@@ -9,30 +9,9 @@ use bevy::{
     render::mesh::Mesh,
     transform::components::Transform,
 };
-
-use bevy::ecs::component::Component;
-
-use crate::{v_graphics::VoxelAssets, v_selector::VoxelSelector};
+use crate::{v_graphics::VoxelAssets, v_selector::VoxelSelector, v_components::{PositionVoxel, TypeVoxel, StateVoxel}};
 use bevy::ecs::system::Query;
 use bevy::ecs::system::Resource;
-
-#[derive(Component, Debug, Clone, Copy, PartialEq)]
-pub struct PositionVoxel(pub IVec3);
-
-#[derive(Component, Debug, Clone, Copy, PartialEq)]
-pub enum TypeVoxel {
-    Tile,
-    Wire,
-    Out,
-    Not,
-    And,
-    Or,
-    Xor,
-    Switch,
-}
-
-#[derive(Component, Debug, Clone, Copy)]
-pub struct StateVoxel(pub bool);
 
 #[derive(Resource)]
 pub struct Voxel;

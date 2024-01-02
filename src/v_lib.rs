@@ -3,8 +3,7 @@ use bevy_mod_raycast::{immediate::Raycast, primitives::Ray3d};
 
 use super::v_config::*;
 use crate::{
-    v_selector::VoxelSelector,
-    v_structure::{PositionVoxel, StateVoxel, TypeVoxel, Voxel},
+    v_selector::VoxelSelector, v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_structure::Voxel,
 };
 
 #[derive(Resource)]

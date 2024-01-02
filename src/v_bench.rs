@@ -9,8 +9,7 @@ use bevy::{
 
 use crate::{
     v_config::{BENCHMARKING, BENCHMARK_SIZE},
-    v_graphics::VoxelAssets,
-    v_structure::{PositionVoxel, StateVoxel, TypeVoxel},
+    v_graphics::VoxelAssets, v_components::{TypeVoxel, PositionVoxel, StateVoxel},
 };
 
 #[derive(Resource)]

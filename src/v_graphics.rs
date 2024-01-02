@@ -2,22 +2,23 @@ use bevy::render::mesh::{Indices, Mesh};
 
 use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
 
-use crate::v_structure::{StateVoxel, TypeVoxel};
 use bevy::asset::AssetServer;
+
+use crate::a_loading::Texture_Handles;
+use crate::v_components::{TypeVoxel, StateVoxel};
 
 #[derive(Resource)]
 pub struct VoxelAssets {
-    pub texture_atlas: Handle<Image>, // Handle to the texture atlas
-    pub voxel_mesh: Handle<Mesh>,     // General voxel mesh
-                                      // Add more materials or meshes as needed
+    pub voxel_mesh: Handle<Mesh>,
+    texture_atlas: Handle<Image>,
 }
 
 impl VoxelAssets {
     pub fn new(
-        asset_server: Res<AssetServer>,
         meshes: &mut ResMut<Assets<Mesh>>,
+        texture_handles: &Res<Texture_Handles>,
     ) -> Self {
-        let texture_handle: Handle<Image> = asset_server.load("TexturePack/Textures.png");
+        let texture_handle = texture_handles.image_handles.get(0).expect("Texture handle not found");
 
         let voxel_assets = VoxelAssets {
             texture_atlas: texture_handle.clone(),
