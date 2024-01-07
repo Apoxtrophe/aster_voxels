@@ -35,11 +35,11 @@ pub fn voxel_loading(
     println!("Beginning asset loading");
     // Load textures
     let mut texture_handles = TextureHandles::new();
-
+    
     
 
     let logic_atlas_handle: Handle<Image> = asset_server.load("TexturePack/LogicAtlas.png");
-    let world_gen_grass: Handle<Image> = asset_server.load("TexturePack/world_grass.png");
+    let world_gen_grass: Handle<Image> = asset_server.load("TexturePack/GrassAtlas.png");
     let crosshair: Handle<Image> = asset_server.load("Crosshair.png");
 
     texture_handles.add_image_handle(logic_atlas_handle);

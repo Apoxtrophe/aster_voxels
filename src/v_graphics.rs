@@ -197,3 +197,5 @@ fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
         [left, bottom],
     ]
 }
+
+
