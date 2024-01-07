@@ -13,8 +13,8 @@ mod v_bench;
 mod b_voxel_setup;
 mod v_components;
 
-use bevy::
-    prelude::*
+use bevy::{
+    prelude::*, render::render_resource::{SamplerDescriptor, AddressMode}}
 ;
 use bevy_atmosphere::plugin::AtmospherePlugin;
 use bevy_egui::EguiPlugin;
@@ -44,7 +44,20 @@ pub enum AppState {
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+
+        .add_plugins(
+            DefaultPlugins
+              .set(ImagePlugin {
+
+                  default_sampler: SamplerDescriptor {
+                  address_mode_u: AddressMode::Repeat,
+                  address_mode_v: AddressMode::Repeat,
+                  address_mode_w: AddressMode::Repeat,
+                  ..default()
+                }.into(),
+              }),
+          )
+
         .add_plugins(AtmospherePlugin)
         .add_plugins(EguiPlugin)
 

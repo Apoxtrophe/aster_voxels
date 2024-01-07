@@ -1,9 +1,9 @@
-use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With}, asset::{Assets, AssetServer, Handle}, render::{mesh::{Mesh, shape}, texture::{Image, ImageSampler}, render_resource::{SamplerDescriptor, AddressMode}}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, DirectionalLight, CascadeShadowConfigBuilder, PbrBundle}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Quat, Vec3}, prelude::default, transform::components::Transform, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, core_pipeline::core_3d::Camera3dBundle};
+use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With}, asset::Assets, render::mesh::{Mesh, shape, VertexAttributeValues}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, DirectionalLight, CascadeShadowConfigBuilder, PbrBundle}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Quat, Vec3}, prelude::default, transform::components::Transform, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, core_pipeline::core_3d::Camera3dBundle};
 use bevy_atmosphere::plugin::AtmosphereCamera;
 
 
 
-use crate::{AppState, v_config::{SUN_ANGLE, SUN_INTENSITY, SUN_SHADOWS, SHADOW_CASCADES, SHADOW_DISTANCE, FIRST_CASCADE_BOUND, OVERLAP_PROPORTION, AMBIENT_COLOR, AMBIENT_INTENSITY, SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_SIZE}, v_components::{CameraRotation, Ground}, a_loading::Texture_Handles, v_graphics::VoxelAssets};
+use crate::{AppState, v_config::{SUN_ANGLE, SUN_INTENSITY, SUN_SHADOWS, SHADOW_CASCADES, SHADOW_DISTANCE, FIRST_CASCADE_BOUND, OVERLAP_PROPORTION, AMBIENT_COLOR, AMBIENT_INTENSITY, SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_SIZE}, v_components::{CameraRotation, Ground}, a_loading::TextureHandles, v_graphics::VoxelAssets};
 
 pub fn voxel_setup(
     mut commands: Commands,
@@ -12,8 +12,7 @@ pub fn voxel_setup(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut ambient_light: ResMut<AmbientLight>,
     mut next_state: ResMut<NextState<AppState>>,
-    mut images: ResMut<Assets<Image>>,
-    texture_handles: Res<Texture_Handles>, 
+    texture_handles: Res<TextureHandles>, 
 ) {
 
     println!("Beginning GameSetup");
@@ -98,38 +97,36 @@ pub fn voxel_setup(
 
 
     
-    // Ground
-    let ground_handle = texture_handles.image_handles.get(1).expect("Texture handle not found");
+    // Create the ground
+    let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
 
-    if let Some(texture) = images.get_mut(ground_handle) {
-        println!("Texture loaded");
-        texture.sampler = ImageSampler::Descriptor(SamplerDescriptor {
-            address_mode_u: AddressMode::Repeat,
-            address_mode_v: AddressMode::Repeat,
-            ..default()
-        }
-        .into());
-    }
 
-    let ground_material = materials.add(StandardMaterial {
-        base_color_texture: Some(ground_handle.clone()),
+    let material_handle = materials.add(StandardMaterial {
+        base_color_texture: Some(handle_texture.clone()),
         ..Default::default()
     });
 
-    let mesh: Mesh = shape::Plane {
-        size: WORLD_SIZE as f32,
-        subdivisions: WORLD_SIZE as u32,
-    }
-    .into();
+
+    let mut mesh : Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32}.into(); 
+    let uvs = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
+    match uvs {
+        VertexAttributeValues::Float32x2(values) => {
+            for uv in values.iter_mut() {
+                uv[0] *= WORLD_SIZE as f32;
+                uv[1] *= WORLD_SIZE as f32; 
+            }
+        },
+        _ => (),
+    };
 
     let mesh_handle = meshes.add(mesh);
+
 
     commands.spawn((
         PbrBundle {
             mesh: mesh_handle,
-            material: ground_material,
-            transform: Transform::from_translation(Vec3::new(0.0, -0.5, 0.0)),
-            ..Default::default()
+            material: material_handle,
+            ..default()
         },
         Ground,
     ));

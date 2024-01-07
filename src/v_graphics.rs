@@ -2,9 +2,8 @@ use bevy::render::mesh::{Indices, Mesh};
 
 use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
 
-use bevy::asset::AssetServer;
 
-use crate::a_loading::Texture_Handles;
+use crate::a_loading::TextureHandles;
 use crate::v_components::{TypeVoxel, StateVoxel};
 
 #[derive(Resource)]
@@ -16,7 +15,7 @@ pub struct VoxelAssets {
 impl VoxelAssets {
     pub fn new(
         meshes: &mut ResMut<Assets<Mesh>>,
-        texture_handles: &Res<Texture_Handles>,
+        texture_handles: &Res<TextureHandles>,
     ) -> Self {
         let texture_handle = texture_handles.image_handles.get(0).expect("Texture handle not found");
 

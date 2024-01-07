@@ -1,20 +1,20 @@
 use std::time::Duration;
 
-use bevy::{ecs::{system::{Commands, ResMut, Res, Resource}, schedule::NextState}, asset::{AssetServer, Assets, Handle}, render::{mesh::Mesh, texture::Image}, time::{Timer, TimerMode}};
+use bevy::{ecs::{system::{Commands, ResMut, Res, Resource}, schedule::NextState}, asset::{AssetServer, Assets, Handle}, render::texture::Image, time::{Timer, TimerMode}};
 
-use crate::{AppState, v_graphics::VoxelAssets, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics};
+use crate::{AppState, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics};
 
 
 
 #[derive(Resource, Clone)]
-pub struct Texture_Handles {
+pub struct TextureHandles {
     pub image_handles: Vec<Handle<Image>>,
 }
 
 
-impl Texture_Handles {
+impl TextureHandles {
     fn new() -> Self {
-        Texture_Handles {
+        TextureHandles {
             image_handles: Vec::new(),
             // initialize other fields...
         }
@@ -31,17 +31,15 @@ impl Texture_Handles {
 pub fn voxel_loading(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    
 ) {
     println!("Beginning asset loading");
     // Load textures
-    let mut texture_handles = Texture_Handles::new();
+    let mut texture_handles = TextureHandles::new();
 
     
 
     let logic_atlas_handle: Handle<Image> = asset_server.load("TexturePack/LogicAtlas.png");
-    let world_gen_grass: Handle<Image> = asset_server.load("WorldGenGrass.png");
+    let world_gen_grass: Handle<Image> = asset_server.load("TexturePack/world_grass.png");
     let crosshair: Handle<Image> = asset_server.load("Crosshair.png");
 
     texture_handles.add_image_handle(logic_atlas_handle);
@@ -68,7 +66,7 @@ pub fn voxel_loading(
 
 pub fn asset_check(
     mut next_state: ResMut<NextState<AppState>>,
-    texture_handles: Res<Texture_Handles>,
+    texture_handles: Res<TextureHandles>,
     image_assets: Res<Assets<Image>>,
 ) {
     // Check if all assets are loaded. If so, go to the next state.
