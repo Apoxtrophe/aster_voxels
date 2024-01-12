@@ -1,4 +1,4 @@
-use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With, world::World}, asset::Assets, render::{mesh::{Mesh, shape, VertexAttributeValues, Indices}, texture, render_resource::PrimitiveTopology}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, DirectionalLight, CascadeShadowConfigBuilder, PbrBundle}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Quat, Vec3}, prelude::default, transform::components::Transform, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, core_pipeline::core_3d::Camera3dBundle};
+use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With, world::World}, asset::Assets, render::{mesh::{Mesh, shape, VertexAttributeValues, Indices}, texture, render_resource::PrimitiveTopology}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, DirectionalLight, CascadeShadowConfigBuilder, PbrBundle}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Quat, Vec3}, prelude::default, transform::components::Transform, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, core_pipeline::{core_3d::Camera3dBundle, fxaa}};
 use bevy_atmosphere::plugin::AtmosphereCamera;
 use rand::Rng;
 
@@ -94,69 +94,10 @@ pub fn voxel_setup(
                 pitch: 0.0,
                 yaw: 0.0,
             })
-            .insert(AtmosphereCamera::default());
+            .insert(AtmosphereCamera::default())
+            .insert(fxaa::Fxaa::default());
 
     // Create the ground
-    
-    let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
-
-
-    let material_handle = materials.add(StandardMaterial {
-        base_color_texture: Some(handle_texture.clone()),
-        ..Default::default()
-    });
-
-
-    let mut mesh : Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32}.into(); 
-    let atlas_width = 8; // Adjust as per your texture atlas
-    let subdivision_size = 1.0 / WORLD_SIZE as f32;
-    let texture_size = 1.0 / atlas_width as f32;
-    let mut rng = rand::thread_rng();
-
-    if let VertexAttributeValues::Float32x2(uvs) = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap() {
-        for segment_x in 0..WORLD_SIZE {
-            for segment_y in 0..WORLD_SIZE {
-                // Randomly select a texture for this segment
-                let texture_index = rng.gen_range(0..atlas_width);
-                let left = texture_index as f32 * texture_size;
-                let right = left + texture_size;
-
-                // Assuming top and bottom are constant since the atlas is 1D
-                let top = 1.0;
-                let bottom = 0.0;
-
-                // UVs for this segment (2 triangles, 6 vertices)
-                let segment_uvs = [
-                    [left, bottom], [right, bottom], [right, top], // First triangle
-                    [right, top], [left, top], [left, bottom]     // Second triangle
-                ];
-
-                // Calculate the index of the first vertex of this segment
-                let vertex_index = (segment_x + segment_y * WORLD_SIZE) * 6;
-
-                // Assign the calculated UVs to the vertices of this segment
-                for i in 0..6 {
-                    uvs[vertex_index as usize + i] = segment_uvs[i];
-                }
-            }
-        }
-    }
-
-    let mesh_handle = meshes.add(mesh);
-
-
-    commands.spawn((
-        PbrBundle {
-            mesh: mesh_handle,
-            material: material_handle,
-            ..default()
-        },
-        Ground,
-    ));
-
-
-
-    /* 
     let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
 
 
@@ -189,25 +130,7 @@ pub fn voxel_setup(
         },
         Ground,
     ));
-    */
 
     println!("Moving onto InGame");
     next_state.set(AppState::InGame);
-}
-
-
-fn calculate_uv_coordinates(texture_index: u32, atlas_width: u32) -> Vec<[f32; 2]> {
-    let texture_size = 1.0 / atlas_width as f32;
-
-    let left = texture_index as f32 * texture_size;
-    let right = left + texture_size;
-    let top = 0.0;
-    let bottom = 1.0;
-
-    vec![
-        [left, top],
-        [right, top],
-        [right, bottom],
-        [left, bottom],
-    ]
 }
