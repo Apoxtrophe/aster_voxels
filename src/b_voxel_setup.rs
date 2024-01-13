@@ -1,11 +1,10 @@
-use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With, world::World}, asset::Assets, render::{mesh::{Mesh, shape, VertexAttributeValues, Indices}, texture, render_resource::PrimitiveTopology}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, DirectionalLight, CascadeShadowConfigBuilder, PbrBundle}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Quat, Vec3}, prelude::default, transform::components::Transform, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, core_pipeline::{core_3d::Camera3dBundle, fxaa}};
-use bevy_atmosphere::plugin::AtmosphereCamera;
+use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With}, asset::{Assets, Handle}, render::{mesh::{Mesh, shape, VertexAttributeValues, Indices}, render_resource::PrimitiveTopology, texture}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, DirectionalLight, CascadeShadowConfigBuilder, PbrBundle}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Quat, Vec3, vec2, Vec2}, prelude::default, transform::{components::Transform, self}, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, core_pipeline::core_3d::Camera3dBundle};
 use bevy_rapier3d::geometry::Collider;
 use rand::Rng;
 
 
 
-use crate::{AppState, v_config::{SUN_ANGLE, SUN_INTENSITY, SUN_SHADOWS, SHADOW_CASCADES, SHADOW_DISTANCE, FIRST_CASCADE_BOUND, OVERLAP_PROPORTION, AMBIENT_COLOR, AMBIENT_INTENSITY, SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_SIZE}, v_components::{CameraRotation, Ground}, a_loading::TextureHandles, v_graphics::VoxelAssets};
+use crate::{AppState, v_config::{SUN_ANGLE, SUN_INTENSITY, SUN_SHADOWS, SHADOW_CASCADES, SHADOW_DISTANCE, FIRST_CASCADE_BOUND, OVERLAP_PROPORTION, AMBIENT_COLOR, AMBIENT_INTENSITY, SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_SIZE, SUN_LOCATION, WORLD_HEIGHT, V_TEXTURE_ATLAS_SIZE}, v_components::Ground, a_loading::TextureHandles, v_graphics::VoxelAssets};
 
 pub fn voxel_setup(
     mut commands: Commands,
@@ -37,7 +36,7 @@ pub fn voxel_setup(
             ..default()
         },
         transform: Transform {
-            translation: Vec3::new(10.0, 2.0, 0.0),
+            translation: SUN_LOCATION.into(),
             rotation: direction,
             ..default()
         },
@@ -85,41 +84,90 @@ pub fn voxel_setup(
         ..Default::default()
     });
 
-    // Create the ground
     let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
 
+    let mut combined_mesh = Mesh::new(PrimitiveTopology::TriangleList);
+
+
+    let normal = Vec3::new(0.0, 1.0, 0.0); // Normal pointing upward
+    let mut normals: Vec<Vec3> = Vec::new();
+    let mut vertices: Vec<Vec3> = Vec::new();
+    let mut indices: Vec<u32> = Vec::new();
+    let mut uvs: Vec<Vec2> = Vec::new();
+    let mut stat_index: u32 = 0;
+    let mut rng = rand::thread_rng();
+    for x in 0..WORLD_SIZE {
+        for z in 0..WORLD_SIZE {
+
+            
+            let offset = stat_index * 4;
+            let xi = x as f32;
+            let zi = z as f32;  
+
+
+            let index = rng.gen_range(0..V_TEXTURE_ATLAS_SIZE);
+
+            let texture_index = index as f32 / V_TEXTURE_ATLAS_SIZE as f32;
+            let texture_size = 1.0 / V_TEXTURE_ATLAS_SIZE as f32;
+            let tile_uvs = [
+                Vec2::new(texture_index - texture_size, 0.0),  // UV for the first vertex
+                Vec2::new(texture_index - texture_size, 1.0),  // UV for the second vertex
+                Vec2::new(texture_index, 0.0),
+                Vec2::new(texture_index, 1.0), 
+            ];
+
+            let tile_vertices = [
+                Vec3::new(xi - 0.5, 0.0, zi - 0.5), // Bottom left
+                Vec3::new(xi - 0.5, 0.0, zi + 0.5), // Top left
+                Vec3::new(xi + 0.5, 0.0, zi - 0.5), // Bottom right
+                Vec3::new(xi + 0.5, 0.0, zi + 0.5), // Top right
+            ];
+
+            let tile_indices = [
+                0 + offset, 1 + offset, 3 + offset, // indices for the first triangle
+                0 + offset, 3 + offset, 2 + offset, // indices for the second triangle
+            ];
+
+
+            for vertex in &tile_vertices {
+                vertices.push(*vertex);
+            }
+
+            for uv in &tile_uvs {
+                uvs.push(*uv);
+            }
+
+            indices.extend_from_slice(&tile_indices);
+            stat_index += 1;
+
+            
+            for _ in 0..4 { // As each tile has 4 vertices
+                normals.push(normal);
+            }
+        }
+    }
+
+    combined_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
+    combined_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+    combined_mesh.set_indices(Some(Indices::U32(indices)));
+    combined_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
 
     let material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(handle_texture.clone()),
         ..Default::default()
     });
-    
 
-    let mut mesh : Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32}.into(); 
-    let uvs = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
-    match uvs {
-        VertexAttributeValues::Float32x2(values) => {
-            for uv in values.iter_mut() {
-                uv[0] *= WORLD_SIZE as f32;
-                uv[1] *= WORLD_SIZE as f32; 
-            }
-        },
-        _ => (),
-    };
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(combined_mesh),
+        material: material_handle,
+        transform: Transform::from_translation(Vec3::new(0.0, WORLD_HEIGHT, 0.0)),
+        ..Default::default()
+    });
 
-    let mesh_handle = meshes.add(mesh);
+    commands.spawn(Collider::cuboid(1000.0, 0.5, 1000.0));
 
-
-    commands.spawn((
-        PbrBundle {
-            mesh: mesh_handle,
-            material: material_handle,
-            ..default()
-        },
-        Ground,
-        Collider::cuboid(WORLD_SIZE as f32 / 2.0, 0.5, WORLD_SIZE as f32 / 2.0),
-    ));
 
     println!("Moving onto InGame");
     next_state.set(AppState::InGame);
+
 }

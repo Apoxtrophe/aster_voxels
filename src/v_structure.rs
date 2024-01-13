@@ -2,7 +2,7 @@ use bevy::{
     asset::Assets,
     ecs::{
         entity::Entity,
-        system::{Commands, Res, ResMut, Insert},
+        system::{Commands, Res, ResMut},
     },
     math::IVec3,
     pbr::{PbrBundle, StandardMaterial},

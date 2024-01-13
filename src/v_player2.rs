@@ -1,17 +1,16 @@
 use std::f32::consts::TAU;
 
 use bevy::{
-    gltf::{GltfMesh, GltfNode},
-    gltf::Gltf,
     math::Vec3Swizzles,
     prelude::*,
     window::CursorGrabMode, input::mouse::MouseWheel,
 };
+use bevy_atmosphere::{plugin::AtmosphereCamera, system_param::Atmosphere};
 use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::v_selector::{vox_scroll_selection, VoxelSelector};
+use crate::{v_selector::{vox_scroll_selection, VoxelSelector}, v_lib::VoxelInfo, v_graphics::VoxelAssets, v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_structure::Voxel, v_config::{FIELD_OF_VIEW, PITCH_SPEED, YAW_SPEED, AIR_ACCELERATION, CAMERA_HEIGHT, CAMERA_RADIUS}};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
 
@@ -20,20 +19,8 @@ pub fn player_setup(
     mut window: Query<&mut Window>,
     assets: Res<AssetServer>,
 ) {
-    let mut window = window.single_mut();
-    window.title = String::from("Minimal FPS Controller Example");
-    // commands.spawn(Window { title: "Minimal FPS Controller Example".to_string(), ..default() });
 
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            illuminance: 6000.0,
-            shadows_enabled: true,
-            ..default()
-        },
-        transform: Transform::from_xyz(4.0, 7.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
-
+    
     // Note that we have two entities for the player
     // One is a "logical" player that handles the physics computation and collision
     // The other is a "render" player that is what is displayed to the user
@@ -61,29 +48,30 @@ pub fn player_setup(
             TransformBundle::from_transform(Transform::from_translation(SPAWN_POINT)),
             LogicalPlayer,
             FpsControllerInput {
-                pitch: -TAU / 12.0,
-                yaw: TAU * 5.0 / 8.0,
+                pitch: -TAU / PITCH_SPEED,
+                yaw: TAU * 5.0 / YAW_SPEED,
                 ..default()
             },
             FpsController {
-                air_acceleration: 80.0,
+                air_acceleration: AIR_ACCELERATION,
                 ..default()
             },
         ))
         .insert(CameraConfig {
-            height_offset: 0.0,
-            radius_scale: 0.75,
+            height_offset: CAMERA_HEIGHT,
+            radius_scale: CAMERA_RADIUS,
         })
         .id();
 
     commands.spawn((
         Camera3dBundle {
             projection: Projection::Perspective(PerspectiveProjection {
-                fov: TAU / 5.0,
+                fov: TAU / FIELD_OF_VIEW,
                 ..default()
             }),
             ..default()
         },
+        AtmosphereCamera::default(),
         RenderPlayer { logical_entity },
     ));
 
@@ -114,7 +102,6 @@ pub fn respawn(
         transform.translation = SPAWN_POINT;
     }
 }
-
 
 pub fn manage_cursor(
     btn: Res<Input<MouseButton>>,
@@ -158,6 +145,53 @@ pub fn display_text(
                 transform.translation.x, transform.translation.y, transform.translation.z,
                 velocity.linvel.xz().length()
             );
+        }
+    }
+}
+
+pub fn voxel_interaction_system(
+    mouse_input: Res<Input<MouseButton>>,
+    voxel_assets: Res<VoxelAssets>,
+    voxel_selector: ResMut<VoxelSelector>,
+    mut commands: Commands,
+    mut voxel: ResMut<Voxel>,
+    voxel_info: Res<VoxelInfo>,
+    keyboard_input: Res<Input<KeyCode>>,
+    remove_query: Query<(Entity, &PositionVoxel)>,
+    state_query: Query<(Entity, &PositionVoxel, &mut StateVoxel)>,
+    materials: ResMut<Assets<StandardMaterial>>,
+    meshes: ResMut<Assets<Mesh>>,
+) {
+    //Placing, removing, and altering state on mouse click
+    
+
+    if voxel_info.in_range {
+        if mouse_input.just_pressed(MouseButton::Left) {
+            if keyboard_input.pressed(KeyCode::ControlLeft) {
+                if let Some(state) = voxel_info.is_on {
+                    if let Some(voxel_type) = voxel_info.voxel_type {
+                        if voxel_type == TypeVoxel::Switch {
+                            voxel.set_state(
+                                &mut commands,
+                                voxel_info.position,
+                                !state,
+                                state_query,
+                            );
+                        }
+                    }
+                }
+            } else {
+                voxel.place(
+                    &mut commands,
+                    voxel_info.adjacent,
+                    &voxel_selector,
+                    &voxel_assets,
+                    materials,
+                    meshes,
+                )
+            }
+        } else if mouse_input.just_pressed(MouseButton::Right) {
+            voxel.remove(&mut commands, voxel_info.position, remove_query);
         }
     }
 }
