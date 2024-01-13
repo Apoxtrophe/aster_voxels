@@ -20,7 +20,7 @@ pub fn player_system(
     keyboard_input: Res<Input<KeyCode>>,
     mut mouse_motion_events: EventReader<MouseMotion>,
     mut query: Query<(&mut Transform, &mut CameraRotation), With<Camera>>,
-    mut voxel_selector: ResMut<VoxelSelector>,
+
     mouse_wheel_events: EventReader<MouseWheel>,
 ) {
     for (mut transform, mut rotation) in query.iter_mut() {
@@ -56,7 +56,7 @@ pub fn player_system(
         }
     }
     // Selection of current voxel type
-    vox_scroll_selection(mouse_wheel_events, &mut voxel_selector);
+    
 }
 
 pub fn voxel_interaction_system(
@@ -71,8 +71,12 @@ pub fn voxel_interaction_system(
     state_query: Query<(Entity, &PositionVoxel, &mut StateVoxel)>,
     materials: ResMut<Assets<StandardMaterial>>,
     meshes: ResMut<Assets<Mesh>>,
+
+    mouse_wheel_events: EventReader<MouseWheel>,
 ) {
     //Placing, removing, and altering state on mouse click
+    
+
     if voxel_info.in_range {
         if mouse_input.just_pressed(MouseButton::Left) {
             if keyboard_input.pressed(KeyCode::ControlLeft) {

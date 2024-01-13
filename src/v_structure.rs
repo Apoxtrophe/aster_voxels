@@ -2,13 +2,14 @@ use bevy::{
     asset::Assets,
     ecs::{
         entity::Entity,
-        system::{Commands, Res, ResMut},
+        system::{Commands, Res, ResMut, Insert},
     },
     math::IVec3,
     pbr::{PbrBundle, StandardMaterial},
     render::mesh::Mesh,
     transform::components::Transform,
 };
+use bevy_rapier3d::geometry::Collider;
 use crate::{v_graphics::VoxelAssets, v_selector::VoxelSelector, v_components::{PositionVoxel, TypeVoxel, StateVoxel}};
 use bevy::ecs::system::Query;
 use bevy::ecs::system::Resource;
@@ -76,7 +77,8 @@ impl Voxel {
             })
             .insert(PositionVoxel(position))
             .insert(voxel_type)
-            .insert(StateVoxel(false));
+            .insert(StateVoxel(false))
+            .insert(Collider::cuboid(0.5, 0.5, 0.5));
     }
 
     pub fn remove(

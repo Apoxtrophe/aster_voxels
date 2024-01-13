@@ -1,5 +1,6 @@
 use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With, world::World}, asset::Assets, render::{mesh::{Mesh, shape, VertexAttributeValues, Indices}, texture, render_resource::PrimitiveTopology}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, DirectionalLight, CascadeShadowConfigBuilder, PbrBundle}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Quat, Vec3}, prelude::default, transform::components::Transform, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, core_pipeline::{core_3d::Camera3dBundle, fxaa}};
 use bevy_atmosphere::plugin::AtmosphereCamera;
+use bevy_rapier3d::geometry::Collider;
 use rand::Rng;
 
 
@@ -84,19 +85,6 @@ pub fn voxel_setup(
         ..Default::default()
     });
 
-    // Create the player
-    commands
-            .spawn(Camera3dBundle {
-                transform: Transform::from_xyz(0.0, 5.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
-                ..Default::default()
-            })
-            .insert(CameraRotation {
-                pitch: 0.0,
-                yaw: 0.0,
-            })
-            .insert(AtmosphereCamera::default())
-            .insert(fxaa::Fxaa::default());
-
     // Create the ground
     let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
 
@@ -105,7 +93,7 @@ pub fn voxel_setup(
         base_color_texture: Some(handle_texture.clone()),
         ..Default::default()
     });
-
+    
 
     let mut mesh : Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32}.into(); 
     let uvs = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
@@ -129,6 +117,7 @@ pub fn voxel_setup(
             ..default()
         },
         Ground,
+        Collider::cuboid(WORLD_SIZE as f32 / 2.0, 0.5, WORLD_SIZE as f32 / 2.0),
     ));
 
     println!("Moving onto InGame");
