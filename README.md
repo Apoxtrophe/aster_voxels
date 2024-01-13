@@ -34,7 +34,7 @@ Logica is an innovative, realtime voxel-based boolean logic simulation game deve
 
 
 # TODO
-**Better player movement (minecraft like) with iterpolated slowdown**
+**Better player movement (minecraft like) with iterpolated slowdown** DONE
 
 **Hotbar for logic components**
 
@@ -46,11 +46,11 @@ Logica is an innovative, realtime voxel-based boolean logic simulation game deve
 
 **Home screen**
 
-**Tiled ground with texture**
+**Tiled ground with texture** DONE
 
-**Better cursor texture**
+**Better cursor texture** DONE
 
-**Unlock the cursor upon pressing a key**
+**Unlock the cursor upon pressing a key** DONE
 
 **Latch components and various auxilary logic components such as screen and busses(maybe)**
 
@@ -65,6 +65,6 @@ Logica is an innovative, realtime voxel-based boolean logic simulation game deve
   
   **Normal maps**
   
-  **Ambient lighting**
+  **Ambient lighting** DONE
 
   **Better visualization of state for voxel components**
