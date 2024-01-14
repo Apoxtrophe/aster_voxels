@@ -10,7 +10,7 @@ use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::{v_selector::{vox_scroll_selection, VoxelSelector}, v_lib::VoxelInfo, v_graphics::VoxelAssets, v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_structure::Voxel, v_config::{FIELD_OF_VIEW, PITCH_SPEED, YAW_SPEED, AIR_ACCELERATION, CAMERA_HEIGHT, CAMERA_RADIUS}};
+use crate::{v_selector::{vox_scroll_selection, VoxelSelector}, v_lib::VoxelInfo, v_graphics::VoxelAssets, v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_structure::Voxel, v_config::{FIELD_OF_VIEW, PITCH_SPEED, YAW_SPEED, AIR_ACCELERATION, CAMERA_HEIGHT, CAMERA_RADIUS, PLAYER_HEIGHT}};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
 
@@ -54,6 +54,7 @@ pub fn player_setup(
             },
             FpsController {
                 air_acceleration: AIR_ACCELERATION,
+                upright_height: PLAYER_HEIGHT,
                 ..default()
             },
         ))
