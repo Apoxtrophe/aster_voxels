@@ -29,8 +29,9 @@ pub const BENCHMARK_SIZE: i32 = 100;
 pub const ONE_SECOND: Duration = Duration::from_secs(1);
 
 // World Generation
-pub const WORLD_SIZE: i32 = 4;
+pub const WORLD_SIZE: i32 = 128;
 pub const WORLD_HEIGHT: f32 = 0.5;
+pub const TEXTURE_BIAS: usize = 24;
  
 
 // Voxel Graphics

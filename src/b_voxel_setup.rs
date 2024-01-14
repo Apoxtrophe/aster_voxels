@@ -4,7 +4,7 @@ use rand::Rng;
 
 
 
-use crate::{AppState, v_config::{SUN_ANGLE, SUN_INTENSITY, SUN_SHADOWS, SHADOW_CASCADES, SHADOW_DISTANCE, FIRST_CASCADE_BOUND, OVERLAP_PROPORTION, AMBIENT_COLOR, AMBIENT_INTENSITY, SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_SIZE, SUN_LOCATION, WORLD_HEIGHT, V_TEXTURE_ATLAS_SIZE}, v_components::Ground, a_loading::TextureHandles, v_graphics::VoxelAssets};
+use crate::{AppState, v_config::{SUN_ANGLE, SUN_INTENSITY, SUN_SHADOWS, SHADOW_CASCADES, SHADOW_DISTANCE, FIRST_CASCADE_BOUND, OVERLAP_PROPORTION, AMBIENT_COLOR, AMBIENT_INTENSITY, SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_SIZE, SUN_LOCATION, WORLD_HEIGHT, V_TEXTURE_ATLAS_SIZE, TEXTURE_BIAS}, v_components::Ground, a_loading::TextureHandles, v_graphics::VoxelAssets};
 
 pub fn voxel_setup(
     mut commands: Commands,
@@ -105,7 +105,20 @@ pub fn voxel_setup(
             let zi = z as f32;  
 
 
-            let index = rng.gen_range(0..V_TEXTURE_ATLAS_SIZE);
+            let mut index = rng.gen_range(0..V_TEXTURE_ATLAS_SIZE + TEXTURE_BIAS);
+
+            if index >= V_TEXTURE_ATLAS_SIZE {
+                index = V_TEXTURE_ATLAS_SIZE;
+            }
+
+
+            let max = 0.05;
+
+
+            let v1r:f32 = rng.gen_range(0.0..max);
+            let v2r:f32 = rng.gen_range(0.0..max);
+            let v3r:f32 = rng.gen_range(0.0..max);
+            let v4r:f32 = rng.gen_range(0.0..max);
 
             let texture_index = index as f32 / V_TEXTURE_ATLAS_SIZE as f32;
             let texture_size = 1.0 / V_TEXTURE_ATLAS_SIZE as f32;
@@ -116,11 +129,15 @@ pub fn voxel_setup(
                 Vec2::new(texture_index, 1.0), 
             ];
 
+
+
+
+            
             let tile_vertices = [
-                Vec3::new(xi - 0.5, 0.0, zi - 0.5), // Bottom left
-                Vec3::new(xi - 0.5, 0.0, zi + 0.5), // Top left
-                Vec3::new(xi + 0.5, 0.0, zi - 0.5), // Bottom right
-                Vec3::new(xi + 0.5, 0.0, zi + 0.5), // Top right
+                Vec3::new(xi - 0.5, v1r, zi - 0.5), // Bottom left
+                Vec3::new(xi - 0.5, v2r, zi + 0.5), // Top left
+                Vec3::new(xi + 0.5, v3r, zi - 0.5), // Bottom right
+                Vec3::new(xi + 0.5, v4r, zi + 0.5), // Top right
             ];
 
             let tile_indices = [
@@ -140,6 +157,8 @@ pub fn voxel_setup(
             indices.extend_from_slice(&tile_indices);
             stat_index += 1;
 
+            println!("Vertices: {}", stat_index *4 );
+
             
             for _ in 0..4 { // As each tile has 4 vertices
                 normals.push(normal);
@@ -151,6 +170,8 @@ pub fn voxel_setup(
     combined_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
     combined_mesh.set_indices(Some(Indices::U32(indices)));
     combined_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+
+    
 
     let material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(handle_texture.clone()),
