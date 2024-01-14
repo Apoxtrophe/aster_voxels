@@ -85,84 +85,58 @@ pub fn voxel_setup(
     });
 
     let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
-
     let mut combined_mesh = Mesh::new(PrimitiveTopology::TriangleList);
-
 
     let normal = Vec3::new(0.0, 1.0, 0.0); // Normal pointing upward
     let mut normals: Vec<Vec3> = Vec::new();
-    let mut vertices: Vec<Vec3> = Vec::new();
-    let mut indices: Vec<u32> = Vec::new();
-    let mut uvs: Vec<Vec2> = Vec::new();
+    let mut vertices = Vec::new();
+    let mut indices = Vec::new();
+    let mut uvs = Vec::new();
     let mut stat_index: u32 = 0;
     let mut rng = rand::thread_rng();
+
     for x in 0..WORLD_SIZE {
         for z in 0..WORLD_SIZE {
-
-            
-            let offset = stat_index * 4;
             let xi = x as f32;
             let zi = z as f32;  
-
-
-            let mut index = rng.gen_range(0..V_TEXTURE_ATLAS_SIZE + TEXTURE_BIAS);
-
-            if index >= V_TEXTURE_ATLAS_SIZE {
-                index = V_TEXTURE_ATLAS_SIZE;
-            }
-
-
-            let max = 0.05;
-
-
-            let v1r:f32 = rng.gen_range(0.0..max);
-            let v2r:f32 = rng.gen_range(0.0..max);
-            let v3r:f32 = rng.gen_range(0.0..max);
-            let v4r:f32 = rng.gen_range(0.0..max);
+            let mut index = rng.gen_range(0..=V_TEXTURE_ATLAS_SIZE + TEXTURE_BIAS);
+            index = index.min(V_TEXTURE_ATLAS_SIZE);
 
             let texture_index = index as f32 / V_TEXTURE_ATLAS_SIZE as f32;
             let texture_size = 1.0 / V_TEXTURE_ATLAS_SIZE as f32;
+            let (u_min, u_max) = ((texture_index - texture_size) as f32, texture_index as f32);
+            let (v_min, v_max) = (0.0, 1.0);
+
             let tile_uvs = [
-                Vec2::new(texture_index - texture_size, 0.0),  // UV for the first vertex
-                Vec2::new(texture_index - texture_size, 1.0),  // UV for the second vertex
-                Vec2::new(texture_index, 0.0),
-                Vec2::new(texture_index, 1.0), 
+                Vec2::new(u_min, v_min),
+                Vec2::new(u_min, v_max),
+                Vec2::new(u_max, v_min),
+                Vec2::new(u_max, v_max), 
             ];
 
+            for &vertex_index in &vertex_indices {
+                let uv = match vertex_index {
+                    // Determine UV based on the corner of the tile the vertex is part of
+                    0 => Vec2::new(u_min, v_min),
+                    1 => Vec2::new(u_min, v_max),
+                    2 => Vec2::new(u_max, v_min),
+                    3 => Vec2::new(u_max, v_max),
+                    _ => unreachable!(),
+                };
+                uvs[vertex_index] = uv;
+            }
 
-
-
-            
-            let tile_vertices = [
-                Vec3::new(xi - 0.5, v1r, zi - 0.5), // Bottom left
-                Vec3::new(xi - 0.5, v2r, zi + 0.5), // Top left
-                Vec3::new(xi + 0.5, v3r, zi - 0.5), // Bottom right
-                Vec3::new(xi + 0.5, v4r, zi + 0.5), // Top right
-            ];
-
+            let offset = stat_index * 4;
             let tile_indices = [
-                0 + offset, 1 + offset, 3 + offset, // indices for the first triangle
-                0 + offset, 3 + offset, 2 + offset, // indices for the second triangle
+                0 + offset, 1 + offset, 3 + offset,
+                0 + offset, 3 + offset, 2 + offset,
             ];
 
-
-            for vertex in &tile_vertices {
-                vertices.push(*vertex);
-            }
-
-            for uv in &tile_uvs {
-                uvs.push(*uv);
-            }
-
+            vertices.extend_from_slice(&tile_vertices);
+            uvs.extend_from_slice(&tile_uvs);
             indices.extend_from_slice(&tile_indices);
+            normals.extend(vec![normal; 4]);
             stat_index += 1;
-
-            println!("Vertices: {}", stat_index *4 );
-
-            
-            for _ in 0..4 { // As each tile has 4 vertices
-                normals.push(normal);
-            }
         }
     }
 
@@ -170,8 +144,6 @@ pub fn voxel_setup(
     combined_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
     combined_mesh.set_indices(Some(Indices::U32(indices)));
     combined_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
-
-    
 
     let material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(handle_texture.clone()),
