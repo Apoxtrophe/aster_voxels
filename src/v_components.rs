@@ -26,3 +26,6 @@ pub enum TypeVoxel {
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct StateVoxel(pub bool);
+
+#[derive(Component)]
+pub struct Sun;

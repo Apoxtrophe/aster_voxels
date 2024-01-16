@@ -1,16 +1,17 @@
-use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With}, asset::{Assets, Handle}, render::{mesh::{Mesh, shape, VertexAttributeValues, Indices}, render_resource::PrimitiveTopology, texture}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, DirectionalLight, CascadeShadowConfigBuilder, PbrBundle}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Quat, Vec3, vec2, Vec2}, prelude::default, transform::{components::Transform, self}, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, core_pipeline::core_3d::Camera3dBundle};
-use bevy_rapier3d::{geometry::{Collider, ComputedColliderShape, VHACDParameters}, rapier::dynamics::RigidBody};
+use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With}, asset::Assets, render::{mesh::{Mesh, Indices}, render_resource::PrimitiveTopology}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, PbrBundle, DirectionalLight, CascadeShadowConfigBuilder}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Vec3, Vec2}, transform::components::Transform, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, prelude::default};
+use bevy_rapier3d::geometry::{Collider, ComputedColliderShape};
 use noise::{Perlin, NoiseFn};
 use rand::Rng;
+use crate::v_config::*;
 
 
 
-use crate::{AppState, v_config::{SUN_ANGLE, SUN_INTENSITY, SUN_SHADOWS, SHADOW_CASCADES, SHADOW_DISTANCE, FIRST_CASCADE_BOUND, OVERLAP_PROPORTION, AMBIENT_COLOR, AMBIENT_INTENSITY, SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_SIZE, SUN_LOCATION, WORLD_HEIGHT, V_TEXTURE_ATLAS_SIZE, TEXTURE_BIAS, NORMALS_MULTIPLIER, TERRIAN_ROUGHNESS, TERRAIN_HEIGHT_VARIANCE, GROUND_ROUGHNESS, GROUND_METALLIC, GROUND_RELFECTANCE}, v_components::Ground, a_loading::TextureHandles, v_graphics::VoxelAssets};
+use crate::{AppState, v_config::{AMBIENT_COLOR, AMBIENT_INTENSITY, SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_SIZE, WORLD_HEIGHT, V_TEXTURE_ATLAS_SIZE, TEXTURE_BIAS, NORMALS_MULTIPLIER, TERRIAN_ROUGHNESS, TERRAIN_HEIGHT_VARIANCE, GROUND_ROUGHNESS, GROUND_METALLIC, GROUND_RELFECTANCE}, v_components::Sun, a_loading::TextureHandles, v_graphics::VoxelAssets};
 
 pub fn voxel_setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    materials: ResMut<Assets<StandardMaterial>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut ambient_light: ResMut<AmbientLight>,
     mut next_state: ResMut<NextState<AppState>>,
@@ -26,34 +27,21 @@ pub fn voxel_setup(
     ));
 
 
-    //SUN
-    let sun_radians = SUN_ANGLE.to_radians();
-    let direction = Quat::from_rotation_x(-sun_radians);
-
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            illuminance: SUN_INTENSITY,
-            shadows_enabled: SUN_SHADOWS,
-            ..default()
+            // Enable shadows
+            shadows_enabled: true,
+            ..Default::default()
         },
-        transform: Transform {
-            translation: SUN_LOCATION.into(),
-            rotation: direction,
-            ..default()
-        },
-        cascade_shadow_config: CascadeShadowConfigBuilder {
-            num_cascades: SHADOW_CASCADES,
-            maximum_distance: SHADOW_DISTANCE,
-            first_cascade_far_bound: FIRST_CASCADE_BOUND,
-            overlap_proportion: OVERLAP_PROPORTION,
-            ..default()
-        }
-        .into(),
-        ..default()
-    });
+        
+        ..Default::default()
+    }).insert(Sun);
     // Ambient lighting
     ambient_light.color = AMBIENT_COLOR;
     ambient_light.brightness = AMBIENT_INTENSITY; // Adjust the brightness as needed
+    ambient_light.brightness = AMBIENT_INTENSITY; // Adjust the brightness as needed
+
+    
 
     // Window settings
     let mut window = windows.single_mut();
@@ -62,7 +50,8 @@ pub fn voxel_setup(
     window.present_mode = PresentMode::AutoVsync;
     window.cursor.icon = CursorIcon::Crosshair;
     window.cursor.grab_mode = CursorGrabMode::Locked;
-    window.mode = WindowMode::Windowed;
+    window.window_theme = Some(bevy::window::WindowTheme::Dark);
+    window.mode = WindowMode::BorderlessFullscreen;
     window.cursor.visible = false;
     window.decorations = true;
     window.window_theme = Some(bevy::window::WindowTheme::Dark);
@@ -85,11 +74,23 @@ pub fn voxel_setup(
         ..Default::default()
     });
 
+    world_gen(commands, meshes, materials, texture_handles);
+
+    println!("Moving onto InGame");
+    next_state.set(AppState::InGame);
+
+}
+
+pub fn world_gen(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    texture_handles: Res<TextureHandles>, 
+) {
     let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
     let mut combined_mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
-    //let normal = Vec3::new(0.0, 1.0, 0.0); // Normal pointing upward
-    
+    //let normal = Vec3::new(0.0, 1.0, 0.0); // Normal pointing upward    
     let mut vertices = Vec::new();
     let mut indices = Vec::new();
     let mut uvs = Vec::new();
@@ -197,8 +198,5 @@ pub fn voxel_setup(
         transform: Transform::from_translation(Vec3::new(0.0, WORLD_HEIGHT, 0.0)),
         ..Default::default()
     }).insert(x_shape);
-
-    println!("Moving onto InGame");
-    next_state.set(AppState::InGame);
-
 }
+

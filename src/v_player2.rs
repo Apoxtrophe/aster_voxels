@@ -5,7 +5,7 @@ use bevy::{
     prelude::*,
     window::CursorGrabMode, input::mouse::MouseWheel,
 };
-use bevy_atmosphere::{plugin::AtmosphereCamera, system_param::Atmosphere};
+use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;

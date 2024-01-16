@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::{ecs::{system::{Commands, ResMut, Res, Resource}, schedule::NextState}, asset::{AssetServer, Assets, Handle}, render::texture::Image, time::{Timer, TimerMode}};
 
-use crate::{AppState, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics};
+use crate::{AppState, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics, v_lighting::{SunDirection, CycleTimer}};
 
 
 
@@ -61,6 +61,10 @@ pub fn voxel_loading(
     )));
 
     commands.insert_resource(PerformanceMetrics::new());
+
+    commands.insert_resource(SunDirection::new());
+
+
     
 }
 

@@ -3,7 +3,7 @@ use bevy::math::IVec3;
 use bevy::prelude::*;
 use std::collections::{HashMap, HashSet};
 
-use crate::v_components::{PositionVoxel, TypeVoxel, StateVoxel};
+use crate::{v_components::{PositionVoxel, TypeVoxel, StateVoxel}, v_lighting::SunDirection};
 
 #[derive(Resource)]
 pub struct MyTimer(pub Timer);
@@ -12,8 +12,11 @@ pub fn logic_operation_system(
     time: Res<Time>,
     mut timer: ResMut<MyTimer>,
     mut voxel_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
+    mut sun_direction: ResMut<SunDirection>,
 ) {
+
     if timer.0.tick(time.delta()).just_finished() {
+
         let mut changes = Vec::new();
         let mut visited = HashSet::new();
 

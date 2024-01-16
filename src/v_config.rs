@@ -3,8 +3,8 @@ use std::time::Duration;
 use bevy::render::color::Color;
 
 //Screen
-pub const SCREEN_WIDTH: f32 = 1920.0;
-pub const SCREEN_HEIGHT: f32 = 1080.0;
+pub const SCREEN_WIDTH: f32 = 3440.0;
+pub const SCREEN_HEIGHT: f32 = 1440.0;
 
 //Player
 pub const YAW_SPEED: f32 = 12.0;
@@ -56,6 +56,7 @@ pub const SUN_ANGLE: f32 = 65.0;
 pub const SUN_INTENSITY: f32 = 100000.0;
 pub const SUN_SHADOWS: bool = true;
 pub const SUN_LOCATION: [f32; 3] = [10.0, 10.0, 0.0];
+pub const ENABLE_DAY_NIGHT_CYCLE: bool = true;
 
 pub const AMBIENT_INTENSITY: f32 = 0.6;
 pub const AMBIENT_COLOR: Color = Color::BEIGE;
