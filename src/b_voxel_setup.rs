@@ -1,17 +1,17 @@
-use bevy::{ecs::{system::{Commands, ResMut, Res, Query}, schedule::NextState, query::With}, asset::Assets, render::{mesh::{Mesh, Indices}, render_resource::PrimitiveTopology}, pbr::{StandardMaterial, AmbientLight, DirectionalLightBundle, PbrBundle, DirectionalLight, CascadeShadowConfigBuilder}, window::{Window, PrimaryWindow, WindowResolution, PresentMode, CursorIcon, CursorGrabMode, WindowMode}, math::{Vec3, Vec2}, transform::components::Transform, ui::{node_bundles::ImageBundle, UiImage, Style, AlignSelf, PositionType, Val}, prelude::default};
-use bevy_rapier3d::geometry::{Collider, ComputedColliderShape};
-use noise::{Perlin, NoiseFn};
-use rand::Rng;
-use crate::v_config::*;
+use bevy::{prelude::*, window::*, render::mesh::VertexAttributeValues};
+
+use bevy_rapier3d::geometry::Collider;
+use crate::{v_config::*, v_components::{Ground, Sun}, a_loading::TextureHandles, VoxelAssets};
+use bevy::render::mesh::shape;
 
 
 
-use crate::{AppState, v_config::{AMBIENT_COLOR, AMBIENT_INTENSITY, SCREEN_WIDTH, SCREEN_HEIGHT, WORLD_SIZE, WORLD_HEIGHT, V_TEXTURE_ATLAS_SIZE, TEXTURE_BIAS, NORMALS_MULTIPLIER, TERRIAN_ROUGHNESS, TERRAIN_HEIGHT_VARIANCE, GROUND_ROUGHNESS, GROUND_METALLIC, GROUND_RELFECTANCE}, v_components::Sun, a_loading::TextureHandles, v_graphics::VoxelAssets};
+use crate::{AppState, v_config::*};
 
 pub fn voxel_setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut ambient_light: ResMut<AmbientLight>,
     mut next_state: ResMut<NextState<AppState>>,
@@ -74,129 +74,49 @@ pub fn voxel_setup(
         ..Default::default()
     });
 
-    world_gen(commands, meshes, materials, texture_handles);
+    //world_gen(commands, meshes, materials, texture_handles);
+        // Create the ground
+    let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
+
+    let handle_parallax_texture = texture_handles.image_handles.get(0).expect("Parallax texture handle not found");
+
+    let material_handle = materials.add(StandardMaterial {
+        base_color_texture: Some(handle_texture.clone()),
+        alpha_mode: AlphaMode::Blend,
+
+        ..Default::default()
+    });
+
+
+    let mut mesh : Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32}.into(); 
+    let uvs = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
+    match uvs {
+        VertexAttributeValues::Float32x2(values) => {
+            for uv in values.iter_mut() {
+                uv[0] *= WORLD_SIZE as f32;
+                uv[1] *= WORLD_SIZE as f32; 
+            }
+        },
+        _ => (),
+    };
+
+    let mesh_handle = meshes.add(mesh);
+
+
+    commands.spawn((
+        PbrBundle {
+            mesh: mesh_handle,
+            material: material_handle,
+            transform: Transform::from_translation(Vec3::new(0.5, WORLD_HEIGHT, 0.5)),
+            ..default()
+        },
+        Ground,
+    )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT, WORLD_SIZE as f32));
+
+
 
     println!("Moving onto InGame");
     next_state.set(AppState::InGame);
 
-}
-
-pub fn world_gen(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    texture_handles: Res<TextureHandles>, 
-) {
-    let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
-    let mut combined_mesh = Mesh::new(PrimitiveTopology::TriangleList);
-
-    //let normal = Vec3::new(0.0, 1.0, 0.0); // Normal pointing upward    
-    let mut vertices = Vec::new();
-    let mut indices = Vec::new();
-    let mut uvs = Vec::new();
-    let mut stat_index: u32 = 0;
-    let mut rng = rand::thread_rng();
-
-    
-    let perlin = Perlin::new(rng.gen_range(0..=1000));
-
-    for x in 0..WORLD_SIZE {
-        for z in 0..WORLD_SIZE {
-            let xi = x as f32;
-            let zi = z as f32;  
-            let mut index = rng.gen_range(0..=V_TEXTURE_ATLAS_SIZE + TEXTURE_BIAS);
-            index = index.min(V_TEXTURE_ATLAS_SIZE);
-
-            let texture_index = index as f32 / V_TEXTURE_ATLAS_SIZE as f32;
-            let texture_size = 1.0 / V_TEXTURE_ATLAS_SIZE as f32;
-            let (u_min, u_max) = ((texture_index - texture_size) as f32, texture_index as f32);
-            let (v_min, v_max) = (0.0, 1.0);
-
-            let tile_uvs = [
-                Vec2::new(u_min, v_min),
-                Vec2::new(u_min, v_max),
-                Vec2::new(u_max, v_min),
-                Vec2::new(u_max, v_max), 
-            ];
-
-
-
-            let iness: f64 = TERRIAN_ROUGHNESS;
-            let terrain_height: f32 = TERRAIN_HEIGHT_VARIANCE;
-
-            let vy1 = perlin.get([(xi as f64 - 0.5) * iness, (zi as f64 - 0.5) * iness]);
-            let vy2 = perlin.get([(xi as f64 - 0.5) * iness, (zi as f64 + 0.5) * iness]);
-            let vy3 = perlin.get([(xi as f64 + 0.5) * iness, (zi as f64 - 0.5) * iness]);
-            let vy4 = perlin.get([(xi as f64 + 0.5) * iness, (zi as f64 + 0.5) * iness]);
-
-            
-            let tile_vertices = [
-                Vec3::new(xi - 0.5, vy1 as f32 * terrain_height, zi - 0.5), // Bottom left
-                Vec3::new(xi - 0.5, vy2 as f32 * terrain_height, zi + 0.5), // Top left
-                Vec3::new(xi + 0.5, vy3 as f32 * terrain_height, zi - 0.5), // Bottom right
-                Vec3::new(xi + 0.5, vy4 as f32 * terrain_height, zi + 0.5), // Top right
-            ];
-
-            let offset = stat_index * 4;
-            let tile_indices = [
-                0 + offset, 1 + offset, 3 + offset,
-                0 + offset, 3 + offset, 2 + offset,
-            ];
-
-            vertices.extend_from_slice(&tile_vertices);
-            uvs.extend_from_slice(&tile_uvs);
-            indices.extend_from_slice(&tile_indices);
-            //normals.extend(vec![normal; 4]);
-            stat_index += 1;
-        }
-    }   
-
-    let mut normals = vec![Vec3::ZERO; vertices.len()];
-
-    let normal_multiplier: f32 = NORMALS_MULTIPLIER;
-
-    for i in (0..indices.len()).step_by(3) {
-        let index1 = indices[i] as usize;
-        let index2 = indices[i + 1] as usize;
-        let index3 = indices[i + 2] as usize;
-    
-        let vertex1 = vertices[index1];
-        let vertex2 = vertices[index2];
-        let vertex3 = vertices[index3];
-    
-        let edge1 = (vertex2 - vertex1) * normal_multiplier;
-        let edge2 = (vertex3 - vertex1) * normal_multiplier;
-        let face_normal = edge1.cross(edge2).normalize();
-
-        normals[index1] += face_normal;
-        normals[index2] += face_normal;
-        normals[index3] += face_normal;
-    }
-
-    for normal in normals.iter_mut() {
-        *normal = normal.normalize();
-    }
-
-    combined_mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
-    combined_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
-    combined_mesh.set_indices(Some(Indices::U32(indices)));
-    combined_mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
-
-    let material_handle = materials.add(StandardMaterial {
-        base_color_texture: Some(handle_texture.clone()),
-        perceptual_roughness: GROUND_ROUGHNESS,
-        metallic: GROUND_METALLIC,
-        reflectance: GROUND_RELFECTANCE,
-        ..Default::default()
-    });
-
-    let x_shape = Collider::from_bevy_mesh(&combined_mesh, &ComputedColliderShape::TriMesh).unwrap();
-
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(combined_mesh),
-        material: material_handle,
-        transform: Transform::from_translation(Vec3::new(0.0, WORLD_HEIGHT, 0.0)),
-        ..Default::default()
-    }).insert(x_shape);
 }
 

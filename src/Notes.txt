@@ -2,4 +2,4 @@ needed features
 
 Minecraft style creative move
 holding down mouse 1 places and holding down mouse 2 deletes. 
-
+Shadows need to be fixes once again :*(

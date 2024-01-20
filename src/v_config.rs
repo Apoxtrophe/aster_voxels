@@ -30,7 +30,7 @@ pub const BENCHMARK_SIZE: i32 = 100;
 pub const ONE_SECOND: Duration = Duration::from_secs(1);
 
 // World Generation
-pub const WORLD_SIZE: i32 = 128;
+pub const WORLD_SIZE: i32 = 256;
 pub const WORLD_HEIGHT: f32 = 0.5;
 pub const TEXTURE_BIAS: usize = 24;
 pub const NORMALS_MULTIPLIER: f32 = 0.5;
@@ -49,14 +49,18 @@ pub const V_REFLECTANCE: f32 = 0.0;
 
 //pub const V_EMMITANCE_COLOR: Color = Color::DARK_GRAY;
 
-pub const V_TEXTURE_ATLAS_SIZE: usize = 8;
+pub const V_TEXTURE_ATLAS_SIZE: usize = 16;
 
 // Lighting
-pub const SUN_ANGLE: f32 = 65.0;
+
 pub const SUN_INTENSITY: f32 = 100000.0;
 pub const SUN_SHADOWS: bool = true;
 pub const SUN_LOCATION: [f32; 3] = [10.0, 10.0, 0.0];
-pub const ENABLE_DAY_NIGHT_CYCLE: bool = true;
+
+pub const SUN_ANGLE: f32 = 65.0;
+pub const ENABLE_DAY_NIGHT_CYCLE: bool = false;
+pub const DAY_LENGTH: f32 = 0.01;
+pub const DAYLIGHT_TIMER_RATE: u64 = 100; 
 
 pub const AMBIENT_INTENSITY: f32 = 0.6;
 pub const AMBIENT_COLOR: Color = Color::BEIGE;

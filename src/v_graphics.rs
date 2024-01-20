@@ -168,6 +168,9 @@ fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
     let top = 0.0;
     let bottom = 1.0;
 
+    let plain_left = (texture_index + 8) as f32 * texture_size;
+    let plain_right = plain_left + texture_size;
+
     // Assuming a simple cube where each face uses the same part of the texture
     vec![
         // UVs for each face of the cube
@@ -176,26 +179,30 @@ fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
         [right, bottom],
         [left, bottom],
         // Repeat this for each of the 6 faces of the cube
-        [left, top],
-        [right, top],
-        [right, bottom],
-        [left, bottom],
-        [left, top],
-        [right, top],
-        [right, bottom],
-        [left, bottom],
-        [left, top],
-        [right, top],
-        [right, bottom],
-        [left, bottom],
-        [left, top],
-        [right, top],
-        [right, bottom],
-        [left, bottom],
-        [left, top],
-        [right, top],
-        [right, bottom],
-        [left, bottom],
+        [plain_left, top],
+        [plain_right, top],
+        [plain_right, bottom],
+        [plain_left, bottom],
+
+        [plain_left, top],
+        [plain_right, top],
+        [plain_right, bottom],
+        [plain_left, bottom],
+
+        [plain_left, top],
+        [plain_right, top],
+        [plain_right, bottom],
+        [plain_left, bottom],
+
+        [plain_left, top],
+        [plain_right, top],
+        [plain_right, bottom],
+        [plain_left, bottom],
+
+        [plain_left, top],
+        [plain_right, top],
+        [plain_right, bottom],
+        [plain_left, bottom],
     ]
 }
 

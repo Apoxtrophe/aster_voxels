@@ -1,8 +1,11 @@
+use bevy::prelude::*;
+
+
 use std::time::Duration;
 
-use bevy::{ecs::{system::{Commands, ResMut, Res, Resource}, schedule::NextState}, asset::{AssetServer, Assets, Handle}, render::texture::Image, time::{Timer, TimerMode}};
 
-use crate::{AppState, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics, v_lighting::{SunDirection, CycleTimer}};
+
+use crate::{AppState, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics, v_lighting::SunDirection};
 
 
 
@@ -38,8 +41,8 @@ pub fn voxel_loading(
     
     
 
-    let logic_atlas_handle: Handle<Image> = asset_server.load("TexturePack/LogicAtlas.png");
-    let world_gen_grass: Handle<Image> = asset_server.load("TexturePack/GrassAtlas.png");
+    let logic_atlas_handle: Handle<Image> = asset_server.load("TexturePack/textures.png");
+    let world_gen_grass: Handle<Image> = asset_server.load("TexturePack/Plaintile.png");
     let crosshair: Handle<Image> = asset_server.load("Crosshair.png");
 
     texture_handles.add_image_handle(logic_atlas_handle);
@@ -64,8 +67,6 @@ pub fn voxel_loading(
 
     commands.insert_resource(SunDirection::new());
 
-
-    
 }
 
 pub fn asset_check(

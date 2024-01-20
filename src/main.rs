@@ -13,6 +13,7 @@ mod b_voxel_setup;
 mod v_components;
 mod v_player2;
 mod v_lighting;
+mod v_ui;
 use std::env;
 
 use bevy::{
@@ -26,6 +27,7 @@ use a_loading::{voxel_loading, asset_check};
 use b_voxel_setup::voxel_setup;
 use bevy_rapier3d::plugin::RapierConfiguration;
 use v_bench::benchmark;
+use v_config::DAYLIGHT_TIMER_RATE;
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_performance::performance_metrics_system;
 use v_lib::update_info;
@@ -54,21 +56,26 @@ fn main() {
     env::set_var("RUST_BACKTRACE", "1");
     App::new()
         .insert_resource(RapierConfiguration::default())
-        .insert_resource(Msaa::Sample4)
+    .insert_resource(Msaa::Sample4)
         .insert_resource(AtmosphereModel::default()) 
         .insert_resource(CycleTimer(Timer::new(
-            bevy::utils::Duration::from_millis(50), // Update our atmosphere every 50ms (in a real game, this would be much slower, but for the sake of an example we use a faster update)
+            bevy::utils::Duration::from_millis(DAYLIGHT_TIMER_RATE), // Update our atmosphere every 50ms (in a real game, this would be much slower, but for the sake of an example we use a faster update)
             TimerMode::Repeating,
         )))
         .add_plugins(
             DefaultPlugins
               .set(ImagePlugin {
 
-                  default_sampler: SamplerDescriptor {
-                  address_mode_u: AddressMode::Repeat,
-                  address_mode_v: AddressMode::Repeat,
-                  address_mode_w: AddressMode::Repeat,
-                  ..default()
+                default_sampler: SamplerDescriptor {
+                address_mode_u: AddressMode::Repeat,
+                address_mode_v: AddressMode::Repeat,
+                address_mode_w: AddressMode::Repeat,
+                mag_filter: bevy::render::render_resource::FilterMode::Nearest,
+                min_filter: bevy::render::render_resource::FilterMode::Linear,
+                mipmap_filter: bevy::render::render_resource::FilterMode::Linear,
+                lod_min_clamp: 0.0,
+                lod_max_clamp: 0.01,
+                ..default()
                 }.into(),
               }),
             )
@@ -79,15 +86,15 @@ fn main() {
         .add_plugins(EguiPlugin)
 
         .add_state::<AppState>()
-        .add_systems(Startup, voxel_loading)
-        .add_systems(Startup, player_setup)
+        .add_systems(Startup, (voxel_loading, player_setup))
+
 
 
         // Asset Loading Systems
         .add_systems(Update, asset_check.run_if(in_state(AppState::AssetLoading)))
 
         // Game-Setup Systems
-        .add_systems(OnEnter(AppState::GameSetup), voxel_setup)
+        .add_systems(OnEnter(AppState::GameSetup), (voxel_setup))
 
         // In-Game Systems
         .add_systems(Update, (

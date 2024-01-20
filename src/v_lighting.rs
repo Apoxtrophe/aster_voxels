@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_atmosphere::prelude::*;
 
-use crate::{v_components::Sun, v_config::{SUN_ANGLE, SUN_INTENSITY}, v_simulation::MyTimer};
+use crate::{v_components::Sun, v_config::{SUN_ANGLE, SUN_INTENSITY, ENABLE_DAY_NIGHT_CYCLE, DAY_LENGTH}, v_simulation::MyTimer};
 
 
 
@@ -31,8 +31,8 @@ pub fn daylight_cycle(
 ) {
     timer.0.tick(time.delta());
     
-    if timer.0.finished(){
-        direction.sun_direction += 0.01;
+    if timer.0.finished() && ENABLE_DAY_NIGHT_CYCLE{
+        direction.sun_direction += DAY_LENGTH;
     }
 
     let sun_direction = direction.sun_direction;
