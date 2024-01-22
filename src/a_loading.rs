@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-
+//use bevy_egui::{egui::{self}, EguiContexts};
+use bevy_egui::{egui, EguiContexts};
 
 use std::time::Duration;
 
@@ -7,13 +8,10 @@ use std::time::Duration;
 
 use crate::{AppState, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics, v_lighting::SunDirection};
 
-
-
 #[derive(Resource, Clone)]
 pub struct TextureHandles {
     pub image_handles: Vec<Handle<Image>>,
 }
-
 
 impl TextureHandles {
     fn new() -> Self {
@@ -31,9 +29,12 @@ impl TextureHandles {
 }
 
 
+
 pub fn voxel_loading(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    
+    mut contexts: EguiContexts,
 ) {
     println!("Beginning asset loading");
     // Load textures
@@ -44,10 +45,12 @@ pub fn voxel_loading(
     let logic_atlas_handle: Handle<Image> = asset_server.load("TexturePack/textures.png");
     let world_gen_grass: Handle<Image> = asset_server.load("TexturePack/Plaintile.png");
     let crosshair: Handle<Image> = asset_server.load("Crosshair.png");
+    let hotbar_atlas: Handle<Image> = asset_server.load("Hotbar/HotbarIcons.png");
 
     texture_handles.add_image_handle(logic_atlas_handle);
     texture_handles.add_image_handle(world_gen_grass);
     texture_handles.add_image_handle(crosshair);
+    texture_handles.add_image_handle(hotbar_atlas);
 
     commands.insert_resource(texture_handles);
 

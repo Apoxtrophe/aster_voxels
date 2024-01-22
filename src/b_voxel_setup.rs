@@ -74,19 +74,18 @@ pub fn voxel_setup(
         ..Default::default()
     });
 
-    //world_gen(commands, meshes, materials, texture_handles);
-        // Create the ground
+    // Create the ground
     let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
-
-    let handle_parallax_texture = texture_handles.image_handles.get(0).expect("Parallax texture handle not found");
 
     let material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(handle_texture.clone()),
         alpha_mode: AlphaMode::Blend,
+        perceptual_roughness: GROUND_ROUGHNESS,
+        metallic: GROUND_METALLIC,
+        reflectance: GROUND_RELFECTANCE,
 
         ..Default::default()
     });
-
 
     let mut mesh : Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32}.into(); 
     let uvs = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
@@ -102,7 +101,6 @@ pub fn voxel_setup(
 
     let mesh_handle = meshes.add(mesh);
 
-
     commands.spawn((
         PbrBundle {
             mesh: mesh_handle,
@@ -112,8 +110,6 @@ pub fn voxel_setup(
         },
         Ground,
     )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT, WORLD_SIZE as f32));
-
-
 
     println!("Moving onto InGame");
     next_state.set(AppState::InGame);

@@ -13,7 +13,7 @@ mod b_voxel_setup;
 mod v_components;
 mod v_player2;
 mod v_lighting;
-mod v_ui;
+mod v_hotbar;
 use std::env;
 
 use bevy::{
@@ -28,6 +28,7 @@ use b_voxel_setup::voxel_setup;
 use bevy_rapier3d::plugin::RapierConfiguration;
 use v_bench::benchmark;
 use v_config::DAYLIGHT_TIMER_RATE;
+use v_hotbar::hotbar_ui;
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_performance::performance_metrics_system;
 use v_lib::update_info;
@@ -94,7 +95,7 @@ fn main() {
         .add_systems(Update, asset_check.run_if(in_state(AppState::AssetLoading)))
 
         // Game-Setup Systems
-        .add_systems(OnEnter(AppState::GameSetup), (voxel_setup))
+        .add_systems(OnEnter(AppState::GameSetup), (voxel_setup,hotbar_ui))
 
         // In-Game Systems
         .add_systems(Update, (
@@ -104,5 +105,6 @@ fn main() {
             update_voxel_emissive,
             logic_operation_system,
         ).run_if(in_state(AppState::InGame)))
+
         .run();
 }
