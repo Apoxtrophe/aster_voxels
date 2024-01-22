@@ -35,11 +35,11 @@ impl VoxelSelector {
             0 => TypeVoxel::Tile,
             1 => TypeVoxel::Wire,
             2 => TypeVoxel::Out,
-            3 => TypeVoxel::Not,
+            3 => TypeVoxel::Switch,
             4 => TypeVoxel::And,
             5 => TypeVoxel::Or,
             6 => TypeVoxel::Xor,
-            _ => TypeVoxel::Switch,
+            _ => TypeVoxel::Not,
         }
     }
 }
@@ -49,9 +49,9 @@ pub fn vox_scroll_selection(
     voxel_selector: &mut ResMut<VoxelSelector>,
 ) {
     for event in mouse_wheel_events.read() {
-        if event.y > 0.0 {
+        if event.y < 0.0 {
             voxel_selector.next();
-        } else if event.y < 0.0 {
+        } else if event.y > 0.0 {
             voxel_selector.previous();
         }
     }
