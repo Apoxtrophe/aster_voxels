@@ -8,7 +8,7 @@ use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::{v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_config::{FIELD_OF_VIEW, PITCH_SPEED, YAW_SPEED, AIR_ACCELERATION, CAMERA_HEIGHT, CAMERA_RADIUS, PLAYER_HEIGHT}, v_graphics::VoxelAssets, v_lib::VoxelInfo, v_selector::{VoxelSelector}, v_structure::Voxel};
+use crate::{v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_config::{FIELD_OF_VIEW, PITCH_SPEED, YAW_SPEED, AIR_ACCELERATION, CAMERA_HEIGHT, CAMERA_RADIUS, PLAYER_HEIGHT}, v_graphics::VoxelAssets, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_selector::VoxelSelector, v_structure::Voxel};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
 
@@ -112,14 +112,22 @@ pub fn manage_cursor(
     mut voxel_selector: ResMut<VoxelSelector>,
 
     mut query: Query<&mut BorderColor>,
-) {
 
+    mut countdown_timer: ResMut<FadeTimer>,
+) {
+    // Update selected voxel && Hotbar selection && Fading text timer
     for event in wheel.read() {
         if event.y < 0.0 {
             voxel_selector.next();
+
+            countdown_timer.active = true;
+            countdown_timer.timer.reset();
             
         } else if event.y > 0.0 {
             voxel_selector.previous();
+
+            countdown_timer.active = true;
+            countdown_timer.timer.reset();
         }
         for (i, mut border_color) in query.iter_mut().enumerate() {
             if i == voxel_selector.current_index {

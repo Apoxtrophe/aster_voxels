@@ -4,7 +4,7 @@ use std::time::Duration;
 
 
 
-use crate::{AppState, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics, v_lighting::SunDirection, v_hotbar::TextFadeTimer};
+use crate::{v_config::LOGIC_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_performance::PerformanceMetrics, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, AppState};
 
 #[derive(Resource, Clone)]
 pub struct TextureHandles {
@@ -66,10 +66,7 @@ pub fn voxel_loading(
 
     commands.insert_resource(SunDirection::new());
 
-    commands.insert_resource(TextFadeTimer(Timer::new(
-        Duration::from_millis(1000),
-        TimerMode::Once,
-    )));
+    commands.insert_resource(FadeTimer::new());
 
 }
 

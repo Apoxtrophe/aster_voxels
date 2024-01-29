@@ -28,7 +28,7 @@ use b_voxel_setup::voxel_setup;
 use bevy_rapier3d::plugin::RapierConfiguration;
 use v_bench::benchmark;
 use v_config::DAYLIGHT_TIMER_RATE;
-use v_hotbar::{hotbar_ui, voxel_descriptor};
+use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_performance::performance_metrics_system;
 use v_lib::update_info;
@@ -93,14 +93,14 @@ fn main() {
 
         // Game-Setup Systems
         .add_systems(OnEnter(AppState::GameSetup), (
-            voxel_setup, hotbar_ui,voxel_descriptor))
+            voxel_setup, hotbar_ui, voxel_descriptor))
 
         // In-Game Systems
         .add_systems(Update, (
             performance_metrics_system, ui_debug, update_info, benchmark, //Optional systems
             manage_cursor, respawn, voxel_interaction_system, //Player systems
             daylight_cycle,
-            //update_hotbar_selection,
+            timer_update_system,
             update_voxel_emissive,
             logic_operation_system,
         ).run_if(in_state(AppState::InGame)))

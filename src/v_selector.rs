@@ -1,11 +1,6 @@
-use bevy::{
-    ecs::{
-        event::EventReader,
-        system::{Query, ResMut, Resource},
-    }, input::mouse::MouseWheel, ui::BorderColor
-};
+use bevy::ecs::system::Resource;
 
-use crate::{v_components::TypeVoxel};
+use crate::v_components::TypeVoxel;
 
 #[derive(Resource, Clone, Copy)]
 pub struct VoxelSelector {
