@@ -6,7 +6,7 @@ use bevy::render::mesh::shape;
 
 
 
-use crate::{AppState, v_config::*};
+use crate::AppState;
 
 pub fn voxel_setup(
     mut commands: Commands,

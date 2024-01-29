@@ -1,12 +1,11 @@
 use bevy::{
     ecs::{
         event::EventReader,
-        system::{ResMut, Resource},
-    },
-    input::mouse::MouseWheel,
+        system::{Query, ResMut, Resource},
+    }, input::mouse::MouseWheel, ui::BorderColor
 };
 
-use crate::v_components::TypeVoxel;
+use crate::{v_components::TypeVoxel};
 
 #[derive(Resource, Clone, Copy)]
 pub struct VoxelSelector {
@@ -40,19 +39,6 @@ impl VoxelSelector {
             5 => TypeVoxel::Or,
             6 => TypeVoxel::Xor,
             _ => TypeVoxel::Not,
-        }
-    }
-}
-
-pub fn vox_scroll_selection(
-    mut mouse_wheel_events: EventReader<MouseWheel>,
-    voxel_selector: &mut ResMut<VoxelSelector>,
-) {
-    for event in mouse_wheel_events.read() {
-        if event.y < 0.0 {
-            voxel_selector.next();
-        } else if event.y > 0.0 {
-            voxel_selector.previous();
         }
     }
 }

@@ -28,11 +28,11 @@ use b_voxel_setup::voxel_setup;
 use bevy_rapier3d::plugin::RapierConfiguration;
 use v_bench::benchmark;
 use v_config::DAYLIGHT_TIMER_RATE;
-use v_hotbar::{hotbar_ui, update_hotbar_selection};
+use v_hotbar::{hotbar_ui, voxel_descriptor};
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_performance::performance_metrics_system;
 use v_lib::update_info;
-use v_player2::{player_setup, manage_cursor, display_text, respawn, voxel_interaction_system};
+use v_player2::{player_setup, manage_cursor, respawn, voxel_interaction_system};
 use v_simulation::logic_operation_system;
 use v_graphics::*;
 use v_debug::*;
@@ -57,7 +57,7 @@ fn main() {
     env::set_var("RUST_BACKTRACE", "1");
     App::new()
         .insert_resource(RapierConfiguration::default())
-        .insert_resource(Msaa::Sample4)
+        .insert_resource(Msaa::Sample2)
         .insert_resource(AtmosphereModel::default()) 
         .insert_resource(CycleTimer(Timer::new(
             bevy::utils::Duration::from_millis(DAYLIGHT_TIMER_RATE), // Update our atmosphere every 50ms (in a real game, this would be much slower, but for the sake of an example we use a faster update)
@@ -92,14 +92,15 @@ fn main() {
         .add_systems(Update, asset_check.run_if(in_state(AppState::AssetLoading)))
 
         // Game-Setup Systems
-        .add_systems(OnEnter(AppState::GameSetup), (voxel_setup, hotbar_ui,))
+        .add_systems(OnEnter(AppState::GameSetup), (
+            voxel_setup, hotbar_ui,voxel_descriptor))
 
         // In-Game Systems
         .add_systems(Update, (
             performance_metrics_system, ui_debug, update_info, benchmark, //Optional systems
-            manage_cursor, display_text, respawn, voxel_interaction_system, //Player systems
+            manage_cursor, respawn, voxel_interaction_system, //Player systems
             daylight_cycle,
-            update_hotbar_selection,
+            //update_hotbar_selection,
             update_voxel_emissive,
             logic_operation_system,
         ).run_if(in_state(AppState::InGame)))

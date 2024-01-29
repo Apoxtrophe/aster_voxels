@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_atmosphere::prelude::*;
 
-use crate::{v_components::Sun, v_config::{SUN_ANGLE, SUN_INTENSITY, ENABLE_DAY_NIGHT_CYCLE, DAY_LENGTH}, v_simulation::MyTimer};
+use crate::{v_components::Sun, v_config::{SUN_ANGLE, SUN_INTENSITY, ENABLE_DAY_NIGHT_CYCLE, DAY_LENGTH}};
 
 
 

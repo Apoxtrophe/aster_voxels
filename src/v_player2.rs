@@ -1,22 +1,19 @@
 use std::f32::consts::TAU;
 
 use bevy::{
-    math::Vec3Swizzles,
-    prelude::*,
-    window::CursorGrabMode, input::mouse::MouseWheel,
+    input::mouse::MouseWheel, prelude::*, render::color, window::CursorGrabMode
 };
 use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::{v_selector::{vox_scroll_selection, VoxelSelector}, v_lib::VoxelInfo, v_graphics::VoxelAssets, v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_structure::Voxel, v_config::{FIELD_OF_VIEW, PITCH_SPEED, YAW_SPEED, AIR_ACCELERATION, CAMERA_HEIGHT, CAMERA_RADIUS, PLAYER_HEIGHT}};
+use crate::{v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_config::{FIELD_OF_VIEW, PITCH_SPEED, YAW_SPEED, AIR_ACCELERATION, CAMERA_HEIGHT, CAMERA_RADIUS, PLAYER_HEIGHT}, v_graphics::VoxelAssets, v_lib::VoxelInfo, v_selector::{VoxelSelector}, v_structure::Voxel};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
 
 pub fn player_setup(
     mut commands: Commands,
-    mut window: Query<&mut Window>,
     assets: Res<AssetServer>,
 ) {
 
@@ -110,14 +107,31 @@ pub fn manage_cursor(
     mut window_query: Query<&mut Window>,
     mut controller_query: Query<&mut FpsController>,
 
-    mouse_wheel_events: EventReader<MouseWheel>,
+    mut wheel: EventReader<MouseWheel>,
 
     mut voxel_selector: ResMut<VoxelSelector>,
+
+    mut query: Query<&mut BorderColor>,
 ) {
 
-    vox_scroll_selection(mouse_wheel_events, &mut voxel_selector);
+    for event in wheel.read() {
+        if event.y < 0.0 {
+            voxel_selector.next();
+            
+        } else if event.y > 0.0 {
+            voxel_selector.previous();
+        }
+        for (i, mut border_color) in query.iter_mut().enumerate() {
+            if i == voxel_selector.current_index {
+                border_color.0 = color::Color::LIME_GREEN.into();
+            } else {
+                border_color.0 = color::Color::DARK_GRAY.into();
+            }
+        }
+    }
 
     let mut window = window_query.single_mut();
+
     if btn.just_pressed(MouseButton::Left) {
         window.cursor.grab_mode = CursorGrabMode::Locked;
         window.cursor.visible = false;
@@ -134,21 +148,9 @@ pub fn manage_cursor(
     }
 }
 
-pub fn display_text(
-    mut controller_query: Query<(&Transform, &Velocity)>,
-    mut text_query: Query<&mut Text>,
-) {
-    for (transform, velocity) in &mut controller_query {
-        for mut text in &mut text_query {
-            text.sections[0].value = format!(
-                "vel: {:.2}, {:.2}, {:.2}\npos: {:.2}, {:.2}, {:.2}\nspd: {:.2}",
-                velocity.linvel.x, velocity.linvel.y, velocity.linvel.z,
-                transform.translation.x, transform.translation.y, transform.translation.z,
-                velocity.linvel.xz().length()
-            );
-        }
-    }
-}
+
+
+
 
 pub fn voxel_interaction_system(
     mouse_input: Res<Input<MouseButton>>,

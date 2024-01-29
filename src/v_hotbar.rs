@@ -1,22 +1,12 @@
-use std::num;
 
-use bevy::{prelude::*, math::vec2, render::color};
-use bevy_egui::{EguiContext, egui::{self, ImageSource, color_picker::Alpha}, EguiContexts, EguiUserTextures};
-use rand::seq::index;
+use bevy::{prelude::*, render::color};
 
-use crate::{a_loading::TextureHandles, v_config::{SCREEN_WIDTH, SCREEN_HEIGHT}, v_selector::VoxelSelector};
-
-struct HotbarSlot {
-    index: usize,
-}
+use crate::{a_loading::TextureHandles, v_config::{SCREEN_WIDTH, SCREEN_HEIGHT}};
 
 pub fn hotbar_ui(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     texture_handles: Res<TextureHandles>, 
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    mut atlas_images: Query<&mut UiTextureAtlasImage>,
-    voxel_selector: Res<VoxelSelector>,
 ) {
     let handle_texture = texture_handles.image_handles.get(3).expect("Texture handle not found");
     let texture_atlas = TextureAtlas::from_grid(handle_texture.clone(), Vec2::new(24.0, 24.0), 9, 1, None, None);
@@ -35,11 +25,11 @@ pub fn hotbar_ui(
     let bottom_alignment = SCREEN_HEIGHT - slot_size;
     let above_bottom = 10.0;
     
-    let border_size = 10.0;
+    let border_size = 10.0 * (hotbar_size * hotbar_size);
 
     for i in 0..num_slots {
 
-        let item = commands.spawn(ButtonBundle {
+        let _ = commands.spawn(ButtonBundle {
             style: Style {
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::SpaceBetween,
@@ -63,7 +53,7 @@ pub fn hotbar_ui(
                     style: Style {
                         min_width: Val::Px(slot_size - border_size),
                         min_height: Val::Px(slot_size - border_size),
-                        right: Val::Px(5.),
+                        right: Val::Px(border_size /2.0),
                         ..Default::default()
                     },
                     texture_atlas: texture_atlas_handle.clone(),
@@ -78,15 +68,35 @@ pub fn hotbar_ui(
     }
 }
 
-pub fn update_hotbar_selection(
-    mut query: Query<&mut BorderColor>,
-    voxel_selector: Res<VoxelSelector>,
+// Hotbar border is updated in v_player2.rs
+
+// Little cute text that shows the current voxel type
+#[derive(Resource)]
+pub struct TextFadeTimer(pub Timer);
+
+pub fn voxel_descriptor(
+    mut commands: Commands, 
+    asset_server: Res<AssetServer>, 
 ) {
-    for (i, mut border_color) in query.iter_mut().enumerate() {
-        if i == voxel_selector.current_index {
-            border_color.0 = color::Color::GOLD.into();
-        } else {
-            border_color.0 = color::Color::DARK_GRAY.into();
-        }
-    }
+    commands.spawn((
+        // Create a TextBundle that has a Text with a single section.
+        TextBundle::from_section(
+            // Accepts a `String` or any type that converts into a `String`, such as `&str`
+            "hello\nbevy!",
+            TextStyle {
+                // This font is loaded and will be used instead of the default font.
+                font: asset_server.load("fira_mono.ttf"),
+                font_size: 100.0,
+                ..default()
+            },
+        ) // Set the alignment of the Text
+        .with_text_alignment(TextAlignment::Center)
+        // Set the style of the TextBundle itself.
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            bottom: Val::Px(5.0),
+            right: Val::Px(5.0),
+            ..default()
+        }),
+    ));
 }

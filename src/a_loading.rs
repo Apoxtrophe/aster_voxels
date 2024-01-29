@@ -1,12 +1,10 @@
 use bevy::prelude::*;
-//use bevy_egui::{egui::{self}, EguiContexts};
-use bevy_egui::{egui, EguiContexts};
 
 use std::time::Duration;
 
 
 
-use crate::{AppState, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics, v_lighting::SunDirection};
+use crate::{AppState, v_structure::Voxel, v_selector::VoxelSelector, v_lib::VoxelInfo, v_simulation::MyTimer, v_config::LOGIC_RATE, v_performance::PerformanceMetrics, v_lighting::SunDirection, v_hotbar::TextFadeTimer};
 
 #[derive(Resource, Clone)]
 pub struct TextureHandles {
@@ -33,8 +31,6 @@ impl TextureHandles {
 pub fn voxel_loading(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    
-    mut contexts: EguiContexts,
 ) {
     println!("Beginning asset loading");
     // Load textures
@@ -69,6 +65,11 @@ pub fn voxel_loading(
     commands.insert_resource(PerformanceMetrics::new());
 
     commands.insert_resource(SunDirection::new());
+
+    commands.insert_resource(TextFadeTimer(Timer::new(
+        Duration::from_millis(1000),
+        TimerMode::Once,
+    )));
 
 }
 
