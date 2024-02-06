@@ -4,7 +4,7 @@ use std::time::Duration;
 
 
 
-use crate::{v_config::LOGIC_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_performance::PerformanceMetrics, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, AppState};
+use crate::{v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, AppState, PerformanceMetrics};
 
 #[derive(Resource, Clone)]
 pub struct TextureHandles {
@@ -40,8 +40,8 @@ pub fn voxel_loading(
 
     let logic_atlas_handle: Handle<Image> = asset_server.load("TexturePack/textures.png");
     let world_gen_grass: Handle<Image> = asset_server.load("TexturePack/Plaintile.png");
-    let crosshair: Handle<Image> = asset_server.load("Crosshair.png");
-    let hotbar_atlas: Handle<Image> = asset_server.load("Hotbar/HotbarIcons.png");
+    let crosshair: Handle<Image> = asset_server.load("UserInterface/Crosshair.png");
+    let hotbar_atlas: Handle<Image> = asset_server.load("UserInterface/HotbarIcons.png");
 
     texture_handles.add_image_handle(logic_atlas_handle);
     texture_handles.add_image_handle(world_gen_grass);
@@ -58,7 +58,7 @@ pub fn voxel_loading(
     commands.insert_resource(VoxelInfo::new());
 
     commands.insert_resource(MyTimer(Timer::new(
-        Duration::from_millis(LOGIC_RATE),
+        Duration::from_millis(SIMULATION_RATE),
         TimerMode::Repeating,
     )));
 

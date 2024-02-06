@@ -3,7 +3,7 @@ use std::{f32::consts::PI, iter::Once};
 
 use bevy::{prelude::*, render::color};
 
-use crate::{a_loading::TextureHandles, v_config::{SCREEN_WIDTH, SCREEN_HEIGHT}, v_selector::VoxelSelector};
+use crate::{a_loading::TextureHandles, v_config::{DESCRIPTOR_BOTTOM, DESCRIPTOR_COLOR, DESCRIPTOR_FADE_TIMER, DESCRIPTOR_FONT_SIZE, DESCRIPTOR_RIGHT, HOTBAR_ABOVE_BOTTOM, HOTBAR_BACKGROUND_COLOR, HOTBAR_BORDER_COLOR, HOTBAR_BORDER_SIZE, HOTBAR_ELEMENT_NUMBER, HOTBAR_SIZE, HOTBAR_SLOT_SIZE, HOTBAR_SPACING, SCREEN_HEIGHT, SCREEN_WIDTH}, v_selector::VoxelSelector};
 
 pub fn hotbar_ui(
     mut commands: Commands,
@@ -14,20 +14,19 @@ pub fn hotbar_ui(
     let texture_atlas = TextureAtlas::from_grid(handle_texture.clone(), Vec2::new(24.0, 24.0), 9, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     
-    let hotbar_size = 1.0;
-    let num_slots = 9;
+    let hotbar_size = HOTBAR_SIZE;
+    let num_slots = HOTBAR_ELEMENT_NUMBER;
 
-    let slot_size = 96.0 * (hotbar_size * hotbar_size);
-    let spacing = 5.0 * hotbar_size;
-
+    let slot_size = HOTBAR_SLOT_SIZE * (hotbar_size * hotbar_size);
+    let spacing = HOTBAR_SPACING * hotbar_size;
 
     let total_item_size = (slot_size * num_slots as f32) + (spacing * num_slots as f32); 
     let side_space = (SCREEN_WIDTH - total_item_size) / 2.0;
 
     let bottom_alignment = SCREEN_HEIGHT - slot_size;
-    let above_bottom = 10.0;
+    let above_bottom = HOTBAR_ABOVE_BOTTOM;
     
-    let border_size = 10.0 * (hotbar_size * hotbar_size);
+    let border_size = HOTBAR_BORDER_SIZE * (hotbar_size * hotbar_size);
 
     for i in 0..num_slots {
 
@@ -45,8 +44,8 @@ pub fn hotbar_ui(
                 //margin: UiRect::all(Val::Px(20.)),
                 ..Default::default()
             },
-            border_color: color::Color::WHITE.into(),
-            background_color: BackgroundColor(Color::rgba(0.8, 0.8, 0.8, 0.3)),
+            border_color: HOTBAR_BORDER_COLOR.into(),
+            background_color: HOTBAR_BACKGROUND_COLOR.into(),
             ..Default::default()
         })
         .with_children(|parent| {
@@ -87,9 +86,9 @@ pub fn voxel_descriptor(
             "Welcome to Logica!",
             TextStyle {
                 // This font is loaded and will be used instead of the default font.
-                font: asset_server.load("fira_mono.ttf"),
-                font_size: 64.0,
-                color: Color::DARK_GREEN,
+                font: asset_server.load("Fonts/Retro Gaming.ttf"),
+                font_size: DESCRIPTOR_FONT_SIZE,
+                color: DESCRIPTOR_COLOR,
                 ..default()
             },
         ) // Set the alignment of the Text
@@ -97,8 +96,8 @@ pub fn voxel_descriptor(
         // Set the style of the TextBundle itself.
         .with_style(Style {
             position_type: PositionType::Absolute,
-            bottom: Val::Percent(8.0),
-            right: Val::Percent(50.0),
+            bottom: Val::Percent(DESCRIPTOR_BOTTOM),
+            right: Val::Percent(DESCRIPTOR_RIGHT),
             align_content: AlignContent::Center,
             justify_content: JustifyContent::Center,
             ..default()
@@ -115,7 +114,7 @@ pub struct FadeTimer {
 impl FadeTimer {
     pub fn new() -> Self {
         FadeTimer {
-            timer: Timer::from_seconds(1.0, TimerMode::Once),
+            timer: Timer::from_seconds(DESCRIPTOR_FADE_TIMER, TimerMode::Once),
             active: false,
         }
     }
@@ -132,7 +131,7 @@ pub fn timer_update_system(
 
         for (mut text, mut fading_text) in query.iter_mut() {
             let mut timer = countdown_timer.timer.tick(time.delta()).percent();
-            let alpha_text = ((timer * (PI/2.0)).cos() as f32);
+            let alpha_text = (timer * (PI/2.0 )).cos() as f32;
             text.sections[0].style.color.set_a(alpha_text);
             text.sections[0].value = format!("{:?}", selected.unwrap());
         }

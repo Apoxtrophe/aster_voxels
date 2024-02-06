@@ -80,9 +80,9 @@ pub fn voxel_setup(
     let material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(handle_texture.clone()),
         alpha_mode: AlphaMode::Blend,
-        perceptual_roughness: GROUND_ROUGHNESS,
-        metallic: GROUND_METALLIC,
-        reflectance: GROUND_RELFECTANCE,
+        perceptual_roughness: WORLD_PERCIEVED_ROUGHNESS,
+        metallic: WORLD_METALLIC,
+        reflectance: WORLD_REFLECTANCE,
 
         ..Default::default()
     });
@@ -105,11 +105,11 @@ pub fn voxel_setup(
         PbrBundle {
             mesh: mesh_handle,
             material: material_handle,
-            transform: Transform::from_translation(Vec3::new(0.5, WORLD_HEIGHT, 0.5)),
+            transform: Transform::from_translation(Vec3::new(0.5, WORLD_HEIGHT_OFFSET, 0.5)),
             ..default()
         },
         Ground,
-    )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT, WORLD_SIZE as f32));
+    )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT_OFFSET, WORLD_SIZE as f32));
 
     println!("Moving onto InGame");
     next_state.set(AppState::InGame);

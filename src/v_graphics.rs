@@ -5,7 +5,7 @@ use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
 
 use crate::a_loading::TextureHandles;
 use crate::v_components::{TypeVoxel, StateVoxel};
-use crate::v_config::{V_ROUGHNESS, V_METALLIC, V_REFLECTANCE, V_TEXTURE_ATLAS_SIZE};
+use crate::v_config::{VOXEL_PERCIEVED_ROUGHNESS, VOXEL_METALLIC, VOXEL_REFLECTANCE, VOXEL_ATLAS_SIZE};
 
 #[derive(Resource)]
 pub struct VoxelAssets {
@@ -34,10 +34,10 @@ impl VoxelAssets {
     ) -> Handle<StandardMaterial> {
         materials.add(StandardMaterial {
             base_color_texture: Some(self.texture_atlas.clone()),
-            perceptual_roughness:V_ROUGHNESS,
-            metallic: V_METALLIC,
+            perceptual_roughness:VOXEL_PERCIEVED_ROUGHNESS,
+            metallic: VOXEL_METALLIC,
             emissive: Color::BLACK,
-            reflectance: V_REFLECTANCE,
+            reflectance: VOXEL_REFLECTANCE,
             ..default()
         })
     }
@@ -160,7 +160,7 @@ pub fn update_voxel_emissive(
 }
 
 fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
-    let atlas_width = V_TEXTURE_ATLAS_SIZE as f32; // Total number of textures in atlas horizontally
+    let atlas_width = VOXEL_ATLAS_SIZE as f32; // Total number of textures in atlas horizontally
     let texture_size = 1.0 / atlas_width;
 
     let left = texture_index as f32 * texture_size;

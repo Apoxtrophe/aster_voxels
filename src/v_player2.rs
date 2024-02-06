@@ -8,7 +8,7 @@ use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::{v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_config::{FIELD_OF_VIEW, PITCH_SPEED, YAW_SPEED, AIR_ACCELERATION, CAMERA_HEIGHT, CAMERA_RADIUS, PLAYER_HEIGHT}, v_graphics::VoxelAssets, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_selector::VoxelSelector, v_structure::Voxel};
+use crate::{v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_config::{PLAYER_FOV, PLAYER_PITCH_SPEED, PLAYER_YAW_SPEED, PLAYER_AIR_ACCELERATION, PLAYER_CAMERA_HEIGHT, PLAYER_CAMERA_RADIUS, PLAYER_HEIGHT}, v_graphics::VoxelAssets, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_selector::VoxelSelector, v_structure::Voxel};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
 
@@ -45,26 +45,26 @@ pub fn player_setup(
             TransformBundle::from_transform(Transform::from_translation(SPAWN_POINT)),
             LogicalPlayer,
             FpsControllerInput {
-                pitch: -TAU / PITCH_SPEED,
-                yaw: TAU * 5.0 / YAW_SPEED,
+                pitch: -TAU / PLAYER_PITCH_SPEED,
+                yaw: TAU * 5.0 / PLAYER_YAW_SPEED,
                 ..default()
             },
             FpsController {
-                air_acceleration: AIR_ACCELERATION,
+                air_acceleration: PLAYER_AIR_ACCELERATION,
                 upright_height: PLAYER_HEIGHT,
                 ..default()
             },
         ))
         .insert(CameraConfig {
-            height_offset: CAMERA_HEIGHT,
-            radius_scale: CAMERA_RADIUS,
+            height_offset: PLAYER_CAMERA_HEIGHT,
+            radius_scale: PLAYER_CAMERA_RADIUS,
         })
         .id();
 
     commands.spawn((
         Camera3dBundle {
             projection: Projection::Perspective(PerspectiveProjection {
-                fov: TAU / FIELD_OF_VIEW,
+                fov: TAU / PLAYER_FOV,
                 ..default()
             }),
             ..default()
@@ -76,7 +76,7 @@ pub fn player_setup(
     commands.spawn(TextBundle::from_section(
         "",
         TextStyle {
-            font: assets.load("fira_mono.ttf"),
+            font: assets.load("Fonts/Retro Gaming.ttf"),
             font_size: 24.0,
             color: Color::BLACK,
         },

@@ -50,7 +50,7 @@ pub fn raycasting(
                     - normal * 0.5)
                     .round()
                     .as_ivec3();
-            let is_in_range = distance < INTERACTION_DISTANCE;
+            let is_in_range = distance < PLAYER_INTERACTION_MAX;
             let adjacent_position = position + normal.as_ivec3();
 
             // Neat lil gizmo

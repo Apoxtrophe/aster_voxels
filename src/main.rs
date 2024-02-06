@@ -26,11 +26,9 @@ use bevy_egui::EguiPlugin;
 use a_loading::{voxel_loading, asset_check};
 use b_voxel_setup::voxel_setup;
 use bevy_rapier3d::plugin::RapierConfiguration;
-use v_bench::benchmark;
-use v_config::DAYLIGHT_TIMER_RATE;
+use v_config::{DEBUGGING, SUN_TIMER_RATE};
 use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
 use v_lighting::{daylight_cycle, CycleTimer};
-use v_performance::performance_metrics_system;
 use v_lib::update_info;
 use v_player2::{player_setup, manage_cursor, respawn, voxel_interaction_system};
 use v_simulation::logic_operation_system;
@@ -60,7 +58,7 @@ fn main() {
         .insert_resource(Msaa::Sample2)
         .insert_resource(AtmosphereModel::default()) 
         .insert_resource(CycleTimer(Timer::new(
-            bevy::utils::Duration::from_millis(DAYLIGHT_TIMER_RATE), // Update our atmosphere every 50ms (in a real game, this would be much slower, but for the sake of an example we use a faster update)
+            bevy::utils::Duration::from_millis(SUN_TIMER_RATE), // Update our atmosphere every 50ms (in a real game, this would be much slower, but for the sake of an example we use a faster update)
             TimerMode::Repeating,
         )))
         .add_plugins(
@@ -97,7 +95,8 @@ fn main() {
 
         // In-Game Systems
         .add_systems(Update, (
-            performance_metrics_system, ui_debug, update_info, benchmark, //Optional systems
+            //Debugging, //Optional systems || Turn off in config under "DEBUGGING"
+            update_info, 
             manage_cursor, respawn, voxel_interaction_system, //Player systems
             daylight_cycle,
             timer_update_system,
