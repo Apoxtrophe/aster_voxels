@@ -1,10 +1,6 @@
 use bevy::prelude::*;
-
 use std::time::Duration;
-
-
-
-use crate::{v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, AppState, PerformanceMetrics};
+use crate::{v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, AppState};
 
 #[derive(Resource, Clone)]
 pub struct TextureHandles {
@@ -12,21 +8,12 @@ pub struct TextureHandles {
 }
 
 impl TextureHandles {
-    fn new() -> Self {
+    fn new(handles: Vec<Handle<Image>>) -> Self {
         TextureHandles {
-            image_handles: Vec::new(),
-            // initialize other fields...
+            image_handles: handles,
         }
     }
-
-    fn add_image_handle(&mut self, handle: Handle<Image>) {
-        self.image_handles.push(handle);
-    }
-
-    // Methods to check if all assets are loaded, etc.
 }
-
-
 
 pub fn voxel_loading(
     mut commands: Commands,
@@ -34,38 +21,29 @@ pub fn voxel_loading(
 ) {
     println!("Beginning asset loading");
     // Load textures
-    let mut texture_handles = TextureHandles::new();
-    
-    
 
-    let logic_atlas_handle: Handle<Image> = asset_server.load("TexturePack/textures.png");
-    let world_gen_grass: Handle<Image> = asset_server.load("TexturePack/Plaintile.png");
-    let crosshair: Handle<Image> = asset_server.load("UserInterface/Crosshair.png");
-    let hotbar_atlas: Handle<Image> = asset_server.load("UserInterface/HotbarIcons.png");
+    let texture_paths = [
+        "TexturePack/textures.png",
+        "TexturePack/Plaintile.png",
+        "UserInterface/Crosshair.png",
+        "UserInterface/HotbarIcons.png",
+    ];
 
-    texture_handles.add_image_handle(logic_atlas_handle);
-    texture_handles.add_image_handle(world_gen_grass);
-    texture_handles.add_image_handle(crosshair);
-    texture_handles.add_image_handle(hotbar_atlas);
+    let texture_handles = texture_paths.iter()
+        .map(|path| asset_server.load(*path))
+        .collect();
+
+    let texture_handles = TextureHandles::new(texture_handles);
 
     commands.insert_resource(texture_handles);
-
-    // Initialize the voxel world
     commands.insert_resource(Voxel::new());
-
     commands.insert_resource(VoxelSelector::new());
-
     commands.insert_resource(VoxelInfo::new());
-
     commands.insert_resource(MyTimer(Timer::new(
         Duration::from_millis(SIMULATION_RATE),
         TimerMode::Repeating,
     )));
-
-    commands.insert_resource(PerformanceMetrics::new());
-
     commands.insert_resource(SunDirection::new());
-
     commands.insert_resource(FadeTimer::new());
 
 }

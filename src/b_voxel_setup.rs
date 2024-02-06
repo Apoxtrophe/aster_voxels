@@ -17,46 +17,44 @@ pub fn voxel_setup(
     mut next_state: ResMut<NextState<AppState>>,
     texture_handles: Res<TextureHandles>, 
 ) {
-
     println!("Beginning GameSetup");
+    // initialize voxel assets
+    commands.insert_resource(VoxelAssets::new(&mut meshes, &texture_handles));
+    setup_lighting(&mut commands, &mut ambient_light);
+    configure_window(windows.single_mut());
+    // Crosshair
+    spawn_ui_elements(&mut commands, &texture_handles);
+    create_ground(&mut commands, &mut meshes, &mut materials, &texture_handles);
+    println!("Moving onto InGame");
+    next_state.set(AppState::InGame);
+}
 
-    // Really hate that this is initialized here and not a_loading
-    commands.insert_resource(VoxelAssets::new(
-        &mut meshes,
-        &texture_handles,
-    ));
-
-
+fn setup_lighting(commands: &mut Commands, ambient_light: &mut ResMut<AmbientLight>) {
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            // Enable shadows
             shadows_enabled: true,
             ..Default::default()
         },
-        
         ..Default::default()
     }).insert(Sun);
-    // Ambient lighting
+
     ambient_light.color = AMBIENT_COLOR;
-    ambient_light.brightness = AMBIENT_INTENSITY; // Adjust the brightness as needed
-    ambient_light.brightness = AMBIENT_INTENSITY; // Adjust the brightness as needed
+    ambient_light.brightness = AMBIENT_INTENSITY;
+}
 
-    
-
-    // Window settings
-    let mut window = windows.single_mut();
+fn configure_window(mut window: Mut<Window>) {
     window.title = "Logica".to_string();
     window.resolution = WindowResolution::new(SCREEN_WIDTH, SCREEN_HEIGHT);
     window.present_mode = PresentMode::AutoVsync;
     window.cursor.icon = CursorIcon::Crosshair;
     window.cursor.grab_mode = CursorGrabMode::Locked;
-    window.window_theme = Some(bevy::window::WindowTheme::Dark);
+    window.window_theme = Some(WindowTheme::Dark);
     window.mode = WindowMode::BorderlessFullscreen;
     window.cursor.visible = false;
     window.decorations = true;
-    window.window_theme = Some(bevy::window::WindowTheme::Dark);
+}
 
-    // Crosshair
+fn spawn_ui_elements(commands: &mut Commands, texture_handles: &Res<TextureHandles>) {
     let crosshair_handle = texture_handles.image_handles.get(2).expect("Texture handle not found");
     commands.spawn(ImageBundle {
         image: UiImage {
@@ -73,22 +71,22 @@ pub fn voxel_setup(
         },
         ..Default::default()
     });
+}
 
-    // Create the ground
+fn create_ground(commands: &mut Commands, meshes: &mut ResMut<Assets<Mesh>>, materials: &mut ResMut<Assets<StandardMaterial>>, texture_handles: &Res<TextureHandles>) {
     let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
-
     let material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(handle_texture.clone()),
         alpha_mode: AlphaMode::Blend,
         perceptual_roughness: WORLD_PERCIEVED_ROUGHNESS,
         metallic: WORLD_METALLIC,
         reflectance: WORLD_REFLECTANCE,
-
         ..Default::default()
     });
 
-    let mut mesh : Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32}.into(); 
+    let mut mesh: Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32 }.into();
     let uvs = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
+
     match uvs {
         VertexAttributeValues::Float32x2(values) => {
             for uv in values.iter_mut() {
@@ -110,9 +108,4 @@ pub fn voxel_setup(
         },
         Ground,
     )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT_OFFSET, WORLD_SIZE as f32));
-
-    println!("Moving onto InGame");
-    next_state.set(AppState::InGame);
-
 }
-

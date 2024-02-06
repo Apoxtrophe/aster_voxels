@@ -1,33 +1,27 @@
 use bevy::render::mesh::{Indices, Mesh};
-
 use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
-
-
 use crate::a_loading::TextureHandles;
 use crate::v_components::{TypeVoxel, StateVoxel};
-use crate::v_config::{VOXEL_PERCIEVED_ROUGHNESS, VOXEL_METALLIC, VOXEL_REFLECTANCE, VOXEL_ATLAS_SIZE};
+use crate::v_config::{VOXEL_PERCIEVED_ROUGHNESS, VOXEL_METALLIC, VOXEL_REFLECTANCE};
+use crate::v_graphics_helper::{calculate_indices, calculate_normals, calculate_positions, calculate_uv_coordinates};
 
 #[derive(Resource)]
 pub struct VoxelAssets {
     pub voxel_mesh: Handle<Mesh>,
     texture_atlas: Handle<Image>,
 }
-
 impl VoxelAssets {
     pub fn new(
         meshes: &mut ResMut<Assets<Mesh>>,
         texture_handles: &Res<TextureHandles>,
     ) -> Self {
         let texture_handle = texture_handles.image_handles.get(0).expect("Texture handle not found");
-
         let voxel_assets = VoxelAssets {
             texture_atlas: texture_handle.clone(),
             voxel_mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
         };
-
         voxel_assets
     }
-
     pub fn atlas_material(
         &self,
         materials: &mut ResMut<Assets<StandardMaterial>>,
@@ -41,7 +35,6 @@ impl VoxelAssets {
             ..default()
         })
     }
-
     pub fn create_voxel_mesh(
         &self,
         voxel_type: TypeVoxel,
@@ -57,89 +50,15 @@ impl VoxelAssets {
             TypeVoxel::Xor => calculate_uv_coordinates(6),
             TypeVoxel::Not => calculate_uv_coordinates(7),
         };
-
-        // Example positions for a unit cube. You'll need to adjust these based on your specific mesh.
-        let positions = vec![
-            // top (facing towards +y)
-            [-0.5, 0.5, -0.5], // vertex with index 0
-            [0.5, 0.5, -0.5],  // vertex with index 1
-            [0.5, 0.5, 0.5],   // etc. until 23
-            [-0.5, 0.5, 0.5],
-            // bottom   (-y)
-            [-0.5, -0.5, -0.5],
-            [0.5, -0.5, -0.5],
-            [0.5, -0.5, 0.5],
-            [-0.5, -0.5, 0.5],
-            // right    (+x)
-            [0.5, -0.5, -0.5],
-            [0.5, -0.5, 0.5],
-            [0.5, 0.5, 0.5], // This vertex is at the same position as vertex with index 2, but they'll have different UV and normal
-            [0.5, 0.5, -0.5],
-            // left     (-x)
-            [-0.5, -0.5, -0.5],
-            [-0.5, -0.5, 0.5],
-            [-0.5, 0.5, 0.5],
-            [-0.5, 0.5, -0.5],
-            // back     (+z)
-            [-0.5, -0.5, 0.5],
-            [-0.5, 0.5, 0.5],
-            [0.5, 0.5, 0.5],
-            [0.5, -0.5, 0.5],
-            // forward  (-z)
-            [-0.5, -0.5, -0.5],
-            [-0.5, 0.5, -0.5],
-            [0.5, 0.5, -0.5],
-            [0.5, -0.5, -0.5],
-        ];
-
-        // Calculate normals for each vertex
-        // Normals are usually unit vectors perpendicular to the surface
-        let normals = vec![
-            // Normals for the top side (towards +y)
-            [0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0],
-            // Normals for the bottom side (towards -y)
-            [0.0, -1.0, 0.0],
-            [0.0, -1.0, 0.0],
-            [0.0, -1.0, 0.0],
-            [0.0, -1.0, 0.0],
-            // Normals for the right side (towards +x)
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            // Normals for the left side (towards -x)
-            [-1.0, 0.0, 0.0],
-            [-1.0, 0.0, 0.0],
-            [-1.0, 0.0, 0.0],
-            [-1.0, 0.0, 0.0],
-            // Normals for the back side (towards +z)
-            [0.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0],
-            // Normals for the forward side (towards -z)
-            [0.0, 0.0, -1.0],
-            [0.0, 0.0, -1.0],
-            [0.0, 0.0, -1.0],
-            [0.0, 0.0, -1.0],
-        ];
+        let positions = calculate_positions();
+        let normals = calculate_normals();
+        let indices = calculate_indices();
 
         let mesh = Mesh::new(PrimitiveTopology::TriangleList)
             .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
             .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
             .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv_coordinates)
-            .with_indices(Some(Indices::U32(vec![
-                0, 3, 1, 1, 3, 2, // triangles making up the top (+y) facing side.
-                4, 5, 7, 5, 6, 7, // bottom (-y)
-                8, 11, 9, 9, 11, 10, // right (+x)
-                12, 13, 15, 13, 14, 15, // left (-x)
-                16, 19, 17, 17, 19, 18, // back (+z)
-                20, 21, 23, 21, 22, 23, // forward (-z)
-            ])));
-
+            .with_indices(Some(Indices::U32(indices)));
         meshes.add(mesh) // Add the mesh to the asset system and return the handle
     }
 }
@@ -158,52 +77,4 @@ pub fn update_voxel_emissive(
         }
     }
 }
-
-fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
-    let atlas_width = VOXEL_ATLAS_SIZE as f32; // Total number of textures in atlas horizontally
-    let texture_size = 1.0 / atlas_width;
-
-    let left = texture_index as f32 * texture_size;
-    let right = left + texture_size;
-    let top = 0.0;
-    let bottom = 1.0;
-
-    let plain_left = (texture_index + 8) as f32 * texture_size;
-    let plain_right = plain_left + texture_size;
-
-    // Assuming a simple cube where each face uses the same part of the texture
-    vec![
-        // UVs for each face of the cube
-        [left, top],
-        [right, top],
-        [right, bottom],
-        [left, bottom],
-        // Repeat this for each of the 6 faces of the cube
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
-
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
-
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
-
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
-
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
-    ]
-}
-
 

@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::{render::color::{self, Color}, ui::{BackgroundColor, Val}};
+use bevy::render::color::{self, Color};
 
 //Screen
 pub const SCREEN_WIDTH: f32 = 3440.0;

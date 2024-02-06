@@ -2,18 +2,17 @@
 mod v_config;
 mod v_graphics;
 mod v_lib;
-mod v_performance;
 mod v_simulation;
 mod v_structure;
 mod a_loading;
 mod v_debug;
 mod v_selector;
-mod v_bench;
 mod b_voxel_setup;
 mod v_components;
 mod v_player2;
 mod v_lighting;
 mod v_hotbar;
+mod v_graphics_helper;
 use std::env;
 
 use bevy::{
@@ -26,7 +25,7 @@ use bevy_egui::EguiPlugin;
 use a_loading::{voxel_loading, asset_check};
 use b_voxel_setup::voxel_setup;
 use bevy_rapier3d::plugin::RapierConfiguration;
-use v_config::{DEBUGGING, SUN_TIMER_RATE};
+use v_config::SUN_TIMER_RATE;
 use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_lib::update_info;
@@ -95,7 +94,6 @@ fn main() {
 
         // In-Game Systems
         .add_systems(Update, (
-            //Debugging, //Optional systems || Turn off in config under "DEBUGGING"
             update_info, 
             manage_cursor, respawn, voxel_interaction_system, //Player systems
             daylight_cycle,

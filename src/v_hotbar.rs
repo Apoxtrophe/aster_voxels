@@ -1,7 +1,7 @@
 
-use std::{f32::consts::PI, iter::Once};
+use std::f32::consts::PI;
 
-use bevy::{prelude::*, render::color};
+use bevy::prelude::*;
 
 use crate::{a_loading::TextureHandles, v_config::{DESCRIPTOR_BOTTOM, DESCRIPTOR_COLOR, DESCRIPTOR_FADE_TIMER, DESCRIPTOR_FONT_SIZE, DESCRIPTOR_RIGHT, HOTBAR_ABOVE_BOTTOM, HOTBAR_BACKGROUND_COLOR, HOTBAR_BORDER_COLOR, HOTBAR_BORDER_SIZE, HOTBAR_ELEMENT_NUMBER, HOTBAR_SIZE, HOTBAR_SLOT_SIZE, HOTBAR_SPACING, SCREEN_HEIGHT, SCREEN_WIDTH}, v_selector::VoxelSelector};
 
@@ -10,38 +10,24 @@ pub fn hotbar_ui(
     texture_handles: Res<TextureHandles>, 
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    let handle_texture = texture_handles.image_handles.get(3).expect("Texture handle not found");
+    let handle_texture = texture_handles.image_handles.get(3).unwrap_or_else(|| panic!("Texture handle not found"));
     let texture_atlas = TextureAtlas::from_grid(handle_texture.clone(), Vec2::new(24.0, 24.0), 9, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     
-    let hotbar_size = HOTBAR_SIZE;
-    let num_slots = HOTBAR_ELEMENT_NUMBER;
+    let slot_size = HOTBAR_SLOT_SIZE; // Assuming HOTBAR_SIZE is always 1
+    let spacing = HOTBAR_SPACING; // Same assumption as above
 
-    let slot_size = HOTBAR_SLOT_SIZE * (hotbar_size * hotbar_size);
-    let spacing = HOTBAR_SPACING * hotbar_size;
-
-    let total_item_size = (slot_size * num_slots as f32) + (spacing * num_slots as f32); 
+    let total_item_size = (slot_size + spacing) * HOTBAR_ELEMENT_NUMBER as f32; 
     let side_space = (SCREEN_WIDTH - total_item_size) / 2.0;
 
-    let bottom_alignment = SCREEN_HEIGHT - slot_size;
-    let above_bottom = HOTBAR_ABOVE_BOTTOM;
-    
-    let border_size = HOTBAR_BORDER_SIZE * (hotbar_size * hotbar_size);
-
-    for i in 0..num_slots {
-
-        let _ = commands.spawn(ButtonBundle {
+    for i in 0..HOTBAR_ELEMENT_NUMBER {
+        commands.spawn(ButtonBundle {
             style: Style {
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::SpaceBetween,
                 width: Val::Px(slot_size),
                 height: Val::Px(slot_size),
-                top: Val::Px(bottom_alignment - above_bottom),
-                
-                left: Val::Px(((slot_size * i as f32) + spacing * i as f32) + side_space),
-
-                border: UiRect::all(Val::Px(border_size)),
-                //margin: UiRect::all(Val::Px(20.)),
+                top: Val::Px(SCREEN_HEIGHT - slot_size - HOTBAR_ABOVE_BOTTOM),
+                left: Val::Px((i as f32) * (slot_size + spacing) + side_space),
+                border: UiRect::all(Val::Px(HOTBAR_BORDER_SIZE)),
                 ..Default::default()
             },
             border_color: HOTBAR_BORDER_COLOR.into(),
@@ -49,22 +35,16 @@ pub fn hotbar_ui(
             ..Default::default()
         })
         .with_children(|parent| {
-            parent.spawn((
-                AtlasImageBundle {  
-                    style: Style {
-                        min_width: Val::Px(slot_size - border_size),
-                        min_height: Val::Px(slot_size - border_size),
-                        right: Val::Px(border_size /2.0),
-                        ..Default::default()
-                    },
-                    texture_atlas: texture_atlas_handle.clone(),
-                    texture_atlas_image: UiTextureAtlasImage { index: (i), flip_x: (false), flip_y: (false) },
-
+            parent.spawn(AtlasImageBundle {  
+                style: Style {
+                    min_width: Val::Px(slot_size - HOTBAR_BORDER_SIZE * 2.0),
+                    min_height: Val::Px(slot_size - HOTBAR_BORDER_SIZE * 2.0),
                     ..Default::default()
                 },
-                Interaction::default(),
-                
-            ));
+                texture_atlas: texture_atlas_handle.clone(),
+                texture_atlas_image: UiTextureAtlasImage { index: i, ..Default::default() },
+                ..Default::default()
+            });
         });
     }
 }
@@ -80,12 +60,9 @@ pub fn voxel_descriptor(
     asset_server: Res<AssetServer>, 
 ) {
     commands.spawn((
-        // Create a TextBundle that has a Text with a single section.
         TextBundle::from_section(
-            // Accepts a `String` or any type that converts into a `String`, such as `&str`
             "Welcome to Logica!",
             TextStyle {
-                // This font is loaded and will be used instead of the default font.
                 font: asset_server.load("Fonts/Retro Gaming.ttf"),
                 font_size: DESCRIPTOR_FONT_SIZE,
                 color: DESCRIPTOR_COLOR,
@@ -98,8 +75,6 @@ pub fn voxel_descriptor(
             position_type: PositionType::Absolute,
             bottom: Val::Percent(DESCRIPTOR_BOTTOM),
             right: Val::Percent(DESCRIPTOR_RIGHT),
-            align_content: AlignContent::Center,
-            justify_content: JustifyContent::Center,
             ..default()
         }),
     )).insert(FadingText);
@@ -129,8 +104,8 @@ pub fn timer_update_system(
     if countdown_timer.active {
         let selected = Some(voxel_selector.current_voxel_type());
 
-        for (mut text, mut fading_text) in query.iter_mut() {
-            let mut timer = countdown_timer.timer.tick(time.delta()).percent();
+        for (mut text, _fading_text) in query.iter_mut() {
+            let timer = countdown_timer.timer.tick(time.delta()).percent();
             let alpha_text = (timer * (PI/2.0 )).cos() as f32;
             text.sections[0].style.color.set_a(alpha_text);
             text.sections[0].value = format!("{:?}", selected.unwrap());

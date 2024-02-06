@@ -13,7 +13,6 @@ pub struct VoxelInfo {
     pub voxel_type: Option<TypeVoxel>,
     pub in_range: bool,
     pub is_on: Option<bool>,
-    pub selected: Option<TypeVoxel>,
 }
 
 impl VoxelInfo {
@@ -24,7 +23,6 @@ impl VoxelInfo {
             in_range: false,
             voxel_type: None,
             is_on: None,
-            selected: None,
         }
     }
 }
@@ -75,7 +73,6 @@ pub fn update_info(
     voxel_selector: ResMut<VoxelSelector>,
     gizmos: Gizmos,
 ) {
-    voxel_info.selected = Some(voxel_selector.current_voxel_type());
     if let Ok((position, adjacent_position, is_in_range)) = raycasting(raycast, query, gizmos) {
         voxel_info.position = position;
         voxel_info.adjacent = adjacent_position;
