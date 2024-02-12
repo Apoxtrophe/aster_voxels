@@ -16,6 +16,7 @@ pub enum TypeVoxel {
     Or,
     Xor,
     Switch,
+    DFlipFlop,
 }
 
 #[derive(Component, Debug, Clone, Copy)]

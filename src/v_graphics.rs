@@ -49,6 +49,7 @@ impl VoxelAssets {
             TypeVoxel::Or => calculate_uv_coordinates(5),
             TypeVoxel::Xor => calculate_uv_coordinates(6),
             TypeVoxel::Not => calculate_uv_coordinates(7),
+            TypeVoxel::DFlipFlop => calculate_uv_coordinates(8),
         };
         let positions = calculate_positions();
         let normals = calculate_normals();

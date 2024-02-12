@@ -8,7 +8,7 @@ pub fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
     let top = 0.0;
     let bottom = 1.0;
 
-    let plain_left = (texture_index + 8) as f32 * texture_size;
+    let plain_left = (texture_index + 9) as f32 * texture_size;
     let plain_right = plain_left + texture_size;
 
     // Assuming a simple cube where each face uses the same part of the texture

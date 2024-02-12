@@ -33,7 +33,7 @@ pub const WORLD_PERCIEVED_ROUGHNESS: f32 = 1.0;
 pub const VOXEL_PERCIEVED_ROUGHNESS: f32 = 1.0;
 pub const VOXEL_METALLIC: f32 = 1.0;
 pub const VOXEL_REFLECTANCE: f32 = 0.0;
-pub const VOXEL_ATLAS_SIZE: usize = 16;
+pub const VOXEL_ATLAS_SIZE: usize = 18;
 
 // Lighting
 pub const SUN_INTENSITY: f32 = 100000.0;

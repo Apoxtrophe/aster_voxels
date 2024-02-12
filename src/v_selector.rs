@@ -1,6 +1,6 @@
 use bevy::ecs::system::Resource;
 
-use crate::v_components::TypeVoxel;
+use crate::{v_components::TypeVoxel, v_config::HOTBAR_ELEMENT_NUMBER};
 
 #[derive(Resource, Clone, Copy)]
 pub struct VoxelSelector {
@@ -13,12 +13,12 @@ impl VoxelSelector {
     }
 
     pub fn next(&mut self) {
-        self.current_index = (self.current_index + 1) % 8;
+        self.current_index = (self.current_index + 1) % HOTBAR_ELEMENT_NUMBER;
     }
 
     pub fn previous(&mut self) {
         if self.current_index == 0 {
-            self.current_index = 7;
+            self.current_index = HOTBAR_ELEMENT_NUMBER - 1;
         } else {
             self.current_index -= 1;
         }
@@ -33,7 +33,8 @@ impl VoxelSelector {
             4 => TypeVoxel::And,
             5 => TypeVoxel::Or,
             6 => TypeVoxel::Xor,
-            _ => TypeVoxel::Not,
+            7 => TypeVoxel::Not,
+            _ => TypeVoxel::DFlipFlop,
         }
     }
 }

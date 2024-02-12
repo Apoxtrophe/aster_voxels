@@ -23,10 +23,10 @@ pub fn voxel_loading(
     // Load textures
 
     let texture_paths = [
-        "TexturePack/textures.png",
-        "TexturePack/Plaintile.png",
+        "TexturePack/TexturePack_V4.png",
+        "TexturePack/Tile.png",
         "UserInterface/Crosshair.png",
-        "UserInterface/HotbarIcons.png",
+        "UserInterface/Hotbar_V2.png",
     ];
 
     let texture_handles = texture_paths.iter()

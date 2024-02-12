@@ -37,7 +37,7 @@ pub fn logic_operation_system(
                         &mut changes,
                     );
                 }
-                TypeVoxel::And | TypeVoxel::Or | TypeVoxel::Xor | TypeVoxel::Not => {
+                TypeVoxel::And | TypeVoxel::Or | TypeVoxel::Xor | TypeVoxel::Not | TypeVoxel::DFlipFlop => {
                     // Update state of logic gates without propagation
                     let is_on = process_logic_gate(position_voxel.0, *type_voxel, &voxel_map);
                     changes.push((entity, is_on));
@@ -73,6 +73,7 @@ fn process_logic_gate(
         TypeVoxel::Or => active_inputs > 0,
         TypeVoxel::Xor => active_inputs == 1,
         TypeVoxel::Not => total_inputs == 1 && active_inputs == 0,
+        TypeVoxel::DFlipFlop => process_d_flip_flop_logic(position, voxel_map),
         _ => false,
     }
 }
@@ -111,7 +112,7 @@ fn process_out_logic(
     position: IVec3,
     voxel_map: &HashMap<IVec3, (Entity, TypeVoxel, StateVoxel)>,
 ) -> bool {
-    // Only logic gates and switches should be able to turn on 'Out' voxels
+    // Only logic gates and switches should be able to turn on 'Out' voxels\
     get_adjacent_positions(position).iter().any(|adj_pos| {
         if let Some((_, type_voxel, state_voxel)) = voxel_map.get(adj_pos) {
             match type_voxel {
@@ -119,6 +120,7 @@ fn process_out_logic(
                 | TypeVoxel::Or
                 | TypeVoxel::Xor
                 | TypeVoxel::Not
+                | TypeVoxel::DFlipFlop
                 | TypeVoxel::Switch => state_voxel.0,
                 _ => false,
             }
@@ -155,4 +157,43 @@ pub fn get_adjacent_positions(position: IVec3) -> [IVec3; 6] {
         position + IVec3::new(0, 0, 1),
         position + IVec3::new(0, 0, -1),
     ]
+}
+
+fn process_d_flip_flop_logic(
+    position: IVec3,
+    voxel_map: &HashMap<IVec3, (Entity, TypeVoxel, StateVoxel)>,
+) -> bool {
+    let top_position = position + IVec3::new(0, 1, 0);
+    let side_positions = [
+        position + IVec3::new(1, 0, 0),
+        position + IVec3::new(-1, 0, 0),
+        position + IVec3::new(0, 0, 1),
+        position + IVec3::new(0, 0, -1),
+    ];
+
+    let mut signal  = 0;
+    let mut data = 0;
+
+    for side_pos in side_positions.iter() {
+        if let Some((_, TypeVoxel::Wire, state_voxel)) = voxel_map.get(side_pos) {
+            if state_voxel.0 {
+                data += 1;
+            }
+        }
+    }
+    if let Some((_, TypeVoxel::Wire, state_voxel)) = voxel_map.get(&top_position) {
+        if state_voxel.0 {
+            signal += 1;
+        }
+    }
+
+    let current_state = voxel_map.get(&position).map_or(false, |(_, _, state)| state.0);
+
+    if signal > 0 && data > 0 {
+        true // Set state to ON if set is ON and data is ON
+    } else if signal > 0 && data == 0 {
+        false // Set state to OFF if set is ON and data is OFF
+    } else {
+        current_state // Unchanged state for other cases
+    }
 }
