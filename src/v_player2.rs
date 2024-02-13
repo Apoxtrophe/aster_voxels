@@ -50,8 +50,40 @@ pub fn player_setup(
                 ..default()
             },
             FpsController {
-                air_acceleration: PLAYER_AIR_ACCELERATION,
-                upright_height: PLAYER_HEIGHT,
+                move_mode: MoveMode::Ground,
+                radius: 0.0,
+                gravity: 20.0,
+
+                air_acceleration: 10.0,
+                fly_speed: 10.0,
+                fast_fly_speed: 20.0,
+                fly_friction: 0.04, 
+
+                walk_speed: 10.0,
+                run_speed: 20.0,
+                jump_speed: 8.0,
+                acceleration: 10.0,
+                friction: 8.0,
+                crouched_speed: 5.0, 
+                crouch_speed: 8.0,
+                uncrouch_speed: 8.0,
+                upright_height: 2.0,
+                crouch_height: 1.5,
+
+                stop_speed: 1.0,
+                sensitivity: 0.0005,
+                enable_input: true, 
+                step_offset: 1.0,
+
+                key_forward: KeyCode::W,
+                key_back: KeyCode::S,
+                key_left: KeyCode::A,
+                key_right: KeyCode::D,
+                key_up: KeyCode::Space,
+                key_down: KeyCode::AltLeft,
+                key_sprint: KeyCode::ShiftLeft,
+                key_jump: KeyCode::Space,
+                key_crouch: KeyCode::AltLeft,
                 ..default()
             },
         ))
