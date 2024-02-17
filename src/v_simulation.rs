@@ -1,9 +1,10 @@
 
-use bevy::math::IVec3;
+use bevy::transform::commands;
+use bevy::{audio, math::IVec3};
 use bevy::prelude::*;
 use std::collections::{HashMap, HashSet};
-
-use crate::v_components::{PositionVoxel, TypeVoxel, StateVoxel};
+use bevy::audio::{AudioSource, Volume, VolumeLevel};
+use crate::{a_loading::AudioAssets, v_components::{PositionVoxel, StateVoxel, TypeVoxel}};
 
 #[derive(Resource)]
 pub struct MyTimer(pub Timer);
@@ -12,7 +13,11 @@ pub fn logic_operation_system(
     time: Res<Time>,
     mut timer: ResMut<MyTimer>,
     mut voxel_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
+    audio: Res<AudioAssets>,
+    mut commands: Commands,
 ) {
+
+    let mut state_change_counter = 0; 
 
     if timer.0.tick(time.delta()).just_finished() {
 
@@ -46,7 +51,19 @@ pub fn logic_operation_system(
                 _ => (),
             }
         }
-        apply_changes(&mut voxel_query, changes)
+        apply_changes(&mut voxel_query, changes, &mut state_change_counter);
+        if state_change_counter > 0 {
+            commands.spawn((
+                AudioBundle {
+                    source: audio.click_sound.clone(),
+                    settings: PlaybackSettings {
+                        volume: Volume::Relative(VolumeLevel::new(state_change_counter as f32)),
+                        ..Default::default()
+                     },
+                    ..default()
+                },
+            ));
+        }
     }
 }
 
@@ -130,9 +147,12 @@ fn process_out_logic(
     })
 }
 
+
+// This is also going to have some audio functionality, should be changed later. 
 fn apply_changes(
     voxel_query: &mut Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
     changes: Vec<(Entity, bool)>,
+    state_change_counter: &mut i32,
 ) {
     // Use a HashMap to store the state changes for each entity
     let mut change_map: HashMap<Entity, bool> = HashMap::new();
@@ -141,8 +161,13 @@ fn apply_changes(
     }
 
     // Apply changes in a single pass
-    for (entity, _, _, mut state_voxel) in voxel_query.iter_mut() {
+    for (entity, _, voxel_type, mut state_voxel) in voxel_query.iter_mut() {
         if let Some(&new_state) = change_map.get(&entity) {
+
+            if !state_voxel.0 && new_state && *voxel_type != TypeVoxel::Wire {
+                *state_change_counter += 1;
+            }
+
             state_voxel.0 = new_state;
         }
     }

@@ -15,7 +15,6 @@ mod v_lib;
 mod v_simulation;
 mod v_structure;
 mod a_loading;
-mod v_debug;
 mod v_selector;
 mod b_voxel_setup;
 mod v_components;
@@ -25,6 +24,7 @@ mod v_hotbar;
 mod v_graphics_helper;
 mod v_main_menu;
 mod v_save; 
+mod v_audio;
 
 // Using structs and enums directly from their modules
 use a_loading::{voxel_loading, asset_check};

@@ -28,12 +28,20 @@ pub fn voxel_loading(
         "UserInterface/Crosshair.png",
         "UserInterface/Hotbar_V2.png",
     ];
-
+    
     let texture_handles = texture_paths.iter()
         .map(|path| asset_server.load(*path))
         .collect();
 
     let texture_handles = TextureHandles::new(texture_handles);
+
+    // Audio Library
+    let click_sound = asset_server.load("Audio/click2.ogg");
+    let audio_assets = AudioAssets {
+        click_sound,
+    };
+
+    commands.insert_resource(audio_assets);
 
     commands.insert_resource(texture_handles);
     commands.insert_resource(Voxel::new());
@@ -67,4 +75,10 @@ pub fn asset_check(
 
         clear_main_menu_entities(commands, query)
     }
+}
+
+
+#[derive(Resource, Clone)]
+pub struct AudioAssets {
+    pub click_sound: Handle<AudioSource>,
 }
