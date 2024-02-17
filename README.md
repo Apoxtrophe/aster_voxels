@@ -38,13 +38,13 @@ Logica is an innovative, realtime voxel-based boolean logic simulation game deve
 
 **Hotbar for logic components** DONE
 
-**World Saving / Loading**
+**World Saving / Loading** DONE
 
 **Json file for configuration settings**
 
 **In-Game menu**
 
-**Home screen**
+**Home screen** DONE
 
 **Tiled ground with texture** DONE
 
@@ -52,7 +52,7 @@ Logica is an innovative, realtime voxel-based boolean logic simulation game deve
 
 **Unlock the cursor upon pressing a key** DONE
 
-**Latch components and various auxilary logic components such as screen and busses(maybe)**
+**Latch components and various auxilary logic components such as screen and busses(maybe)** DONE (Sorta)
 
 **Sound effects for the player (walking, placing, destructing and etc)**
 
