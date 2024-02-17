@@ -1,7 +1,7 @@
 use bevy::{prelude::*, window::*, render::mesh::VertexAttributeValues};
 
 use bevy_rapier3d::geometry::Collider;
-use crate::{v_config::*, v_components::{Ground, Sun}, a_loading::TextureHandles, VoxelAssets};
+use crate::{a_loading::TextureHandles, v_components::{Ground, Sun}, v_config::*, v_graphics::VoxelAssets};
 use bevy::render::mesh::shape;
 
 
@@ -25,6 +25,7 @@ pub fn voxel_setup(
     // Crosshair
     spawn_ui_elements(&mut commands, &texture_handles);
     create_ground(&mut commands, &mut meshes, &mut materials, &texture_handles);
+
     println!("Moving onto InGame");
     next_state.set(AppState::InGame);
 }
@@ -109,3 +110,4 @@ fn create_ground(commands: &mut Commands, meshes: &mut ResMut<Assets<Mesh>>, mat
         Ground,
     )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT_OFFSET, WORLD_SIZE as f32));
 }
+

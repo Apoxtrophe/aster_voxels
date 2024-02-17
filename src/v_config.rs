@@ -1,4 +1,4 @@
-use std::time::Duration;
+
 use bevy::render::color::{self, Color};
 //Screen
 pub const SCREEN_WIDTH: f32 = 3440.0;
@@ -41,7 +41,7 @@ pub const SUN_TIMER_RATE: u64 = 100;
 pub const AMBIENT_INTENSITY: f32 = 0.6;
 pub const AMBIENT_COLOR: Color = Color::BEIGE;
 
-//Hotbar
+// Hotbar
 pub const HOTBAR_SIZE: f32 = 1.0;
 pub const HOTBAR_ELEMENT_NUMBER: usize = 9; 
 pub const HOTBAR_SLOT_SIZE: f32 = 96.0;
@@ -51,10 +51,14 @@ pub const HOTBAR_BORDER_SIZE: f32 = 10.0;
 pub const HOTBAR_BACKGROUND_COLOR: Color = Color::WHITE;
 pub const HOTBAR_BORDER_COLOR: Color = color::Color::WHITE;
 
-//Hotbar Descriptor
+// Hotbar Descriptor
 pub const DESCRIPTOR_FONT_SIZE: f32 = 64.0;
 pub const DESCRIPTOR_COLOR: Color = Color::SEA_GREEN;
 pub const DESCRIPTOR_BOTTOM: f32 = 8.0;
 pub const DESCRIPTOR_RIGHT: f32 = 50.0; 
 pub const DESCRIPTOR_FADE_TIMER: f32 = 1.0; 
 
+// Main menu
+pub const CONTINUE_BUTTON_OFF: Color = Color::DARK_GREEN;
+pub const CONTINUE_BUTTON_HOVER: Color = Color::GREEN;
+pub const CONTINUE_BUTTON_ON: Color = Color::LIME_GREEN;

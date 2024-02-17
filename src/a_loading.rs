@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use std::time::Duration;
-use crate::{v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, AppState};
+use crate::{v_components::MainMenuEntity, v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_main_menu::clear_main_menu_entities, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, AppState};
 
 #[derive(Resource, Clone)]
 pub struct TextureHandles {
@@ -52,6 +52,9 @@ pub fn asset_check(
     mut next_state: ResMut<NextState<AppState>>,
     texture_handles: Res<TextureHandles>,
     image_assets: Res<Assets<Image>>,
+
+    commands: Commands,
+    query: Query<Entity, With<MainMenuEntity>>,
 ) {
     // Check if all assets are loaded. If so, go to the next state.
     let all_loaded = texture_handles.image_handles.iter().all(|handle| {
@@ -61,5 +64,7 @@ pub fn asset_check(
     if all_loaded {
         println!("Moving onto GameSetup");
         next_state.set(AppState::GameSetup);
+
+        clear_main_menu_entities(commands, query)
     }
 }

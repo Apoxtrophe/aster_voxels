@@ -61,6 +61,7 @@ impl Voxel {
         voxel_assets: &Res<VoxelAssets>,
         mut materials: ResMut<Assets<StandardMaterial>>,
         mut meshes: ResMut<Assets<Mesh>>,
+        state: bool,
     ) {
         let voxel_type = voxel_selector.current_voxel_type();
         let voxel_mesh_handle = voxel_assets.create_voxel_mesh(voxel_type, &mut meshes);
@@ -77,7 +78,33 @@ impl Voxel {
             })
             .insert(PositionVoxel(position))
             .insert(voxel_type)
-            .insert(StateVoxel(false))
+            .insert(StateVoxel(state))
+            .insert(Collider::cuboid(0.5, 0.5, 0.5));
+    }
+
+    pub fn lean_place(
+        &mut self,
+        commands: &mut Commands,
+        position: IVec3,
+        voxel_type: TypeVoxel,
+        state: bool,
+        voxel_assets: &Res<VoxelAssets>,
+        mut meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<StandardMaterial>>,
+    ) {
+        let voxel_mesh_handle = voxel_assets.create_voxel_mesh(voxel_type, &mut meshes);
+        let atlas_material = voxel_assets.atlas_material(materials);
+
+        commands
+            .spawn(PbrBundle {
+                mesh: voxel_mesh_handle,  // Use the UV mapped mesh
+                material: atlas_material, // Use the atlas material
+                transform: Transform::from_translation(position.as_vec3()),
+                ..Default::default()
+            })
+            .insert(PositionVoxel(position))
+            .insert(voxel_type)
+            .insert(StateVoxel(state))
             .insert(Collider::cuboid(0.5, 0.5, 0.5));
     }
 

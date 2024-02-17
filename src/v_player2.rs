@@ -17,12 +17,6 @@ pub fn player_setup(
     assets: Res<AssetServer>,
 ) {
 
-    
-    // Note that we have two entities for the player
-    // One is a "logical" player that handles the physics computation and collision
-    // The other is a "render" player that is what is displayed to the user
-    // This distinction is useful for later on if you want to add multiplayer,
-    // where often time these two ideas are not exactly synced up
     let logical_entity = commands
         .spawn((
             Collider::capsule(Vec3::Y * 0.5, Vec3::Y * 1.5, 0.5),
@@ -45,8 +39,8 @@ pub fn player_setup(
             TransformBundle::from_transform(Transform::from_translation(SPAWN_POINT)),
             LogicalPlayer,
             FpsControllerInput {
-                pitch: -TAU / PLAYER_PITCH_SPEED,
-                yaw: TAU * 5.0 / PLAYER_YAW_SPEED,
+                pitch: (-TAU / PLAYER_PITCH_SPEED) * 0.0,
+                yaw: (TAU * 5.0 / PLAYER_YAW_SPEED) * 0.0,
                 ..default()
             },
             FpsController {
@@ -231,6 +225,7 @@ pub fn voxel_interaction_system(
                     &voxel_assets,
                     materials,
                     meshes,
+                    false,
                 )
             }
         } else if mouse_input.just_pressed(MouseButton::Right) {
