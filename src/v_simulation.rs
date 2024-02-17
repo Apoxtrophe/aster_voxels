@@ -4,6 +4,7 @@ use bevy::{audio, math::IVec3};
 use bevy::prelude::*;
 use std::collections::{HashMap, HashSet};
 use bevy::audio::{AudioSource, Volume, VolumeLevel};
+use crate::v_audio::RelayLoop;
 use crate::{a_loading::AudioAssets, v_components::{PositionVoxel, StateVoxel, TypeVoxel}};
 
 #[derive(Resource)]
@@ -15,6 +16,8 @@ pub fn logic_operation_system(
     mut voxel_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
     audio: Res<AudioAssets>,
     mut commands: Commands,
+
+    music_controller: Query<&AudioSink, With<RelayLoop>>,
 ) {
 
     let mut state_change_counter = 0; 
@@ -52,17 +55,11 @@ pub fn logic_operation_system(
             }
         }
         apply_changes(&mut voxel_query, changes, &mut state_change_counter);
+
         if state_change_counter > 0 {
-            commands.spawn((
-                AudioBundle {
-                    source: audio.click_sound.clone(),
-                    settings: PlaybackSettings {
-                        volume: Volume::Relative(VolumeLevel::new(state_change_counter as f32)),
-                        ..Default::default()
-                     },
-                    ..default()
-                },
-            ));
+            if let Ok(sink) = music_controller.get_single() {
+                sink.set_volume(state_change_counter as f32/ 5.0)
+            }
         }
     }
 }
