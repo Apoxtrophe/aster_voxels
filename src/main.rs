@@ -34,7 +34,7 @@ use v_graphics::update_voxel_emissive;
 use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_lib::update_info;
-use v_main_menu::{main_menu_buttons, setup_main_menu};
+use v_main_menu::{animate_sprite, main_menu_buttons, setup_main_menu};
 use v_player2::{player_setup, manage_cursor, respawn, voxel_interaction_system};
 use v_save::{check_for_save_input, world_loader};
 use v_simulation::logic_operation_system;
@@ -84,7 +84,7 @@ fn main() {
             
         .add_systems(Startup, setup_main_menu)
         .add_systems(Update, (
-            main_menu_buttons,
+            main_menu_buttons, animate_sprite,
         ).run_if(in_state(AppState::MainMenu)))
         
         // Asset Loading Systems
