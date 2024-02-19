@@ -1,11 +1,10 @@
 
-use bevy::transform::commands;
+
 use bevy::{audio, math::IVec3};
 use bevy::prelude::*;
 use std::collections::{HashMap, HashSet};
-use bevy::audio::{AudioSource, Volume, VolumeLevel};
-use crate::v_audio::RelayLoop;
-use crate::{a_loading::AudioAssets, v_components::{PositionVoxel, StateVoxel, TypeVoxel}};
+
+use crate::v_components::{PositionVoxel, StateVoxel, TypeVoxel};
 
 #[derive(Resource)]
 pub struct MyTimer(pub Timer);
@@ -14,12 +13,7 @@ pub fn logic_operation_system(
     time: Res<Time>,
     mut timer: ResMut<MyTimer>,
     mut voxel_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &mut StateVoxel)>,
-    audio: Res<AudioAssets>,
-    mut commands: Commands,
-
-    music_controller: Query<&AudioSink, With<RelayLoop>>,
 ) {
-
     let mut state_change_counter = 0; 
 
     if timer.0.tick(time.delta()).just_finished() {
@@ -55,12 +49,6 @@ pub fn logic_operation_system(
             }
         }
         apply_changes(&mut voxel_query, changes, &mut state_change_counter);
-
-        if state_change_counter > 0 {
-            if let Ok(sink) = music_controller.get_single() {
-                sink.set_volume(state_change_counter as f32/ 5.0)
-            }
-        }
     }
 }
 
@@ -160,11 +148,6 @@ fn apply_changes(
     // Apply changes in a single pass
     for (entity, _, voxel_type, mut state_voxel) in voxel_query.iter_mut() {
         if let Some(&new_state) = change_map.get(&entity) {
-
-            if !state_voxel.0 && new_state && *voxel_type != TypeVoxel::Wire {
-                *state_change_counter += 1;
-            }
-
             state_voxel.0 = new_state;
         }
     }

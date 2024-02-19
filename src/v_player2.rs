@@ -39,8 +39,8 @@ pub fn player_setup(
             TransformBundle::from_transform(Transform::from_translation(SPAWN_POINT)),
             LogicalPlayer,
             FpsControllerInput {
-                pitch: (-TAU / PLAYER_PITCH_SPEED) * 0.0,
-                yaw: (TAU * 5.0 / PLAYER_YAW_SPEED) * 0.0,
+                pitch: (-TAU / PLAYER_PITCH_SPEED),
+                yaw: (TAU * 5.0 / PLAYER_YAW_SPEED),
                 ..default()
             },
             FpsController {

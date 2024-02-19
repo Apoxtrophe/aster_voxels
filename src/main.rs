@@ -29,7 +29,6 @@ mod v_audio;
 // Using structs and enums directly from their modules
 use a_loading::{voxel_loading, asset_check};
 use b_voxel_setup::voxel_setup;
-use v_audio::setup_relay_audio;
 use v_config::SUN_TIMER_RATE;
 use v_graphics::update_voxel_emissive;
 use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
@@ -106,7 +105,7 @@ fn main() {
 
         // In-Game Systems
 
-        .add_systems(OnEnter(AppState::InGame), (world_loader, setup_relay_audio))
+        .add_systems(OnEnter(AppState::InGame), (world_loader))
 
         .add_systems(Update, (
             update_info, 
