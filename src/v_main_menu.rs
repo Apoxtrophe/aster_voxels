@@ -1,15 +1,9 @@
 
-use bevy::{animation::{AnimationClip, AnimationPlayer, RepeatAnimation}, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{component::Component, entity::Entity, query::{Changed, With}, schedule::NextState, system::{Commands, Query, Res, ResMut}, world::Mut}, hierarchy::{BuildChildren, Children}, math::{Vec2, Vec3}, prelude::{Deref, DerefMut}, render::color::Color, sprite::{SpriteSheetBundle, TextureAtlas, TextureAtlasSprite}, text::{Text, TextStyle}, time::{Time, Timer, TimerMode}, transform::components::{GlobalTransform, Transform}, ui::{node_bundles::{ButtonBundle, NodeBundle, TextBundle}, widget::Button, AlignItems, BackgroundColor, BorderColor, Interaction, JustifyContent, Style, UiRect, Val}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
+use std::process::id;
+
+use bevy::{animation::{AnimationClip, AnimationPlayer, RepeatAnimation}, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{component::Component, entity::Entity, query::{Changed, With}, schedule::NextState, system::{Commands, Query, Res, ResMut}, world::Mut}, hierarchy::{BuildChildren, Children}, math::{Vec2, Vec3}, prelude::{Deref, DerefMut}, render::color::Color, sprite::{SpriteSheetBundle, TextureAtlas, TextureAtlasSprite}, text::{Text, TextAlignment, TextStyle}, time::{Time, Timer, TimerMode}, transform::components::{GlobalTransform, Transform}, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, AlignItems, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
 
 use crate::{main, v_components::MainMenuEntity, v_config::{CONTINUE_BUTTON_HOVER, CONTINUE_BUTTON_OFF, CONTINUE_BUTTON_ON}, AppState};
-
-#[derive(Component)]
-pub struct AnimationIndices {
-    pub first: usize,
-    pub last: usize,
-}
-#[derive(Component, Deref, DerefMut)]
-pub struct AnimationTimer(pub Timer);
 
 pub fn setup_main_menu(
     mut commands: Commands,
@@ -21,98 +15,183 @@ pub fn setup_main_menu(
     // UI CAMERA
     commands.spawn(Camera2dBundle::default()).insert(MainMenuEntity);
     
-    let main_menu_handle = asset_server.load("UserInterface/main_splash.png");
-    let texture_atlas = TextureAtlas::from_grid(main_menu_handle.clone(), Vec2::new(379.0, 216.0), 20, 1, None, None);
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    let animation_indices = AnimationIndices {first: 1, last: 19};
-    commands.spawn((SpriteSheetBundle {
-        sprite: TextureAtlasSprite::new(animation_indices.first),
-        texture_atlas: texture_atlas_handle,
-        transform: Transform::from_scale(Vec3::splat(5.0)),
-        //global_transform: GlobalTransform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
-        ..default()
-    },
-    animation_indices,
-    AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)
-    )));
+    let main_image_handle = asset_server.load("UserInterface/logicalogo2.png");
     
-
-
-
-    commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
+    let parent = NodeBundle {
+        style: Style {
+            display: Display::Flex,
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            align_content: AlignContent::Center,
+            overflow: Overflow::clip(),
+            justify_items: JustifyItems::Center,
+            ..default()  
+        },
+        ..default()
+    };
+    
+    let child_main = ImageBundle {
+        style: Style {
+            // Size of the image
+            width: Val::Px(1920.0),
+            height: Val::Px(1080.0),
+            
             ..default()
-        })
-        .with_children(|parent| {
-            parent
-                .spawn(ButtonBundle {
-                    style: Style {
-                        width: Val::Px(150.0),
-                        height: Val::Px(65.0),
-                        border: UiRect::all(Val::Px(5.0)),
-                        // horizontally center child text
-                        justify_content: JustifyContent::Center,
-                        // vertically center child text
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    border_color: BorderColor(Color::BLACK),
-                    background_color: CONTINUE_BUTTON_OFF.into(),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Button",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
-                        },
-                    )).insert(MainMenuEntity);
-                }).insert(MainMenuEntity);
-        }).insert(MainMenuEntity);
+        },
+        z_index: ZIndex::Local(-5),
+        image: main_image_handle.into(),
+        // This makes the image non-interactive and ignores pointer events
+        ..default()
+    };
+
+    let button_load = ButtonBundle {
+        style: Style {
+            min_width: Val::Px(200.0),
+            min_height: Val::Px(80.0),
+            max_height: Val::Px(80.0),
+            left: Val::Percent(-50.0),
+            top: Val::Percent(50.0),
+            border: UiRect::all(Val::Px(5.0)),
+            align_content: AlignContent::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        
+        z_index: ZIndex::Local(5),
+        background_color: Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) }.into(),
+        transform: Transform {
+            ..default()
+        },
+        ..default()
+    };
+
+    let load_text = TextBundle::from_section(
+        "LOAD", // The text you want on the button
+        TextStyle {
+            font: asset_server.load("Fonts/Retro Gaming.ttf"), // Load your font
+            font_size: 80.0, // Set the font size
+            color: Color::WHITE, // Text color
+        },
+    )
+    .with_text_alignment(TextAlignment::Center) // Align text to the center
+    .with_style(Style {
+        ..default()
+    });
+
+    let button_new = ButtonBundle {
+        style: Style {
+            position_type: PositionType::Absolute,
+            min_width: Val::Px(200.0),
+            min_height: Val::Px(80.0),
+            max_height: Val::Px(80.0),
+            left: Val::Percent(50.0),
+            top: Val::Percent(60.0),
+            border: UiRect::all(Val::Px(5.0)),
+            align_content: AlignContent::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        
+        z_index: ZIndex::Local(5),
+        background_color: Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) }.into(),
+        transform: Transform {
+            ..default()
+        },
+        ..default()
+    };
+
+    let new_text = TextBundle::from_section(
+        "NEW", // The text you want on the button
+        TextStyle {
+            font: asset_server.load("Fonts/Retro Gaming.ttf"), // Load your font
+            font_size: 80.0, // Set the font size
+            color: Color::WHITE, // Text color
+        },
+    )
+    .with_text_alignment(TextAlignment::Center) // Align text to the center
+    .with_style(Style {
+        ..default()
+    });
+
+    let button_settings = ButtonBundle {
+        style: Style {
+            position_type: PositionType::Absolute,
+            min_width: Val::Px(200.0),
+            min_height: Val::Px(80.0),
+            max_height: Val::Px(80.0),
+            left: Val::Percent(50.0),
+            top: Val::Percent(70.0),
+            border: UiRect::all(Val::Px(5.0)),
+            align_content: AlignContent::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        
+        z_index: ZIndex::Local(5),
+        background_color: Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) }.into(),
+        transform: Transform {
+            ..default()
+        },
+        ..default()
+    };
+
+    let settings_text = TextBundle::from_section(
+        "SETTINGS", // The text you want on the button
+        TextStyle {
+            font: asset_server.load("Fonts/Retro Gaming.ttf"), // Load your font
+            font_size: 80.0, // Set the font size
+            color: Color::WHITE, // Text color
+        },
+    )
+    .with_text_alignment(TextAlignment::Center) // Align text to the center
+    .with_style(Style {
+        align_content: AlignContent::Center, //
+        ..default()
+    });
+
+
+    let parent_entity = commands.spawn(parent).id();
+    let child_main = commands.spawn(child_main).id();
+    let load_button_entity = commands.spawn(button_load).id();
+    let new_button_entity = commands.spawn(button_new).id();
+    let settings_button_entity = commands.spawn(button_settings).id();
+    let load_text_entity = commands.spawn(load_text).id();
+    let new_text_entity = commands.spawn(new_text).id();
+    let settings_text_entity = commands.spawn(settings_text).id();
+
+    commands.entity(parent_entity).push_children(&[child_main, load_button_entity, new_button_entity, settings_button_entity]);
+    commands.entity(load_button_entity).push_children(&[load_text_entity]);
+    commands.entity(new_button_entity).push_children(&[new_text_entity]);
+    commands.entity(settings_button_entity).push_children(&[settings_text_entity]);
+
 }
 
 pub fn main_menu_buttons(
+    mut commands: Commands,
     mut interaction_query: Query<
         (
+            Entity,
             &Interaction,
             &mut BackgroundColor,
             &mut BorderColor,
-            &Children,
+            Option<&Children>, // Now optional, to account for buttons without text as children
         ),
-        (Changed<Interaction>, With<Button>),
+        With<Button>, // Query entities with Button component
     >,
-    mut text_query: Query<&mut Text>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
-    for (interaction, mut color, mut border_color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
+    for (entity, interaction, mut color, mut border_color, children) in interaction_query.iter_mut() {   
         match *interaction {
             Interaction::Pressed => {
-                text.sections[0].value = "Press".to_string();
-                *color = CONTINUE_BUTTON_ON.into();
                 border_color.0 = Color::RED;
-
                 next_state.set(AppState::AssetLoading);
-            }
+            },
             Interaction::Hovered => {
-                text.sections[0].value = "Hover".to_string();
-                *color = CONTINUE_BUTTON_HOVER.into();
                 border_color.0 = Color::WHITE;
-            }
+            },
             Interaction::None => {
-                text.sections[0].value = "Button".to_string();
-                *color = CONTINUE_BUTTON_OFF.into();
-                border_color.0 = Color::BLACK;
-            }
+                border_color.0 = Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) };
+            },
         }
     }
 }
@@ -123,25 +202,5 @@ pub fn clear_main_menu_entities(
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
-    }
-}
-
-pub fn animate_sprite(
-    time: Res<Time>,
-    mut query: Query<(
-        &AnimationIndices,
-        &mut AnimationTimer,
-        &mut TextureAtlasSprite,
-    )>,
-) {
-    for (indices, mut timer, mut sprite) in &mut query {
-        timer.tick(time.delta());
-        if timer.just_finished() {
-            sprite.index = if sprite.index == indices.last {
-                indices.first
-            } else {
-                sprite.index + 1
-            };
-        }
     }
 }
