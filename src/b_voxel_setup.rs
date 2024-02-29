@@ -3,10 +3,8 @@ use bevy::{prelude::*, window::*, render::mesh::VertexAttributeValues};
 use bevy_rapier3d::geometry::Collider;
 use crate::{a_loading::TextureHandles, v_components::{Ground, Sun}, v_config::*, v_graphics::VoxelAssets};
 use bevy::render::mesh::shape;
-
-
-
 use crate::AppState;
+
 
 pub fn voxel_setup(
     mut commands: Commands,

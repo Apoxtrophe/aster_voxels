@@ -8,7 +8,7 @@ use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::{v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_config::{PLAYER_FOV, PLAYER_PITCH_SPEED, PLAYER_YAW_SPEED, PLAYER_AIR_ACCELERATION, PLAYER_CAMERA_HEIGHT, PLAYER_CAMERA_RADIUS, PLAYER_HEIGHT}, v_graphics::VoxelAssets, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_selector::VoxelSelector, v_structure::Voxel};
+use crate::{v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_config::{PLAYER_FOV, PLAYER_PITCH_SPEED, PLAYER_YAW_SPEED, PLAYER_CAMERA_HEIGHT, PLAYER_CAMERA_RADIUS}, v_graphics::VoxelAssets, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_selector::VoxelSelector, v_structure::Voxel};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
 
@@ -69,10 +69,10 @@ pub fn player_setup(
                 enable_input: true, 
                 step_offset: 1.0,
 
-                key_forward: KeyCode::W,
-                key_back: KeyCode::S,
-                key_left: KeyCode::A,
-                key_right: KeyCode::D,
+                key_forward: KeyCode::KeyW,
+                key_back: KeyCode::KeyS,
+                key_left: KeyCode::KeyA,
+                key_right: KeyCode::KeyD,
                 key_up: KeyCode::Space,
                 key_down: KeyCode::AltLeft,
                 key_sprint: KeyCode::ShiftLeft,
@@ -128,8 +128,8 @@ pub fn respawn(
 }
 
 pub fn manage_cursor(
-    btn: Res<Input<MouseButton>>,
-    key: Res<Input<KeyCode>>,
+    btn: Res<ButtonInput<MouseButton>>,
+    key: Res<ButtonInput<KeyCode>>,
     mut window_query: Query<&mut Window>,
     mut controller_query: Query<&mut FpsController>,
 
@@ -187,13 +187,13 @@ pub fn manage_cursor(
 
 
 pub fn voxel_interaction_system(
-    mouse_input: Res<Input<MouseButton>>,
+    mouse_input: Res<ButtonInput<MouseButton>>,
     voxel_assets: Res<VoxelAssets>,
     voxel_selector: ResMut<VoxelSelector>,
     mut commands: Commands,
     mut voxel: ResMut<Voxel>,
     voxel_info: Res<VoxelInfo>,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     remove_query: Query<(Entity, &PositionVoxel)>,
     state_query: Query<(Entity, &PositionVoxel, &mut StateVoxel)>,
     materials: ResMut<Assets<StandardMaterial>>,

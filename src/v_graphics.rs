@@ -1,4 +1,5 @@
 use bevy::render::mesh::{Indices, Mesh};
+use bevy::render::render_asset::{RenderAssetUsages};
 use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
 use crate::a_loading::TextureHandles;
 use crate::v_components::{TypeVoxel, StateVoxel};
@@ -55,12 +56,14 @@ impl VoxelAssets {
         let normals = calculate_normals();
         let indices = calculate_indices();
 
-        let mesh = Mesh::new(PrimitiveTopology::TriangleList)
+        let mut mesh = Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
             .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
             .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
-            .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv_coordinates)
-            .with_indices(Some(Indices::U32(indices)));
-        meshes.add(mesh) // Add the mesh to the asset system and return the handle
+            .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv_coordinates);
+           
+        mesh.insert_indices(Some(Indices::U32(indices)).unwrap());
+        let mesh_handle = meshes.add(mesh);
+        mesh_handle
     }
 }
 

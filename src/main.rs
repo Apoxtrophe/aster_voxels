@@ -80,7 +80,7 @@ fn main() {
         .add_plugins(AtmospherePlugin)
         .add_plugins(EguiPlugin)
 
-        .add_state::<AppState>()
+        .init_state::<AppState>()
             
         .add_systems(Startup, setup_main_menu)
         .add_systems(Update, (
@@ -105,7 +105,7 @@ fn main() {
 
         // In-Game Systems
 
-        .add_systems(OnEnter(AppState::InGame), (world_loader))
+        .add_systems(OnEnter(AppState::InGame), world_loader)
 
         .add_systems(Update, (
             update_info, 

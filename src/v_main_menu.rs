@@ -1,13 +1,12 @@
 
-use std::process::id;
 
-use bevy::{animation::{AnimationClip, AnimationPlayer, RepeatAnimation}, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{component::Component, entity::Entity, query::{Changed, With}, schedule::NextState, system::{Commands, Query, Res, ResMut}, world::Mut}, hierarchy::{BuildChildren, Children}, math::{Vec2, Vec3}, prelude::{Deref, DerefMut}, render::color::Color, sprite::{SpriteSheetBundle, TextureAtlas, TextureAtlasSprite}, text::{Text, TextAlignment, TextStyle}, time::{Time, Timer, TimerMode}, transform::components::{GlobalTransform, Transform}, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, AlignItems, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
+use bevy::{app::Main, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::{BuildChildren, Children}, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
 
-use crate::{main, v_components::MainMenuEntity, v_config::{CONTINUE_BUTTON_HOVER, CONTINUE_BUTTON_OFF, CONTINUE_BUTTON_ON}, AppState};
+use crate::{v_components::MainMenuEntity, AppState};
 
 pub fn setup_main_menu(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    asset_server: Res<AssetServer>,mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
 
@@ -28,6 +27,7 @@ pub fn setup_main_menu(
             ..default()  
         },
         ..default()
+        
     };
     
     let child_main = ImageBundle {
@@ -73,7 +73,7 @@ pub fn setup_main_menu(
             color: Color::WHITE, // Text color
         },
     )
-    .with_text_alignment(TextAlignment::Center) // Align text to the center
+    .with_text_justify(JustifyText::Center) // Align text to the center
     .with_style(Style {
         ..default()
     });
@@ -108,7 +108,7 @@ pub fn setup_main_menu(
             color: Color::WHITE, // Text color
         },
     )
-    .with_text_alignment(TextAlignment::Center) // Align text to the center
+    .with_text_justify(JustifyText::Center) // Align text to the center
     .with_style(Style {
         ..default()
     });
@@ -143,27 +143,25 @@ pub fn setup_main_menu(
             color: Color::WHITE, // Text color
         },
     )
-    .with_text_alignment(TextAlignment::Center) // Align text to the center
+    .with_text_justify(JustifyText::Center) // Align text to the center
     .with_style(Style {
         align_content: AlignContent::Center, //
         ..default()
     });
 
+    let parent_entity = commands.spawn(parent).insert(MainMenuEntity).id();
+    let child_main = commands.spawn(child_main).insert(MainMenuEntity).id();
+    let load_button_entity = commands.spawn(button_load).insert(MainMenuEntity).id();
+    let new_button_entity = commands.spawn(button_new).insert(MainMenuEntity).id();
+    let settings_button_entity = commands.spawn(button_settings).insert(MainMenuEntity).id();
+    let load_text_entity = commands.spawn(load_text).insert(MainMenuEntity).id();
+    let new_text_entity = commands.spawn(new_text).insert(MainMenuEntity).id();
+    let settings_text_entity = commands.spawn(settings_text).insert(MainMenuEntity).id();
 
-    let parent_entity = commands.spawn(parent).id();
-    let child_main = commands.spawn(child_main).id();
-    let load_button_entity = commands.spawn(button_load).id();
-    let new_button_entity = commands.spawn(button_new).id();
-    let settings_button_entity = commands.spawn(button_settings).id();
-    let load_text_entity = commands.spawn(load_text).id();
-    let new_text_entity = commands.spawn(new_text).id();
-    let settings_text_entity = commands.spawn(settings_text).id();
-
-    commands.entity(parent_entity).push_children(&[child_main, load_button_entity, new_button_entity, settings_button_entity]);
+    commands.entity(parent_entity).push_children(&[child_main, load_button_entity, new_button_entity, settings_button_entity]).insert(MainMenuEntity);
     commands.entity(load_button_entity).push_children(&[load_text_entity]);
     commands.entity(new_button_entity).push_children(&[new_text_entity]);
     commands.entity(settings_button_entity).push_children(&[settings_text_entity]);
-
 }
 
 pub fn main_menu_buttons(

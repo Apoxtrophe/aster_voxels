@@ -1,5 +1,10 @@
 use bevy::prelude::*;
-use bevy_mod_raycast::{immediate::Raycast, primitives::Ray3d};
+use bevy_mod_raycast::immediate::Raycast;
+
+
+
+use bevy_math::Ray3d;
+
 
 use super::v_config::*;
 use crate::{
@@ -37,13 +42,13 @@ pub fn raycasting(
     mut gizmos: Gizmos,
 ) -> Result<(IVec3, IVec3, bool), RaycastingError> {
     if let Ok(camera_transform) = query.get_single() {
-        let ray = Ray3d::new(camera_transform.translation, camera_transform.forward());
+        let ray = Ray3d::new(camera_transform.translation, camera_transform.forward().into());
         if let Some((_, intersection_data)) = raycast.cast_ray(ray, &default()).iter().next() {
             let distance = intersection_data.distance();
             let normal = intersection_data.normal().round();
             let triangle = intersection_data.triangle().unwrap();
             let position =
-                ((Vec3::from(triangle.v0) + Vec3::from(triangle.v1) + Vec3::from(triangle.v2))
+                ((Vec3::from(triangle[0]) + Vec3::from(triangle[1]) + Vec3::from(triangle[2]))
                     / 3.0
                     - normal * 0.5)
                     .round()

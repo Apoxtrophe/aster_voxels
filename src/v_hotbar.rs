@@ -8,10 +8,11 @@ use crate::{a_loading::TextureHandles, v_config::{DESCRIPTOR_BOTTOM, DESCRIPTOR_
 pub fn hotbar_ui(
     mut commands: Commands,
     texture_handles: Res<TextureHandles>, 
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let handle_texture = texture_handles.image_handles.get(3).unwrap_or_else(|| panic!("Texture handle not found"));
-    let texture_atlas = TextureAtlas::from_grid(handle_texture.clone(), Vec2::new(24.0, 24.0), 9, 1, None, None);
+    //let texture_atlas = TextureAtlasLayout::from_grid(handle_texture.clone(), Vec2::new(24.0, 24.0), 9, 1, None, None);
+    let texture_atlas = TextureAtlasLayout::from_grid(Vec2::new(24.0, 24.0), 9, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     
     let slot_size = HOTBAR_SLOT_SIZE; // Assuming HOTBAR_SIZE is always 1
@@ -41,9 +42,13 @@ pub fn hotbar_ui(
                     min_height: Val::Px(slot_size - HOTBAR_BORDER_SIZE * 2.0),
                     ..Default::default()
                 },
-                texture_atlas: texture_atlas_handle.clone(),
-                texture_atlas_image: UiTextureAtlasImage { index: i, ..Default::default() },
-                ..Default::default()
+                texture_atlas: texture_atlas_handle.clone().into(),
+                image: UiImage {
+                    texture: handle_texture.clone(),
+                    ..Default::default()
+                },
+
+                ..default()
             });
         });
     }
@@ -69,7 +74,7 @@ pub fn voxel_descriptor(
                 ..default()
             },
         ) // Set the alignment of the Text
-        .with_text_alignment(TextAlignment::Center)
+        .with_text_justify(JustifyText::Center)
         // Set the style of the TextBundle itself.
         .with_style(Style {
             position_type: PositionType::Absolute,
@@ -105,7 +110,7 @@ pub fn timer_update_system(
         let selected = Some(voxel_selector.current_voxel_type());
 
         for (mut text, _fading_text) in query.iter_mut() {
-            let timer = countdown_timer.timer.tick(time.delta()).percent();
+            let timer = countdown_timer.timer.tick(time.delta()).fraction() as f32;
             let alpha_text = (timer * (PI/2.0 )).cos() as f32;
             text.sections[0].style.color.set_a(alpha_text);
             text.sections[0].value = format!("{:?}", selected.unwrap());

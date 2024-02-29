@@ -2,7 +2,7 @@ use bevy::asset::Assets;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::system::{Commands, Query, Res, ResMut};
 use bevy::input::keyboard::KeyCode;
-use bevy::input::Input;
+use bevy::input::ButtonInput;
 use bevy::pbr::StandardMaterial;
 use bevy::render::mesh::Mesh;
 use serde::{Serialize, Deserialize};
@@ -44,7 +44,7 @@ pub fn load_world() -> io::Result<SavedWorld> {
 }
 
 pub fn check_for_save_input(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
 ) {
     if keyboard_input.just_pressed(KeyCode::F5) {
