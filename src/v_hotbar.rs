@@ -42,7 +42,10 @@ pub fn hotbar_ui(
                     min_height: Val::Px(slot_size - HOTBAR_BORDER_SIZE * 2.0),
                     ..Default::default()
                 },
-                texture_atlas: texture_atlas_handle.clone().into(),
+                texture_atlas: TextureAtlas {
+                    layout: texture_atlas_handle.clone(),
+                    index: i,
+                },
                 image: UiImage {
                     texture: handle_texture.clone(),
                     ..Default::default()

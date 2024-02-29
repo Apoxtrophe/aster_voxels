@@ -33,12 +33,12 @@ pub const VOXEL_REFLECTANCE: f32 = 0.0;
 pub const VOXEL_ATLAS_SIZE: usize = 18;
 
 // Lighting
-pub const SUN_INTENSITY: f32 = 100000.0;
+pub const SUN_INTENSITY: f32 = 10000.0;
 pub const SUN_ANGLE: f32 = 65.0;
 pub const SUN_DAY_NIGHT: bool = false;
 pub const SUN_DAY_LENGTH: f32 = 0.01;
 pub const SUN_TIMER_RATE: u64 = 100; 
-pub const AMBIENT_INTENSITY: f32 = 0.6;
+pub const AMBIENT_INTENSITY: f32 = 100.0;
 pub const AMBIENT_COLOR: Color = Color::BEIGE;
 
 // Hotbar

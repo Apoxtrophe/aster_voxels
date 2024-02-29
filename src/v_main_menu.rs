@@ -6,7 +6,8 @@ use crate::{v_components::MainMenuEntity, AppState};
 
 pub fn setup_main_menu(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
+    asset_server: Res<AssetServer>,
+    texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
 

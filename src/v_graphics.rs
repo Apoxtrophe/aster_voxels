@@ -73,10 +73,10 @@ pub fn update_voxel_emissive(
 ) {
     for (state, material_handle) in query.iter_mut() {
         if let Some(material) = materials.get_mut(&*material_handle) {
-            material.emissive = if state.0 {
-                Color::DARK_GRAY // Use the base color as the emissive color
+            material.base_color = if state.0 {
+                Color::GREEN
             } else {
-                Color::BLACK // Non-emissive state
+                Color::WHITE // Non-emissive state
             };
         }
     }
