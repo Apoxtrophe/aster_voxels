@@ -1,8 +1,16 @@
 
 
-use bevy::{app::Main, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::{BuildChildren, Children}, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
+use bevy::{app::Main, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{component::Component, entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::{BuildChildren, Children}, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
 
 use crate::{v_components::MainMenuEntity, AppState};
+
+
+#[derive(Component)]
+pub enum MenuButton {
+    Load,
+    New,
+    Settings,
+}
 
 pub fn setup_main_menu(
     mut commands: Commands,
@@ -150,19 +158,40 @@ pub fn setup_main_menu(
         ..default()
     });
 
-    let parent_entity = commands.spawn(parent).insert(MainMenuEntity).id();
-    let child_main = commands.spawn(child_main).insert(MainMenuEntity).id();
-    let load_button_entity = commands.spawn(button_load).insert(MainMenuEntity).id();
-    let new_button_entity = commands.spawn(button_new).insert(MainMenuEntity).id();
-    let settings_button_entity = commands.spawn(button_settings).insert(MainMenuEntity).id();
-    let load_text_entity = commands.spawn(load_text).insert(MainMenuEntity).id();
-    let new_text_entity = commands.spawn(new_text).insert(MainMenuEntity).id();
-    let settings_text_entity = commands.spawn(settings_text).insert(MainMenuEntity).id();
+    let parent_entity = commands.spawn(parent)
+        .insert(MainMenuEntity)
+        .id();
 
-    commands.entity(parent_entity).push_children(&[child_main, load_button_entity, new_button_entity, settings_button_entity]).insert(MainMenuEntity);
-    commands.entity(load_button_entity).push_children(&[load_text_entity]);
-    commands.entity(new_button_entity).push_children(&[new_text_entity]);
-    commands.entity(settings_button_entity).push_children(&[settings_text_entity]);
+    let child_main = commands.spawn(child_main)
+        .insert(MainMenuEntity)
+        .id();
+
+    let load_button_entity = commands.spawn(button_load)
+        .insert(MainMenuEntity)
+        .insert(MenuButton::Load)
+        .with_children(|parent| {
+            parent.spawn(load_text).insert(MainMenuEntity);
+        })
+        .id();
+
+    let new_button_entity = commands.spawn(button_new)
+        .insert(MainMenuEntity)
+        .insert(MenuButton::New)
+        .with_children(|parent| {
+            parent.spawn(new_text).insert(MainMenuEntity);
+        })
+        .id();
+
+    let settings_button_entity = commands.spawn(button_settings)
+        .insert(MainMenuEntity)
+        .insert(MenuButton::Settings)
+        .with_children(|parent| {
+            parent.spawn(settings_text).insert(MainMenuEntity);
+        })
+        .id();
+
+    commands.entity(parent_entity)
+        .push_children(&[child_main, load_button_entity, new_button_entity, settings_button_entity]);
 }
 
 pub fn main_menu_buttons(
@@ -173,17 +202,28 @@ pub fn main_menu_buttons(
             &Interaction,
             &mut BackgroundColor,
             &mut BorderColor,
-            Option<&Children>, // Now optional, to account for buttons without text as children
+            &MenuButton, // Add the MenuButton component to the query
         ),
-        With<Button>, // Query entities with Button component
+        With<Button>,
     >,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
-    for (entity, interaction, mut color, mut border_color, children) in interaction_query.iter_mut() {   
+    for (entity, interaction, mut color, mut border_color, menu_button) in interaction_query.iter_mut() {   
         match *interaction {
             Interaction::Pressed => {
                 border_color.0 = Color::RED;
-                next_state.set(AppState::AssetLoading);
+                match menu_button{
+                    MenuButton::Load => {
+                        next_state.set(AppState::AssetLoading);
+                    }
+                    MenuButton::New => {
+
+                    }
+                    MenuButton::Settings => {
+
+                    }
+                    
+                }
             },
             Interaction::Hovered => {
                 border_color.0 = Color::WHITE;
