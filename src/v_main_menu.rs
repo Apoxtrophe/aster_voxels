@@ -1,9 +1,10 @@
-
-
 use bevy::{app::Main, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{component::Component, entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::{BuildChildren, Children}, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
 
 use crate::{v_components::MainMenuEntity, AppState};
 
+use bevy::prelude::*;
+use bevy_egui::{egui, EguiContext, EguiContexts, EguiPlugin};
+use bevy::prelude::Resource;
 
 #[derive(Component)]
 pub enum MenuButton {
@@ -53,6 +54,78 @@ pub fn setup_main_menu(
         ..default()
     };
 
+    let parent_entity = commands.spawn(parent)
+        .insert(MainMenuEntity)
+        .id();
+
+    let child_main = commands.spawn(child_main)
+        .insert(MainMenuEntity)
+        .id();
+
+    let load_button_entity = create_load_button(&mut commands, &asset_server);
+    let new_button_entity = create_new_button(&mut commands, &asset_server);
+    let settings_button_entity = create_settings_button(&mut commands, &asset_server);
+
+    commands.entity(parent_entity).push_children(&[
+        child_main,
+        load_button_entity,
+        new_button_entity,
+        settings_button_entity,
+    ]);
+}
+
+pub fn main_menu_buttons(
+    mut commands: Commands,
+    mut contexts: EguiContexts,
+    mut interaction_query: Query<
+        (
+            Entity,
+            &Interaction,
+            &mut BackgroundColor,
+            &mut BorderColor,
+            &MenuButton, // Add the MenuButton component to the query
+        ),
+        With<Button>,
+    >,
+    mut next_state: ResMut<NextState<AppState>>,
+) {
+    for (entity, interaction, mut color, mut border_color, menu_button) in interaction_query.iter_mut() {   
+        match *interaction {
+            Interaction::Pressed => {
+                border_color.0 = Color::RED;
+                match menu_button {
+                    MenuButton::Load => {
+                        next_state.set(AppState::LoadWorldMenu);
+                    }
+                    MenuButton::New => {
+                        next_state.set(AppState::WorldNaming);
+                    }
+                    MenuButton::Settings => {}
+                }
+            },
+            Interaction::Hovered => {
+                border_color.0 = Color::WHITE;
+            },
+            Interaction::None => {
+                border_color.0 = Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) };
+            },
+        }
+    }
+}
+
+pub fn clear_main_menu_entities(
+    mut commands: Commands,
+    query: Query<Entity, With<MainMenuEntity>>,
+) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn();
+    }
+}
+
+fn create_load_button(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+) -> Entity {
     let button_load = ButtonBundle {
         style: Style {
             min_width: Val::Px(200.0),
@@ -87,6 +160,20 @@ pub fn setup_main_menu(
         ..default()
     });
 
+    commands
+        .spawn(button_load)
+        .insert(MainMenuEntity)
+        .insert(MenuButton::Load)
+        .with_children(|parent| {
+            parent.spawn(load_text).insert(MainMenuEntity);
+        })
+        .id()
+}
+
+fn create_new_button(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+) -> Entity {
     let button_new = ButtonBundle {
         style: Style {
             position_type: PositionType::Absolute,
@@ -122,6 +209,20 @@ pub fn setup_main_menu(
         ..default()
     });
 
+    commands
+        .spawn(button_new)
+        .insert(MainMenuEntity)
+        .insert(MenuButton::New)
+        .with_children(|parent| {
+            parent.spawn(new_text).insert(MainMenuEntity);
+        })
+        .id()
+}
+
+fn create_settings_button(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+) -> Entity {
     let button_settings = ButtonBundle {
         style: Style {
             position_type: PositionType::Absolute,
@@ -158,88 +259,82 @@ pub fn setup_main_menu(
         ..default()
     });
 
-    let parent_entity = commands.spawn(parent)
-        .insert(MainMenuEntity)
-        .id();
-
-    let child_main = commands.spawn(child_main)
-        .insert(MainMenuEntity)
-        .id();
-
-    let load_button_entity = commands.spawn(button_load)
-        .insert(MainMenuEntity)
-        .insert(MenuButton::Load)
-        .with_children(|parent| {
-            parent.spawn(load_text).insert(MainMenuEntity);
-        })
-        .id();
-
-    let new_button_entity = commands.spawn(button_new)
-        .insert(MainMenuEntity)
-        .insert(MenuButton::New)
-        .with_children(|parent| {
-            parent.spawn(new_text).insert(MainMenuEntity);
-        })
-        .id();
-
-    let settings_button_entity = commands.spawn(button_settings)
+    commands
+        .spawn(button_settings)
         .insert(MainMenuEntity)
         .insert(MenuButton::Settings)
         .with_children(|parent| {
             parent.spawn(settings_text).insert(MainMenuEntity);
         })
-        .id();
-
-    commands.entity(parent_entity)
-        .push_children(&[child_main, load_button_entity, new_button_entity, settings_button_entity]);
+        .id()
 }
 
-pub fn main_menu_buttons(
+
+// NEW button functionality and world naming
+#[derive(Resource, Default)]
+pub struct WorldName(pub String);
+
+#[derive(Component)]
+pub struct WorldNameInput {
+    pub name: String,
+}
+
+pub fn setup_world_naming(
     mut commands: Commands,
-    mut interaction_query: Query<
-        (
-            Entity,
-            &Interaction,
-            &mut BackgroundColor,
-            &mut BorderColor,
-            &MenuButton, // Add the MenuButton component to the query
-        ),
-        With<Button>,
-    >,
+) {
+    commands.spawn(WorldNameInput {name: String::new()});
+}
+
+pub fn world_naming(
+    mut commands: Commands,
+    mut contexts: EguiContexts,
     mut next_state: ResMut<NextState<AppState>>,
+    mut world_name_input: Query<&mut WorldNameInput>,
+    mut world_name: ResMut<WorldName>,
 ) {
-    for (entity, interaction, mut color, mut border_color, menu_button) in interaction_query.iter_mut() {   
-        match *interaction {
-            Interaction::Pressed => {
-                border_color.0 = Color::RED;
-                match menu_button{
-                    MenuButton::Load => {
-                        next_state.set(AppState::AssetLoading);
-                    }
-                    MenuButton::New => {
+    egui::Window::new("Name Your World")
+        .collapsible(false)
+        .resizable(false)
+        .show(contexts.ctx_mut(), |ui| {
+            let mut world_name_input = world_name_input.single_mut();
+            ui.text_edit_singleline(&mut world_name_input.name);
 
-                    }
-                    MenuButton::Settings => {
-
-                    }
-                    
-                }
-            },
-            Interaction::Hovered => {
-                border_color.0 = Color::WHITE;
-            },
-            Interaction::None => {
-                border_color.0 = Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) };
-            },
-        }
-    }
+            if ui.button("Create World").clicked() {
+                world_name.0 = world_name_input.name.clone();
+                next_state.set(AppState::AssetLoading);
+            }
+        });
 }
 
-pub fn clear_main_menu_entities(
+// Functionality for the "Load" button; loading a chosen world
+#[derive(Resource, Default)]
+pub struct SelectedWorld(pub Option<String>);
+
+pub fn load_world_menu (
     mut commands: Commands,
-    query: Query<Entity, With<MainMenuEntity>>,
+    mut contexts: EguiContexts,
+    mut next_state: ResMut<NextState<AppState>>,
+    mut selected_world: ResMut<SelectedWorld>,
 ) {
-    for entity in query.iter() {
-        commands.entity(entity).despawn();
-    }
+    egui::Window::new("Load World")
+    .collapsible(false)
+    .resizable(false)
+    .show(contexts.ctx_mut(), |ui| {
+        if let Ok(entries) = std::fs::read_dir("assets/Saves") {
+            for entry in entries {
+                if let Ok(entry) = entry {
+                    if let Some(file_name) = entry.file_name().to_str() {
+                        if file_name.ends_with(".json") {
+                            let world_name = file_name.trim_end_matches(".json");
+                            if ui.button(world_name).clicked() {
+                                selected_world.0 = Some(world_name.to_string());
+                                next_state.set(AppState::AssetLoading);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    });
 }

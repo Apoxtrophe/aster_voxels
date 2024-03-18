@@ -34,7 +34,7 @@ use v_graphics::update_voxel_emissive;
 use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_lib::update_info;
-use v_main_menu::{main_menu_buttons, setup_main_menu};
+use v_main_menu::{load_world_menu, main_menu_buttons, setup_main_menu, setup_world_naming, world_naming, SelectedWorld, WorldName};
 use v_player2::{player_setup, manage_cursor, respawn, voxel_interaction_system};
 use v_save::{check_for_save_input, world_loader};
 use v_simulation::logic_operation_system;
@@ -44,6 +44,10 @@ use v_simulation::logic_operation_system;
 pub enum AppState {
     #[default]
     MainMenu,
+    // Main Menu Ish
+    WorldNaming,
+    LoadWorldMenu,
+    //
     AssetLoading,
     GameSetup,
     InGame,
@@ -51,6 +55,8 @@ pub enum AppState {
 
 fn main() {
     App::new()
+        .insert_resource(WorldName::default())
+        .insert_resource(SelectedWorld::default())
         .insert_resource(RapierConfiguration::default())
         .insert_resource(Msaa::Sample2)
         .insert_resource(AtmosphereModel::default()) 
@@ -86,6 +92,10 @@ fn main() {
         .add_systems(Update, (
             main_menu_buttons,
         ).run_if(in_state(AppState::MainMenu)))
+
+        .add_systems(OnEnter(AppState::WorldNaming), setup_world_naming)
+        .add_systems(Update, (world_naming).run_if(in_state(AppState::WorldNaming)))
+        .add_systems(Update, (load_world_menu).run_if(in_state(AppState::LoadWorldMenu)))
         
         // Asset Loading Systems
         .add_systems(OnEnter(AppState::AssetLoading), (
