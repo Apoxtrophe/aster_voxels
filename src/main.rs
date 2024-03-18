@@ -24,7 +24,6 @@ mod v_hotbar;
 mod v_graphics_helper;
 mod v_main_menu;
 mod v_save; 
-mod v_audio;
 
 // Using structs and enums directly from their modules
 use a_loading::{voxel_loading, asset_check};
@@ -44,10 +43,8 @@ use v_simulation::logic_operation_system;
 pub enum AppState {
     #[default]
     MainMenu,
-    // Main Menu Ish
     WorldNaming,
     LoadWorldMenu,
-    //
     AssetLoading,
     GameSetup,
     InGame,
@@ -67,17 +64,16 @@ fn main() {
         .add_plugins(
             DefaultPlugins
               .set(ImagePlugin {
-                
                 default_sampler: SamplerDescriptor {
-                address_mode_u: AddressMode::Repeat,
-                address_mode_v: AddressMode::Repeat,
-                address_mode_w: AddressMode::Repeat,
-                mag_filter: bevy::render::render_resource::FilterMode::Nearest,
-                min_filter: bevy::render::render_resource::FilterMode::Linear,
-                mipmap_filter: bevy::render::render_resource::FilterMode::Linear,
-                lod_min_clamp: 0.0,
-                lod_max_clamp: 0.01,
-                ..default()
+                    address_mode_u: AddressMode::Repeat,
+                    address_mode_v: AddressMode::Repeat,
+                    address_mode_w: AddressMode::Repeat,
+                    mag_filter: bevy::render::render_resource::FilterMode::Nearest,
+                    min_filter: bevy::render::render_resource::FilterMode::Linear,
+                    mipmap_filter: bevy::render::render_resource::FilterMode::Linear,
+                    lod_min_clamp: 0.0,
+                    lod_max_clamp: 0.01,
+                    ..default()
                 }.into(),
               }),
             )
@@ -89,37 +85,21 @@ fn main() {
         .init_state::<AppState>()
             
         .add_systems(Startup, setup_main_menu)
-        .add_systems(Update, (
-            main_menu_buttons,
-        ).run_if(in_state(AppState::MainMenu)))
+        .add_systems(Update, main_menu_buttons.run_if(in_state(AppState::MainMenu)))
 
         .add_systems(OnEnter(AppState::WorldNaming), setup_world_naming)
-        .add_systems(Update, (world_naming).run_if(in_state(AppState::WorldNaming)))
-        .add_systems(Update, (load_world_menu).run_if(in_state(AppState::LoadWorldMenu)))
+        .add_systems(Update, world_naming.run_if(in_state(AppState::WorldNaming)))
+        .add_systems(Update, load_world_menu.run_if(in_state(AppState::LoadWorldMenu)))
         
-        // Asset Loading Systems
-        .add_systems(OnEnter(AppState::AssetLoading), (
-            voxel_loading, 
-            player_setup,
-        ))
+        .add_systems(OnEnter(AppState::AssetLoading), (voxel_loading, player_setup))
+        .add_systems(Update, asset_check.run_if(in_state(AppState::AssetLoading)))
 
-
-        .add_systems(Update, (
-             asset_check
-            ).run_if(in_state(AppState::AssetLoading)))
-
-        // Game-Setup Systems
-        .add_systems(OnEnter(AppState::GameSetup), (
-            voxel_setup, hotbar_ui, voxel_descriptor,
-        ))
-
-        // In-Game Systems
+        .add_systems(OnEnter(AppState::GameSetup), (voxel_setup, hotbar_ui, voxel_descriptor))
 
         .add_systems(OnEnter(AppState::InGame), world_loader)
-
         .add_systems(Update, (
             update_info, 
-            manage_cursor, respawn, voxel_interaction_system, //Player systems
+            manage_cursor, respawn, voxel_interaction_system,
             daylight_cycle,
             check_for_save_input,
             timer_update_system,

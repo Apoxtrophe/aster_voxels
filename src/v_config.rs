@@ -39,7 +39,7 @@ pub const SUN_DAY_NIGHT: bool = false;
 pub const SUN_DAY_LENGTH: f32 = 0.01;
 pub const SUN_TIMER_RATE: u64 = 100; 
 pub const AMBIENT_INTENSITY: f32 = 100.0;
-pub const AMBIENT_COLOR: Color = Color::BEIGE;
+pub const AMBIENT_COLOR: Color = Color::GREEN;
 
 // Hotbar
 pub const HOTBAR_SIZE: f32 = 1.0;
@@ -48,8 +48,8 @@ pub const HOTBAR_SLOT_SIZE: f32 = 96.0;
 pub const HOTBAR_SPACING: f32 = 5.0;
 pub const HOTBAR_ABOVE_BOTTOM: f32 = 10.0;
 pub const HOTBAR_BORDER_SIZE: f32 = 10.0;
-pub const HOTBAR_BACKGROUND_COLOR: Color = Color::WHITE;
-pub const HOTBAR_BORDER_COLOR: Color = color::Color::WHITE;
+pub const HOTBAR_BACKGROUND_COLOR: Color = Color::GRAY;
+pub const HOTBAR_BORDER_COLOR: Color = color::Color::ORANGE_RED;
 
 // Hotbar Descriptor
 pub const DESCRIPTOR_FONT_SIZE: f32 = 64.0;

@@ -92,7 +92,6 @@ pub fn update_info(
         handle_no_voxel_found(&mut voxel_info);
     }
 }
-
 fn handle_no_voxel_found(voxel_info: &mut VoxelInfo) {
     voxel_info.is_on = None;
     voxel_info.voxel_type = None;

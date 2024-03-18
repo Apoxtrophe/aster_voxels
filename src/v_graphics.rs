@@ -68,17 +68,19 @@ impl VoxelAssets {
 }
 
 pub fn update_voxel_emissive(
+    time: Res<Time>,
     mut query: Query<(&StateVoxel, &mut Handle<StandardMaterial>)>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     for (state, material_handle) in query.iter_mut() {
         if let Some(material) = materials.get_mut(&*material_handle) {
-            material.base_color = if state.0 {
-                Color::GREEN
+            if state.0 {
+                let pulse_frequency = 8.0; // Adjust this value to change the pulse frequency
+                let t = (time.elapsed_seconds() * pulse_frequency).sin() * 0.5 + 4.5;
+                material.emissive = Color::rgb(t*0.5, t, t*0.5);
             } else {
-                Color::WHITE // Non-emissive state
-            };
+                material.emissive = Color::BLACK;
+            }
         }
     }
 }
-

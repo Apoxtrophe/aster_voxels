@@ -1,9 +1,6 @@
 use bevy::prelude::*;
 use bevy_atmosphere::prelude::*;
-
 use crate::{v_components::Sun, v_config::{SUN_ANGLE, SUN_INTENSITY, SUN_DAY_NIGHT, SUN_DAY_LENGTH}};
-
-
 
 #[derive(Resource)]
 pub struct SunDirection {
@@ -18,10 +15,8 @@ impl SunDirection {
     }
 }
 
-
 #[derive(Resource)]
 pub struct CycleTimer(pub Timer);
-
 pub fn daylight_cycle(
     mut atmosphere: AtmosphereMut<Nishita>,
     mut query: Query<(&mut Transform, &mut DirectionalLight), With<Sun>>,

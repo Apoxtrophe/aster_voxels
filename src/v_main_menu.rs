@@ -3,7 +3,7 @@ use bevy::{app::Main, asset::{AssetServer, Assets}, core_pipeline::core_2d::Came
 use crate::{v_components::MainMenuEntity, AppState};
 
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext, EguiContexts, EguiPlugin};
+use bevy_egui::{egui::{self, pos2, Color32, FontDefinitions}, EguiContext, EguiContexts, EguiPlugin};
 use bevy::prelude::Resource;
 
 #[derive(Component)]
@@ -37,7 +37,6 @@ pub fn setup_main_menu(
             ..default()  
         },
         ..default()
-        
     };
     
     let child_main = ImageBundle {
@@ -53,7 +52,6 @@ pub fn setup_main_menu(
         // This makes the image non-interactive and ignores pointer events
         ..default()
     };
-
     let parent_entity = commands.spawn(parent)
         .insert(MainMenuEntity)
         .id();
@@ -61,7 +59,6 @@ pub fn setup_main_menu(
     let child_main = commands.spawn(child_main)
         .insert(MainMenuEntity)
         .id();
-
     let load_button_entity = create_load_button(&mut commands, &asset_server);
     let new_button_entity = create_new_button(&mut commands, &asset_server);
     let settings_button_entity = create_settings_button(&mut commands, &asset_server);
@@ -126,24 +123,22 @@ fn create_load_button(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
 ) -> Entity {
+    let button_style = Style {
+        min_width: Val::Px(200.0),
+        min_height: Val::Px(80.0),
+        max_height: Val::Px(80.0),
+        left: Val::Percent(-50.0),
+        top: Val::Percent(50.0),
+        border: UiRect::all(Val::Px(5.0)),
+        align_content: AlignContent::Center,
+        justify_content: JustifyContent::Center,
+        ..default()
+    };
+
     let button_load = ButtonBundle {
-        style: Style {
-            min_width: Val::Px(200.0),
-            min_height: Val::Px(80.0),
-            max_height: Val::Px(80.0),
-            left: Val::Percent(-50.0),
-            top: Val::Percent(50.0),
-            border: UiRect::all(Val::Px(5.0)),
-            align_content: AlignContent::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        },
-        
+        style: button_style,
         z_index: ZIndex::Local(5),
-        background_color: Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) }.into(),
-        transform: Transform {
-            ..default()
-        },
+        background_color: Color::NONE.into(),
         ..default()
     };
 
@@ -269,7 +264,6 @@ fn create_settings_button(
         .id()
 }
 
-
 // NEW button functionality and world naming
 #[derive(Resource, Default)]
 pub struct WorldName(pub String);
@@ -291,19 +285,22 @@ pub fn world_naming(
     mut next_state: ResMut<NextState<AppState>>,
     mut world_name_input: Query<&mut WorldNameInput>,
     mut world_name: ResMut<WorldName>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-    egui::Window::new("Name Your World")
-        .collapsible(false)
-        .resizable(false)
-        .show(contexts.ctx_mut(), |ui| {
-            let mut world_name_input = world_name_input.single_mut();
-            ui.text_edit_singleline(&mut world_name_input.name);
-
-            if ui.button("Create World").clicked() {
-                world_name.0 = world_name_input.name.clone();
-                next_state.set(AppState::AssetLoading);
-            }
-        });
+    if let Some(mut input) = world_name_input.iter_mut().next() {
+        egui::SidePanel::right("Create World")
+            .resizable(false)
+            .show(contexts.ctx_mut(), |ui| {
+                ui.text_edit_singleline(&mut input.name);
+                if ui.button("Create World").clicked() {
+                    world_name.0 = input.name.clone();
+                    next_state.set(AppState::AssetLoading);
+                }
+            });
+    }
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        next_state.set(AppState::MainMenu);
+    }
 }
 
 // Functionality for the "Load" button; loading a chosen world
@@ -311,30 +308,35 @@ pub fn world_naming(
 pub struct SelectedWorld(pub Option<String>);
 
 pub fn load_world_menu (
-    mut commands: Commands,
     mut contexts: EguiContexts,
     mut next_state: ResMut<NextState<AppState>>,
     mut selected_world: ResMut<SelectedWorld>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
+
     egui::Window::new("Load World")
     .collapsible(false)
     .resizable(false)
+    .fixed_pos(egui::pos2(1920.0/ 2.0 - 200.0,1080.0 / 2.0 - 150.0,))
     .show(contexts.ctx_mut(), |ui| {
+        ui.vertical_centered(|ui| {
+            ui.heading("Choose a world to load:");
+        });
+        ui.separator();
         if let Ok(entries) = std::fs::read_dir("assets/Saves") {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    if let Some(file_name) = entry.file_name().to_str() {
-                        if file_name.ends_with(".json") {
-                            let world_name = file_name.trim_end_matches(".json");
-                            if ui.button(world_name).clicked() {
-                                selected_world.0 = Some(world_name.to_string());
-                                next_state.set(AppState::AssetLoading);
-                            }
+            for entry in entries.flatten() {
+                if let Some(file_name) = entry.file_name().to_str() {
+                    if let Some(world_name) = file_name.strip_suffix(".json") {
+                        if ui.button(world_name).clicked() {
+                            selected_world.0 = Some(world_name.to_string());
+                            next_state.set(AppState::AssetLoading);
                         }
                     }
                 }
             }
         }
-
     });
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        next_state.set(AppState::MainMenu);
+    }
 }

@@ -5,7 +5,6 @@ use crate::{a_loading::TextureHandles, v_components::{Ground, Sun}, v_config::*,
 use bevy::render::mesh::shape;
 use crate::AppState;
 
-
 pub fn voxel_setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -95,7 +94,6 @@ fn create_ground(commands: &mut Commands, meshes: &mut ResMut<Assets<Mesh>>, mat
         },
         _ => (),
     };
-
     let mesh_handle = meshes.add(mesh);
 
     commands.spawn((

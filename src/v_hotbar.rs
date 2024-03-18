@@ -50,7 +50,6 @@ pub fn hotbar_ui(
                     texture: handle_texture.clone(),
                     ..Default::default()
                 },
-
                 ..default()
             });
         });

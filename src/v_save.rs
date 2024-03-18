@@ -76,10 +76,8 @@ pub fn world_loader(
     
                 println!("Loading world...");
                 for (voxel_position, voxel_type, voxel_state) in saved_world.voxels {
-    
                     let position = voxel_position.0;
                     let state = voxel_state.0;
-    
                     voxel.lean_place(
                         &mut commands,
                         position,
