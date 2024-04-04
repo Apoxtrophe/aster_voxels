@@ -1,4 +1,5 @@
 use bevy::{app::Main, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{component::Component, entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::{BuildChildren, Children}, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
+use bevy_rapier3d::rapier::crossbeam::epoch::Pointable;
 
 use crate::{v_components::MainMenuEntity, AppState};
 
@@ -143,14 +144,14 @@ fn create_load_button(
     };
 
     let load_text = TextBundle::from_section(
-        "LOAD", // The text you want on the button
+        "LOAD", 
         TextStyle {
-            font: asset_server.load("Fonts/Retro Gaming.ttf"), // Load your font
-            font_size: 80.0, // Set the font size
-            color: Color::WHITE, // Text color
+            font: asset_server.load("Fonts/Retro Gaming.ttf"), 
+            font_size: 80.0,
+            color: Color::WHITE,
         },
     )
-    .with_text_justify(JustifyText::Center) // Align text to the center
+    .with_text_justify(JustifyText::Center) 
     .with_style(Style {
         ..default()
     });
@@ -192,14 +193,14 @@ fn create_new_button(
     };
 
     let new_text = TextBundle::from_section(
-        "NEW", // The text you want on the button
+        "NEW", 
         TextStyle {
-            font: asset_server.load("Fonts/Retro Gaming.ttf"), // Load your font
-            font_size: 80.0, // Set the font size
-            color: Color::WHITE, // Text color
+            font: asset_server.load("Fonts/Retro Gaming.ttf"),
+            font_size: 80.0, 
+            color: Color::WHITE, 
         },
     )
-    .with_text_justify(JustifyText::Center) // Align text to the center
+    .with_text_justify(JustifyText::Center) 
     .with_style(Style {
         ..default()
     });
@@ -241,16 +242,16 @@ fn create_settings_button(
     };
 
     let settings_text = TextBundle::from_section(
-        "SETTINGS", // The text you want on the button
+        "SETTINGS",
         TextStyle {
-            font: asset_server.load("Fonts/Retro Gaming.ttf"), // Load your font
-            font_size: 80.0, // Set the font size
-            color: Color::WHITE, // Text color
+            font: asset_server.load("Fonts/Retro Gaming.ttf"), 
+            font_size: 80.0,
+            color: Color::WHITE,
         },
     )
-    .with_text_justify(JustifyText::Center) // Align text to the center
+    .with_text_justify(JustifyText::Center) 
     .with_style(Style {
-        align_content: AlignContent::Center, //
+        align_content: AlignContent::Center,
         ..default()
     });
 
@@ -264,7 +265,6 @@ fn create_settings_button(
         .id()
 }
 
-// NEW button functionality and world naming
 #[derive(Resource, Default)]
 pub struct WorldName(pub String);
 
@@ -290,14 +290,42 @@ pub fn world_naming(
     if let Some(mut input) = world_name_input.iter_mut().next() {
         egui::SidePanel::right("Create World")
             .resizable(false)
+            .default_width(400.0)
             .show(contexts.ctx_mut(), |ui| {
-                ui.text_edit_singleline(&mut input.name);
-                if ui.button("Create World").clicked() {
-                    world_name.0 = input.name.clone();
-                    next_state.set(AppState::AssetLoading);
-                }
+                ui.spacing_mut().item_spacing = egui::vec2(10.0, 10.0);
+                ui.add_space(10.0);
+                ui.vertical_centered_justified(|ui| {
+                    ui.label(
+                        egui::RichText::new("Create A New World")
+                            .text_style(egui::TextStyle::Heading),
+                    );
+                    ui.separator();
+                    ui.add_space(10.0);
+                    let text_edit = ui.add_sized(
+                        egui::vec2(64.0, 40.0),
+                        egui::TextEdit::singleline(&mut input.name)
+                            .font(egui::TextStyle::Heading)
+                            .text_color(egui::Color32::from_rgb(255, 255, 255))
+                            .frame(true)
+                            .hint_text("World Name"),
+                    );
+                    ui.add_space(20.0);
+
+                    let button = ui.add_sized(
+                        egui::vec2(64.0, 40.0),
+                        egui::Button::new("Create World")
+                            .small()
+                            .fill(egui::Color32::from_rgb(48, 48, 48))
+                            .stroke(egui::Stroke::new(3.0, egui::Color32::from_rgb(255, 255, 255)))
+                    );
+                    if button.clicked() {
+                        world_name.0 = input.name.clone();
+                        next_state.set(AppState::AssetLoading);
+                    }
+                });
             });
     }
+
     if keyboard_input.just_pressed(KeyCode::Escape) {
         next_state.set(AppState::MainMenu);
     }
@@ -319,7 +347,7 @@ pub fn load_world_menu (
     .resizable(false)
     .fixed_pos(egui::pos2(1920.0/ 2.0 - 200.0,1080.0 / 2.0 - 150.0,))
     .show(contexts.ctx_mut(), |ui| {
-        ui.vertical_centered(|ui| {
+        ui.vertical_centered_justified(|ui| {
             ui.heading("Choose a world to load:");
         });
         ui.separator();

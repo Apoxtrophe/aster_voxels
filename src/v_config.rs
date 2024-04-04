@@ -21,7 +21,7 @@ pub const SIMULATION_RATE: u64 = 100;
 
 // World Generation
 pub const WORLD_SIZE: i32 = 256;
-pub const WORLD_HEIGHT_OFFSET: f32 = 0.5;
+pub const WORLD_HEIGHT_OFFSET: f32 = 0.25;
 pub const WORLD_REFLECTANCE: f32 = 0.0;
 pub const WORLD_METALLIC: f32 = 0.0;
 pub const WORLD_PERCIEVED_ROUGHNESS: f32 = 1.0;
@@ -38,8 +38,8 @@ pub const SUN_ANGLE: f32 = 65.0;
 pub const SUN_DAY_NIGHT: bool = false;
 pub const SUN_DAY_LENGTH: f32 = 0.01;
 pub const SUN_TIMER_RATE: u64 = 100; 
-pub const AMBIENT_INTENSITY: f32 = 100.0;
-pub const AMBIENT_COLOR: Color = Color::GREEN;
+pub const AMBIENT_INTENSITY: f32 = 500.0;
+pub const AMBIENT_COLOR: Color = Color::BEIGE;
 
 // Hotbar
 pub const HOTBAR_SIZE: f32 = 1.0;

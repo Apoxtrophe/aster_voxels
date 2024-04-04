@@ -1,7 +1,7 @@
-use std::f32::consts::TAU;
+use std::{f32::consts::TAU, time::Duration};
 
 use bevy::{
-    input::mouse::MouseWheel, prelude::*, render::color, window::CursorGrabMode
+    input::mouse::MouseWheel, prelude::*, render::color, time, window::CursorGrabMode
 };
 use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_rapier3d::prelude::*;
@@ -182,11 +182,8 @@ pub fn manage_cursor(
     }
 }
 
-
-
-
-
 pub fn voxel_interaction_system(
+    time: Res<Time>,
     mouse_input: Res<ButtonInput<MouseButton>>,
     voxel_assets: Res<VoxelAssets>,
     voxel_selector: ResMut<VoxelSelector>,
@@ -198,12 +195,14 @@ pub fn voxel_interaction_system(
     state_query: Query<(Entity, &PositionVoxel, &mut StateVoxel)>,
     materials: ResMut<Assets<StandardMaterial>>,
     meshes: ResMut<Assets<Mesh>>,
+    mut place_timer: Local<Timer>,
+    mut remove_timer: Local<Timer>,
 ) {
-    //Placing, removing, and altering state on mouse click
-    
+    let place_delay = Duration::from_millis(200);
+    let remove_delay = Duration::from_millis(100);
 
     if voxel_info.in_range {
-        if mouse_input.just_pressed(MouseButton::Left) {
+        if mouse_input.just_pressed(MouseButton::Left) || (mouse_input.pressed(MouseButton::Left) && place_timer.tick(time.delta()).finished()) {
             if keyboard_input.pressed(KeyCode::ControlLeft) {
                 if let Some(state) = voxel_info.is_on {
                     if let Some(voxel_type) = voxel_info.voxel_type {
@@ -226,10 +225,16 @@ pub fn voxel_interaction_system(
                     materials,
                     meshes,
                     false,
-                )
+                );
             }
-        } else if mouse_input.just_pressed(MouseButton::Right) {
+            place_timer.reset();
+            place_timer.set_duration(place_delay);
+        }
+
+        if mouse_input.just_pressed(MouseButton::Right) || (mouse_input.pressed(MouseButton::Right) && remove_timer.tick(time.delta()).finished()) {
             voxel.remove(&mut commands, voxel_info.position, remove_query);
+            remove_timer.reset();
+            remove_timer.set_duration(remove_delay);
         }
     }
 }
