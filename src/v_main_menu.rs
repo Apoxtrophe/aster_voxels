@@ -1,4 +1,4 @@
-use bevy::{app::Main, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{component::Component, entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::{BuildChildren, Children}, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
+use bevy::{app::Main, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{component::Component, entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::{BuildChildren, Children}, log::tracing_subscriber::fmt::format, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
 use bevy_rapier3d::rapier::crossbeam::epoch::Pointable;
 
 use crate::{v_components::MainMenuEntity, AppState};
@@ -343,28 +343,56 @@ pub fn load_world_menu (
 ) {
 
     egui::Window::new("Load World")
-    .collapsible(false)
-    .resizable(false)
-    .fixed_pos(egui::pos2(1920.0/ 2.0 - 200.0,1080.0 / 2.0 - 150.0,))
-    .show(contexts.ctx_mut(), |ui| {
-        ui.vertical_centered_justified(|ui| {
-            ui.heading("Choose a world to load:");
-        });
-        ui.separator();
-        if let Ok(entries) = std::fs::read_dir("assets/Saves") {
-            for entry in entries.flatten() {
-                if let Some(file_name) = entry.file_name().to_str() {
-                    if let Some(world_name) = file_name.strip_suffix(".json") {
-                        if ui.button(world_name).clicked() {
-                            selected_world.0 = Some(world_name.to_string());
-                            next_state.set(AppState::AssetLoading);
+        .collapsible(false)
+        .resizable(false)
+        .fixed_pos(egui::pos2(1920.0/ 2.0 - 200.0,1080.0 / 2.0 - 150.0,))
+        .show(contexts.ctx_mut(), |ui| {
+            ui.vertical_centered_justified(|ui| {
+                ui.heading("Choose a world to load:");
+            });
+            ui.separator();
+
+            let mut selected = None;
+
+            if let Ok(entries) = std::fs::read_dir("assets/Saves") {
+                for entry in entries.flatten() {
+                    if let Some(file_name) = entry.file_name().to_str() {
+                        if let Some(world_name) = file_name.strip_suffix(".json") {
+                            let selected = selected_world.0 == Some(world_name.to_string());
+            
+                            if ui.selectable_label(selected, world_name).clicked() {
+                                selected_world.0 = Some(world_name.to_string());
+                            }
                         }
                     }
                 }
             }
+
+            if let Some(world) = selected {
+                selected_world.0 = Some(world)
+            }
+
+            ui.separator();
+
+            ui.horizontal(|ui| {
+                if ui.button("Load").clicked() {
+                    if selected_world.0.is_some() {
+                        next_state.set(AppState::AssetLoading);
+                    }
+                }
+
+                if ui.button("Delete").clicked() {
+                    if let Some(world) = &selected_world.0 {
+                        let file_path = format!("assets/Saves/{}.json", world);
+                        if std::fs::remove_file(&file_path).is_ok() {
+                            selected_world.0 = None;
+                        }
+                    }
+                }
+            })
+                           
+        });
+        if keyboard_input.just_pressed(KeyCode::Escape) {
+            next_state.set(AppState::MainMenu);
         }
-    });
-    if keyboard_input.just_pressed(KeyCode::Escape) {
-        next_state.set(AppState::MainMenu);
-    }
 }

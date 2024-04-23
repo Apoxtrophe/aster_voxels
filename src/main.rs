@@ -1,7 +1,7 @@
 
 // External crate imports
 use bevy::{
-    prelude::*, render::render_resource::{AddressMode, SamplerDescriptor}
+    gltf::GltfPlugin, prelude::*, render::render_resource::{AddressMode, SamplerDescriptor}
 };
 use bevy_atmosphere::{plugin::AtmospherePlugin, model::AtmosphereModel};
 use bevy_egui::EguiPlugin;

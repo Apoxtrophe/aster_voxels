@@ -13,6 +13,7 @@ pub fn voxel_setup(
     mut ambient_light: ResMut<AmbientLight>,
     mut next_state: ResMut<NextState<AppState>>,
     texture_handles: Res<TextureHandles>, 
+    asset_server: Res<AssetServer>,
 ) {
     println!("Beginning GameSetup");
     // initialize voxel assets
@@ -82,6 +83,7 @@ fn create_ground(commands: &mut Commands, meshes: &mut ResMut<Assets<Mesh>>, mat
         ..Default::default()
     });
 
+    
     let mut mesh: Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32 }.into();
     let uvs = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
 
@@ -106,4 +108,3 @@ fn create_ground(commands: &mut Commands, meshes: &mut ResMut<Assets<Mesh>>, mat
         Ground,
     )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT_OFFSET, WORLD_SIZE as f32));
 }
-
