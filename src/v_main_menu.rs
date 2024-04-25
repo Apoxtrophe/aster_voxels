@@ -292,11 +292,9 @@ pub fn world_naming(
             .resizable(false)
             .default_width(400.0)
             .show(contexts.ctx_mut(), |ui| {
-                ui.spacing_mut().item_spacing = egui::vec2(10.0, 10.0);
-                ui.add_space(10.0);
                 ui.vertical_centered_justified(|ui| {
                     ui.label(
-                        egui::RichText::new("Create A New World")
+                        egui::RichText::new("Create World").color(Color32::WHITE).size(48.0)
                             .text_style(egui::TextStyle::Heading),
                     );
                     ui.separator();
@@ -307,7 +305,7 @@ pub fn world_naming(
                             .font(egui::TextStyle::Heading)
                             .text_color(egui::Color32::from_rgb(255, 255, 255))
                             .frame(true)
-                            .hint_text("World Name"),
+                            .hint_text(egui::RichText::new("World Name").color(Color32::DARK_GRAY).size(32.0)), 
                     );
                     ui.add_space(20.0);
 
@@ -331,41 +329,49 @@ pub fn world_naming(
     }
 }
 
-// Functionality for the "Load" button; loading a chosen world
 #[derive(Resource, Default)]
 pub struct SelectedWorld(pub Option<String>);
 
-pub fn load_world_menu (
+pub fn load_world_menu(
     mut contexts: EguiContexts,
     mut next_state: ResMut<NextState<AppState>>,
     mut selected_world: ResMut<SelectedWorld>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-
-    egui::Window::new("Load World")
-        .collapsible(false)
+    egui::SidePanel::right("load_world_panel")
         .resizable(false)
-        .fixed_pos(egui::pos2(1920.0/ 2.0 - 200.0,1080.0 / 2.0 - 150.0,))
+        .default_width(400.0)
         .show(contexts.ctx_mut(), |ui| {
             ui.vertical_centered_justified(|ui| {
-                ui.heading("Choose a world to load:");
+                ui.heading(egui::RichText::new("Load World").color(Color32::WHITE).size(48.0))
             });
             ui.separator();
+            ui.add_space(16.0);
 
             let mut selected = None;
-
             if let Ok(entries) = std::fs::read_dir("assets/Saves") {
-                for entry in entries.flatten() {
-                    if let Some(file_name) = entry.file_name().to_str() {
-                        if let Some(world_name) = file_name.strip_suffix(".json") {
-                            let selected = selected_world.0 == Some(world_name.to_string());
-            
-                            if ui.selectable_label(selected, world_name).clicked() {
-                                selected_world.0 = Some(world_name.to_string());
+                ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                    for entry in entries.flatten() {
+                        if let Some(file_name) = entry.file_name().to_str() {
+                            if let Some(world_name) = file_name.strip_suffix(".json") {
+                                let selected = selected_world.0 == Some(world_name.to_string());
+                                ui.add_space(8.0);
+                                if ui
+                                    .selectable_label(
+                                        selected,
+                                        egui::RichText::new(world_name)
+                                            .heading()
+                                            .color(Color32::GRAY)
+                                            .size(32.0),
+                                    )
+                                    .clicked()
+                                {
+                                    selected_world.0 = Some(world_name.to_string());
+                                }
                             }
                         }
                     }
-                }
+                });
             }
 
             if let Some(world) = selected {
@@ -373,15 +379,34 @@ pub fn load_world_menu (
             }
 
             ui.separator();
+            ui.add_space(16.0);
 
-            ui.horizontal(|ui| {
-                if ui.button("Load").clicked() {
+            ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                if ui
+                    .button(
+                        egui::RichText::new("Load")
+                            .heading()
+                            .color(Color32::WHITE)
+                            .size(48.0),
+                    )
+                    .clicked()
+                {
                     if selected_world.0.is_some() {
                         next_state.set(AppState::AssetLoading);
                     }
                 }
 
-                if ui.button("Delete").clicked() {
+                ui.add_space(8.0);
+
+                if ui
+                    .button(
+                        egui::RichText::new("Delete")
+                            .heading()
+                            .color(Color32::WHITE)
+                            .size(48.0),
+                    )
+                    .clicked()
+                {
                     if let Some(world) = &selected_world.0 {
                         let file_path = format!("assets/Saves/{}.json", world);
                         if std::fs::remove_file(&file_path).is_ok() {
@@ -389,10 +414,10 @@ pub fn load_world_menu (
                         }
                     }
                 }
-            })
-                           
+            });
         });
-        if keyboard_input.just_pressed(KeyCode::Escape) {
-            next_state.set(AppState::MainMenu);
-        }
+
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        next_state.set(AppState::MainMenu);
+    }
 }
