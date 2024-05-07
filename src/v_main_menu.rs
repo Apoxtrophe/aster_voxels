@@ -1,5 +1,4 @@
-use bevy::{app::Main, asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{component::Component, entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::{BuildChildren, Children}, log::tracing_subscriber::fmt::format, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
-use bevy_rapier3d::rapier::crossbeam::epoch::Pointable;
+use bevy::{asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::BuildChildren, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
 
 use crate::{v_components::MainMenuEntity, AppState};
 
@@ -22,11 +21,16 @@ pub fn setup_main_menu(
 ) {
 
     windows.single_mut().resolution = WindowResolution::new(1920.0, 1080.0);
+    windows.single_mut().cursor.visible = true;
     // UI CAMERA
     commands.spawn(Camera2dBundle::default()).insert(MainMenuEntity);
     
     let main_image_handle = asset_server.load("UserInterface/logicalogo2.png");
     
+    println!("Entering Main Menu");
+
+
+
     let parent = NodeBundle {
         style: Style {
             display: Display::Flex,
@@ -307,11 +311,11 @@ pub fn world_naming(
                             .frame(true)
                             .hint_text(egui::RichText::new("World Name").color(Color32::DARK_GRAY).size(32.0)), 
                     );
+                    ui.separator();
                     ui.add_space(20.0);
-
                     let button = ui.add_sized(
                         egui::vec2(64.0, 40.0),
-                        egui::Button::new("Create World")
+                        egui::Button::new(egui::RichText::new("Create").color(Color32::WHITE).size(36.0))
                             .small()
                             .fill(egui::Color32::from_rgb(48, 48, 48))
                             .stroke(egui::Stroke::new(3.0, egui::Color32::from_rgb(255, 255, 255)))

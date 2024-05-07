@@ -28,3 +28,6 @@ pub struct Sun;
 
 #[derive(Component)] 
 pub struct MainMenuEntity;
+
+#[derive(Component)] 
+pub struct MainCamera;

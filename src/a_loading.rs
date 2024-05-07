@@ -27,6 +27,7 @@ pub fn voxel_loading(
         "TexturePack/Tile.png",
         "UserInterface/Crosshair.png",
         "UserInterface/Hotbar_V2.png",
+        "UserInterface/SaveIcon.png",
     ];
     
     let texture_handles = texture_paths.iter()

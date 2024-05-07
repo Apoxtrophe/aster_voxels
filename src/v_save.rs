@@ -1,10 +1,11 @@
 use bevy::asset::Assets;
 use bevy::ecs::entity::Entity;
-use bevy::ecs::system::{Commands, Query, Res, ResMut};
+use bevy::ecs::system::{Commands, Local, Query, Res, ResMut};
 use bevy::input::keyboard::KeyCode;
 use bevy::input::ButtonInput;
 use bevy::pbr::StandardMaterial;
 use bevy::render::mesh::Mesh;
+use bevy::time::Time;
 use serde::{Serialize, Deserialize};
 use std::fs::File;
 use std::io::{self, BufReader, Write};
@@ -14,13 +15,17 @@ use crate::v_graphics::VoxelAssets;
 use crate::v_main_menu::{SelectedWorld, WorldName};
 use crate::v_structure::Voxel;
 
+use chrono::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct SavedWorld {
     pub voxels: Vec<(PositionVoxel, TypeVoxel, StateVoxel)>,
 }
 
-fn save_world(query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>, world_name: &str) -> io::Result<()> {
+fn save_world(
+    query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
+     world_name: &str
+    ) -> io::Result<()> {
     let mut world_data = Vec::new();
 
     for (_, pos, typ, state) in query.iter() {
@@ -91,5 +96,31 @@ pub fn world_loader(
             },
             Err(e) => eprintln!("Failed to load world: {}", e),
         }
+    }
+}
+
+pub fn autosave_system(
+    time: Res<Time>,
+    // Other necessary resources and components for saving
+    query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
+    world_name: Res<WorldName>,
+    mut autosave_triggered: Local<bool>,
+) {
+    let current_time = chrono::Local::now();
+    let current_minute = current_time.minute();
+
+    if current_minute % 5 == 0 && current_time.second() == 0 {
+        if !*autosave_triggered {
+            if let Err(e) = save_world(query, &world_name.0) {
+                println!("Failed to save world: {}", e);
+            } else {
+                println!("World saved successfully.");
+            }
+
+            *autosave_triggered = true;
+            println!("Autosave triggered at {:02}:{:02}", current_time.hour(), current_minute);
+        }
+    } else {
+        *autosave_triggered = false;
     }
 }

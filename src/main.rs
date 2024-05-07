@@ -1,10 +1,10 @@
 
 // External crate imports
 use bevy::{
-    gltf::GltfPlugin, prelude::*, render::render_resource::{AddressMode, SamplerDescriptor}
+    prelude::*, render::render_resource::{AddressMode, SamplerDescriptor}
 };
 use bevy_atmosphere::{plugin::AtmospherePlugin, model::AtmosphereModel};
-use bevy_egui::EguiPlugin;
+use bevy_egui::{egui::widgets, EguiPlugin};
 use bevy_rapier3d::{prelude::*, plugin::RapierConfiguration};
 use bevy_fps_controller::controller::*;
 
@@ -24,30 +24,36 @@ mod v_hotbar;
 mod v_graphics_helper;
 mod v_main_menu;
 mod v_save; 
-
+mod v_in_game_menu;
+mod v_pre_main_menu;
+mod v_widgets;
 // Using structs and enums directly from their modules
 use a_loading::{voxel_loading, asset_check};
 use b_voxel_setup::voxel_setup;
 use v_config::SUN_TIMER_RATE;
 use v_graphics::update_voxel_emissive;
 use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
+use v_in_game_menu::{in_game_menu, print_entities};
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_lib::update_info;
 use v_main_menu::{load_world_menu, main_menu_buttons, setup_main_menu, setup_world_naming, world_naming, SelectedWorld, WorldName};
 use v_player2::{player_setup, manage_cursor, respawn, voxel_interaction_system};
-use v_save::{check_for_save_input, world_loader};
+use v_pre_main_menu::pre_main_menu_cleanup;
+use v_save::{autosave_system, check_for_save_input, world_loader};
 use v_simulation::logic_operation_system;
+use v_widgets::game_widgets;
 
 // Application state definitions
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum AppState {
     #[default]
-    MainMenu,
-    WorldNaming,
-    LoadWorldMenu,
-    AssetLoading,
-    GameSetup,
-    InGame,
+    PreMainMenu, //Cleaning up entities and preparing clean slate for main menu
+    MainMenu, // Main menu handling
+    WorldNaming, // World creation 
+    LoadWorldMenu, // World Loading
+    AssetLoading, // Loading Assets
+    GameSetup, // Adding assets to world
+    InGame, // In game loop 
 }
 
 fn main() {
@@ -83,8 +89,12 @@ fn main() {
         .add_plugins(EguiPlugin)
 
         .init_state::<AppState>()
-            
-        .add_systems(Startup, setup_main_menu)
+
+
+        .add_systems(Startup, pre_main_menu_cleanup)    
+        .add_systems(Update, print_entities)
+
+        .add_systems(OnEnter(AppState::MainMenu), setup_main_menu)
         .add_systems(Update, main_menu_buttons.run_if(in_state(AppState::MainMenu)))
 
         .add_systems(OnEnter(AppState::WorldNaming), setup_world_naming)
@@ -98,6 +108,8 @@ fn main() {
 
         .add_systems(OnEnter(AppState::InGame), world_loader)
         .add_systems(Update, (
+            game_widgets,
+            in_game_menu,
             update_info, 
             manage_cursor, respawn, voxel_interaction_system,
             daylight_cycle,
@@ -105,7 +117,7 @@ fn main() {
             timer_update_system,
             update_voxel_emissive,
             logic_operation_system,
+            autosave_system,
         ).run_if(in_state(AppState::InGame)))
-
         .run();
 }

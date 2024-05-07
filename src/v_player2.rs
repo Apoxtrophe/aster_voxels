@@ -1,14 +1,14 @@
 use std::{f32::consts::TAU, time::Duration};
 
 use bevy::{
-    input::mouse::MouseWheel, prelude::*, render::color, time, window::CursorGrabMode
+    input::mouse::MouseWheel, prelude::*, render::color,  window::CursorGrabMode
 };
 use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::{v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_config::{PLAYER_FOV, PLAYER_PITCH_SPEED, PLAYER_YAW_SPEED, PLAYER_CAMERA_HEIGHT, PLAYER_CAMERA_RADIUS}, v_graphics::VoxelAssets, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_selector::VoxelSelector, v_structure::Voxel};
+use crate::{v_components::{MainCamera, PositionVoxel, StateVoxel, TypeVoxel}, v_config::{PLAYER_CAMERA_HEIGHT, PLAYER_CAMERA_RADIUS, PLAYER_FOV, PLAYER_PITCH_SPEED, PLAYER_YAW_SPEED}, v_graphics::VoxelAssets, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_selector::VoxelSelector, v_structure::Voxel};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
 
@@ -97,6 +97,7 @@ pub fn player_setup(
         },
         AtmosphereCamera::default(),
         RenderPlayer { logical_entity },
+        MainCamera,
     ));
 
     commands.spawn(TextBundle::from_section(
