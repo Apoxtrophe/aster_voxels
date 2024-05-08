@@ -7,6 +7,9 @@ pub struct TextureHandles {
     pub image_handles: Vec<Handle<Image>>,
 }
 
+#[derive(Resource)]
+pub struct SaveNotificationTimer(pub Timer);
+
 impl TextureHandles {
     fn new(handles: Vec<Handle<Image>>) -> Self {
         TextureHandles {

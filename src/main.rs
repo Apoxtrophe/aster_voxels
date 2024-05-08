@@ -39,9 +39,9 @@ use v_lib::update_info;
 use v_main_menu::{load_world_menu, main_menu_buttons, setup_main_menu, setup_world_naming, world_naming, SelectedWorld, WorldName};
 use v_player2::{player_setup, manage_cursor, respawn, voxel_interaction_system};
 use v_pre_main_menu::pre_main_menu_cleanup;
-use v_save::{autosave_system, check_for_save_input, world_loader};
+use v_save::{autosave_system, check_for_save_input, world_loader, SaveEvent};
 use v_simulation::logic_operation_system;
-use v_widgets::game_widgets;
+use v_widgets::SaveNotificationPlugin;
 
 // Application state definitions
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -87,7 +87,8 @@ fn main() {
         .add_plugins(FpsControllerPlugin)
         .add_plugins(AtmospherePlugin)
         .add_plugins(EguiPlugin)
-
+        .add_plugins(SaveNotificationPlugin).add_event::<SaveEvent>()
+        
         .init_state::<AppState>()
 
 
@@ -108,7 +109,6 @@ fn main() {
 
         .add_systems(OnEnter(AppState::InGame), world_loader)
         .add_systems(Update, (
-            game_widgets,
             in_game_menu,
             update_info, 
             manage_cursor, respawn, voxel_interaction_system,

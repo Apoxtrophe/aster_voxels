@@ -1,4 +1,4 @@
-use bevy::{asset::AssetServer, core::Name, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Local, Query, Res, ResMut}}, hierarchy::DespawnRecursiveExt, input::{keyboard::KeyCode, ButtonInput}};
+use bevy::{app::App, asset::AssetServer, core::Name, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Local, Query, Res, ResMut}}, hierarchy::DespawnRecursiveExt, input::{keyboard::KeyCode, ButtonInput}};
 use bevy_egui::{egui::{self, Color32}, EguiContexts};
 
 use crate::{v_components::MainCamera, AppState};
@@ -16,12 +16,15 @@ pub fn in_game_menu(
     camera_query: Query<Entity, With<MainCamera>>,
 
     asset_server: Res<AssetServer>,
+
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         *menu_visible = !*menu_visible;
     }
 
     if *menu_visible {
+        
+
         egui::SidePanel::left("in_game_menu_panel")
             .resizable(false)
             .default_width(400.0)
