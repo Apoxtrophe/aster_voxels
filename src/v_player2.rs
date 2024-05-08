@@ -8,7 +8,7 @@ use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::{v_components::{MainCamera, PositionVoxel, StateVoxel, TypeVoxel}, v_config::{PLAYER_CAMERA_HEIGHT, PLAYER_CAMERA_RADIUS, PLAYER_FOV, PLAYER_PITCH_SPEED, PLAYER_YAW_SPEED}, v_graphics::VoxelAssets, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_selector::VoxelSelector, v_structure::Voxel};
+use crate::{v_components::{MainCamera, PositionVoxel, StateVoxel, TypeVoxel}, v_config::{PLAYER_CAMERA_HEIGHT, PLAYER_CAMERA_RADIUS, PLAYER_FOV, PLAYER_PITCH_SPEED, PLAYER_YAW_SPEED}, v_graphics::VoxelAssets, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_selector::VoxelSelector, v_structure::Voxel, v_widgets::SpeedBar};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
 
@@ -198,9 +198,20 @@ pub fn voxel_interaction_system(
     meshes: ResMut<Assets<Mesh>>,
     mut place_timer: Local<Timer>,
     mut remove_timer: Local<Timer>,
+
+    mut speed_bar: ResMut<SpeedBar>,
 ) {
     let place_delay = Duration::from_millis(200);
     let remove_delay = Duration::from_millis(100);
+
+    println!("simulation speed: {}", speed_bar.speed_index);
+
+    if keyboard_input.just_pressed(KeyCode::BracketRight) {
+        speed_bar.speed_index = (speed_bar.speed_index + 1).clamp(1,5);
+    }
+    if keyboard_input.just_pressed(KeyCode::BracketLeft) {
+        speed_bar.speed_index = (speed_bar.speed_index - 1).clamp(1, 5);
+    }
 
     if voxel_info.in_range {
         if mouse_input.just_pressed(MouseButton::Left) || (mouse_input.pressed(MouseButton::Left) && place_timer.tick(time.delta()).finished()) {

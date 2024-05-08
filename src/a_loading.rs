@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use std::time::Duration;
-use crate::{v_components::MainMenuEntity, v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_main_menu::clear_main_menu_entities, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, AppState};
+use crate::{v_components::MainMenuEntity, v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_main_menu::clear_main_menu_entities, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, v_widgets::SpeedBar, AppState};
 
 #[derive(Resource, Clone)]
 pub struct TextureHandles {
@@ -31,6 +31,7 @@ pub fn voxel_loading(
         "UserInterface/Crosshair.png",
         "UserInterface/Hotbar_V2.png",
         "UserInterface/SaveIcon.png",
+        "UserInterface/SpeedBar.png",
     ];
     
     let texture_handles = texture_paths.iter()
@@ -57,6 +58,7 @@ pub fn voxel_loading(
     )));
     commands.insert_resource(SunDirection::new());
     commands.insert_resource(FadeTimer::new());
+    commands.insert_resource(SpeedBar::new());
 
 }
 

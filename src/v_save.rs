@@ -42,6 +42,9 @@ fn save_world(
     let serialized = serde_json::to_string(&saved_world)?;
 
     let file_name = format!("{}.json", world_name);
+
+    println!("World Name: {}", world_name);
+
     let file_path = format!("assets/Saves/{}", file_name);
     let mut file = File::create(file_path)?;
     file.write_all(serialized.as_bytes())?;
