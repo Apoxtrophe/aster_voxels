@@ -4,7 +4,7 @@ use bevy::{
     prelude::*, render::render_resource::{AddressMode, SamplerDescriptor}
 };
 use bevy_atmosphere::{plugin::AtmospherePlugin, model::AtmosphereModel};
-use bevy_egui::{egui::widgets, EguiPlugin};
+use bevy_egui::EguiPlugin;
 use bevy_rapier3d::{prelude::*, plugin::RapierConfiguration};
 use bevy_fps_controller::controller::*;
 
@@ -33,7 +33,7 @@ use b_voxel_setup::voxel_setup;
 use v_config::SUN_TIMER_RATE;
 use v_graphics::update_voxel_emissive;
 use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
-use v_in_game_menu::{in_game_menu, print_entities};
+use v_in_game_menu::in_game_menu;
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_lib::update_info;
 use v_main_menu::{load_world_menu, main_menu_buttons, setup_main_menu, setup_world_naming, world_naming, SelectedWorld, WorldName};
@@ -93,7 +93,6 @@ fn main() {
 
 
         .add_systems(Startup, pre_main_menu_cleanup)    
-        .add_systems(Update, print_entities)
 
         .add_systems(OnEnter(AppState::MainMenu), setup_main_menu)
         .add_systems(Update, main_menu_buttons.run_if(in_state(AppState::MainMenu)))

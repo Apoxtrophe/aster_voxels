@@ -1,9 +1,9 @@
-use bevy::{asset::{AssetServer, Assets}, core_pipeline::core_2d::Camera2dBundle, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::BuildChildren, render::color::Color, sprite::TextureAtlasLayout, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
+use bevy::{asset::AssetServer, core_pipeline::core_2d::Camera2dBundle, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::BuildChildren, render::color::Color, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
 
 use crate::{v_components::MainMenuEntity, AppState};
 
 use bevy::prelude::*;
-use bevy_egui::{egui::{self, pos2, Color32, FontDefinitions}, EguiContext, EguiContexts, EguiPlugin};
+use bevy_egui::{egui::{self, Color32}, EguiContexts};
 use bevy::prelude::Resource;
 
 #[derive(Component)]
@@ -16,7 +16,6 @@ pub enum MenuButton {
 pub fn setup_main_menu(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
 
@@ -77,8 +76,6 @@ pub fn setup_main_menu(
 }
 
 pub fn main_menu_buttons(
-    mut commands: Commands,
-    mut contexts: EguiContexts,
     mut interaction_query: Query<
         (
             Entity,
@@ -91,7 +88,7 @@ pub fn main_menu_buttons(
     >,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
-    for (entity, interaction, mut color, mut border_color, menu_button) in interaction_query.iter_mut() {   
+    for (_, interaction, _, mut border_color, menu_button) in interaction_query.iter_mut() {   
         match *interaction {
             Interaction::Pressed => {
                 border_color.0 = Color::RED;
@@ -284,7 +281,6 @@ pub fn setup_world_naming(
 }
 
 pub fn world_naming(
-    mut commands: Commands,
     mut contexts: EguiContexts,
     mut next_state: ResMut<NextState<AppState>>,
     mut world_name_input: Query<&mut WorldNameInput>,
@@ -303,7 +299,7 @@ pub fn world_naming(
                     );
                     ui.separator();
                     ui.add_space(10.0);
-                    let text_edit = ui.add_sized(
+                    let _ = ui.add_sized(
                         egui::vec2(64.0, 40.0),
                         egui::TextEdit::singleline(&mut input.name)
                             .font(egui::TextStyle::Heading)
@@ -352,7 +348,7 @@ pub fn load_world_menu(
             ui.separator();
             ui.add_space(16.0);
 
-            let mut selected = None;
+            let selected = None;
             if let Ok(entries) = std::fs::read_dir("assets/Saves") {
                 ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                     for entry in entries.flatten() {

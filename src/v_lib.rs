@@ -8,7 +8,7 @@ use bevy_math::Ray3d;
 
 use super::v_config::*;
 use crate::{
-    v_selector::VoxelSelector, v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_structure::Voxel,
+    v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_structure::Voxel,
 };
 
 #[derive(Resource)]
@@ -75,7 +75,6 @@ pub fn update_info(
     mut voxel_info: ResMut<VoxelInfo>,
     voxel: ResMut<Voxel>,
     get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
-    voxel_selector: ResMut<VoxelSelector>,
     gizmos: Gizmos,
 ) {
     if let Ok((position, adjacent_position, is_in_range)) = raycasting(raycast, query, gizmos) {

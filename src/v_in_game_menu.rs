@@ -1,4 +1,4 @@
-use bevy::{app::App, asset::AssetServer, core::Name, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Local, Query, Res, ResMut}}, hierarchy::DespawnRecursiveExt, input::{keyboard::KeyCode, ButtonInput}};
+use bevy::{core::Name, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Local, Query, Res, ResMut}}, hierarchy::DespawnRecursiveExt, input::{keyboard::KeyCode, ButtonInput}};
 use bevy_egui::{egui::{self, Color32}, EguiContexts};
 
 use crate::{v_components::MainCamera, AppState};
@@ -10,13 +10,10 @@ pub fn in_game_menu(
     mut menu_visible: Local<bool>,
 
     // Despawn ish
-    mut commands: Commands,
+    commands: Commands,
     entities: Query<(Entity, Option<&Name>)>,
 
     camera_query: Query<Entity, With<MainCamera>>,
-
-    asset_server: Res<AssetServer>,
-
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         *menu_visible = !*menu_visible;
@@ -45,7 +42,7 @@ pub fn in_game_menu(
                         )
                         .clicked()
                     {
-                        despawn_all(commands, entities, camera_query, asset_server);
+                        despawn_all(commands, entities, camera_query);
                         next_state.set(AppState::MainMenu);
                         *menu_visible = false;
                     }
@@ -58,7 +55,6 @@ pub fn despawn_all(
     mut commands: Commands,
     entities: Query<(Entity, Option<&Name>)>,
     camera_query: Query<Entity, With<MainCamera>>,
-    asset_server: Res<AssetServer>,
 ) {
     for camera_entity in camera_query.iter() {
         commands.entity(camera_entity).despawn_recursive();
@@ -68,30 +64,5 @@ pub fn despawn_all(
         if commands.get_entity(entity).is_some() {
             commands.entity(entity).despawn_recursive();
         }
-    }
-}
-
-pub fn print_entities(
-    query: Query<Entity>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut commands: Commands,
-    entities: Query<(Entity, Option<&Name>)>,
-    camera_query: Query<Entity, With<MainCamera>>,
-
-) {
-    if keyboard_input.just_pressed(KeyCode::F1) {
-        println!("Entities in the game:");
-        for entity in query.iter() {
-            println!("{:?}", entity);
-        }
-    }  
-}
-
-pub fn despawn_main_camera(
-    mut commands: Commands,
-    camera_query: Query<Entity, With<MainCamera>>,
-) {
-    for entity in camera_query.iter() {
-        commands.entity(entity).despawn_recursive();
     }
 }

@@ -12,10 +12,6 @@ pub const PLAYER_CAMERA_RADIUS: f32 = 0.75;
 pub const PLAYER_FOV: f32 = 5.0;
 pub const PLAYER_INTERACTION_MAX: f32 = 10.0;
 
-    //FPS CONTROLLER
-    pub const PLAYER_AIR_ACCELERATION: f32 = 80.0;
-    pub const PLAYER_HEIGHT: f32 = 2.0;
-
 // Simulation Settings
 pub const SIMULATION_RATE: u64 = 100;
 
@@ -42,7 +38,6 @@ pub const AMBIENT_INTENSITY: f32 = 500.0;
 pub const AMBIENT_COLOR: Color = Color::BEIGE;
 
 // Hotbar
-pub const HOTBAR_SIZE: f32 = 1.0;
 pub const HOTBAR_ELEMENT_NUMBER: usize = 9; 
 pub const HOTBAR_SLOT_SIZE: f32 = 96.0;
 pub const HOTBAR_SPACING: f32 = 5.0;
@@ -59,6 +54,3 @@ pub const DESCRIPTOR_RIGHT: f32 = 50.0;
 pub const DESCRIPTOR_FADE_TIMER: f32 = 1.0; 
 
 // Main menu
-pub const CONTINUE_BUTTON_OFF: Color = Color::DARK_GREEN;
-pub const CONTINUE_BUTTON_HOVER: Color = Color::GREEN;
-pub const CONTINUE_BUTTON_ON: Color = Color::LIME_GREEN;

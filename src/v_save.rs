@@ -6,12 +6,10 @@ use bevy::input::keyboard::KeyCode;
 use bevy::input::ButtonInput;
 use bevy::pbr::StandardMaterial;
 use bevy::render::mesh::Mesh;
-use bevy::time::Time;
 use serde::{Serialize, Deserialize};
 use std::fs::File;
 use std::io::{self, BufReader, Write};
 
-use crate::a_loading::SaveNotificationTimer;
 use crate::v_components::{PositionVoxel, StateVoxel, TypeVoxel};
 use crate::v_graphics::VoxelAssets;
 use crate::v_main_menu::{SelectedWorld, WorldName};
@@ -33,7 +31,6 @@ fn save_world(
     world_name: &str,
 
     mut save_event_writer: EventWriter<SaveEvent>,
-    mut timer: ResMut<SaveNotificationTimer>,
     ) -> io::Result<()> {
     let mut world_data = Vec::new();
 
@@ -70,11 +67,10 @@ pub fn check_for_save_input(
     query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
     world_name: Res<WorldName>,
 
-    mut save_event_writer: EventWriter<SaveEvent>,
-    mut timer: ResMut<SaveNotificationTimer>,
+    save_event_writer: EventWriter<SaveEvent>,
 ) {
     if keyboard_input.just_pressed(KeyCode::F5) {
-        if let Err(e) = save_world(query, &world_name.0, save_event_writer, timer) {
+        if let Err(e) = save_world(query, &world_name.0, save_event_writer) {
             eprintln!("Failed to save world: {}", e);
         } else {
             println!("World saved successfully.");
@@ -116,21 +112,19 @@ pub fn world_loader(
 }
 
 pub fn autosave_system(
-    time: Res<Time>,
     // Other necessary resources and components for saving
     query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
     world_name: Res<WorldName>,
     mut autosave_triggered: Local<bool>,
 
-    mut save_event_writer: EventWriter<SaveEvent>,
-    mut timer: ResMut<SaveNotificationTimer>,
+    save_event_writer: EventWriter<SaveEvent>,
 ) {
     let current_time = chrono::Local::now();
     let current_minute = current_time.minute();
 
     if current_minute % 5 == 0 && current_time.second() == 0 {
         if !*autosave_triggered {
-            if let Err(e) = save_world(query, &world_name.0, save_event_writer, timer) {
+            if let Err(e) = save_world(query, &world_name.0, save_event_writer) {
                 println!("Failed to save world: {}", e);
             } else {
                 println!("World saved successfully.");

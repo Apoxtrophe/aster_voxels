@@ -1,5 +1,5 @@
 use bevy::render::mesh::{Indices, Mesh};
-use bevy::render::render_asset::{RenderAssetUsages};
+use bevy::render::render_asset::RenderAssetUsages;
 use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
 use crate::a_loading::TextureHandles;
 use crate::v_components::{TypeVoxel, StateVoxel};

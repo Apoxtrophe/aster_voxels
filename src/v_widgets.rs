@@ -1,5 +1,4 @@
-use bevy::{app::{App, Plugin, Startup, Update}, asset::AssetServer, ecs::{component::Component, entity::Entity, event::{EventReader, Events}, query::With, schedule::{common_conditions::in_state, IntoSystemConfigs, OnEnter}, system::{Commands, Query, Res, ResMut}}, hierarchy::BuildChildren, prelude::default, render::{color::Color, texture::Image, view::Visibility}, sprite::SpriteBundle, time::{Time, Timer, TimerMode}, transform::components::Transform, ui::{node_bundles::{ImageBundle, MaterialNodeBundle, NodeBundle}, AlignItems, BackgroundColor, JustifyContent, Node, PositionType, Style, UiImage, Val}};
-use bevy_math::Vec3;
+use bevy::{app::{App, Plugin, Update}, ecs::{component::Component, event::EventReader, query::With, schedule::{common_conditions::in_state, IntoSystemConfigs, OnEnter}, system::{Commands, Query, Res, ResMut}}, prelude::default, render::view::Visibility, time::{Time, Timer, TimerMode}, ui::{node_bundles::ImageBundle, Style, UiImage, Val}};
 
 use crate::{a_loading::{SaveNotificationTimer, TextureHandles}, v_save::SaveEvent, AppState};
 
@@ -14,7 +13,7 @@ impl Plugin for SaveNotificationPlugin {
 }
 
 #[derive(Component)]
-struct SaveNotification;
+pub struct SaveNotification;
 
 pub fn setup_save_notification(
     mut commands: Commands,
@@ -39,7 +38,7 @@ pub fn setup_save_notification(
  
 pub fn update_save_notification(
     mut query: Query<&mut Visibility, With<SaveNotification>>,
-    mut save_event_reader: EventReader<SaveEvent>,
+    save_event_reader: EventReader<SaveEvent>,
     time: Res<Time>,
     mut timer: ResMut<SaveNotificationTimer>,
 ) {

@@ -13,7 +13,6 @@ pub fn voxel_setup(
     mut ambient_light: ResMut<AmbientLight>,
     mut next_state: ResMut<NextState<AppState>>,
     texture_handles: Res<TextureHandles>, 
-    asset_server: Res<AssetServer>,
 ) {
     println!("Beginning GameSetup");
     // initialize voxel assets
