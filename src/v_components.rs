@@ -12,11 +12,11 @@ pub enum TypeVoxel {
     Tile,
     Wire,
     Out,
-    Not,
+    Switch,
     And,
     Or,
     Xor,
-    Switch,
+    Not,
     DFlipFlop,
 }
 

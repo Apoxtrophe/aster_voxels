@@ -15,11 +15,8 @@ pub fn voxel_setup(
     texture_handles: Res<TextureHandles>, 
 ) {
     println!("Beginning GameSetup");
-    // initialize voxel assets
     commands.insert_resource(VoxelAssets::new(&mut meshes, &texture_handles));
-    setup_lighting(&mut commands, &mut ambient_light);
-    configure_window(windows.single_mut());
-    // Crosshair
+    setup_environment(&mut commands, &mut ambient_light, windows.single_mut());
     spawn_ui_elements(&mut commands, &texture_handles);
     create_ground(&mut commands, &mut meshes, &mut materials, &texture_handles);
 
@@ -40,16 +37,25 @@ fn setup_lighting(commands: &mut Commands, ambient_light: &mut ResMut<AmbientLig
     ambient_light.brightness = AMBIENT_INTENSITY;
 }
 
-fn configure_window(mut window: Mut<Window>) {
+fn configure_window(window: &mut Window) {
     window.title = "Logica".to_string();
     window.resolution = WindowResolution::new(SCREEN_WIDTH, SCREEN_HEIGHT);
     window.present_mode = PresentMode::AutoVsync;
     window.cursor.icon = CursorIcon::Crosshair;
     window.cursor.grab_mode = CursorGrabMode::Locked;
     window.window_theme = Some(WindowTheme::Dark);
-    window.mode = WindowMode::BorderlessFullscreen;
+    window.mode = WindowMode::Windowed;
     window.cursor.visible = false;
     window.decorations = true;
+}
+
+fn setup_environment(
+    commands: &mut Commands,
+    ambient_light: &mut ResMut<AmbientLight>,
+    mut window: Mut<Window>,
+) {
+    setup_lighting(commands, ambient_light);
+    configure_window(&mut window);
 }
 
 fn spawn_ui_elements(commands: &mut Commands, texture_handles: &Res<TextureHandles>) {
@@ -71,39 +77,39 @@ fn spawn_ui_elements(commands: &mut Commands, texture_handles: &Res<TextureHandl
     });
 }
 
-fn create_ground(commands: &mut Commands, meshes: &mut ResMut<Assets<Mesh>>, materials: &mut ResMut<Assets<StandardMaterial>>, texture_handles: &Res<TextureHandles>) {
-    let handle_texture = texture_handles.image_handles.get(1).expect("Texture handle not found");
-    let material_handle = materials.add(StandardMaterial {
-        base_color_texture: Some(handle_texture.clone()),
-        alpha_mode: AlphaMode::Blend,
-        perceptual_roughness: WORLD_PERCIEVED_ROUGHNESS,
-        metallic: WORLD_METALLIC,
-        reflectance: WORLD_REFLECTANCE,
-        ..Default::default()
-    });
+fn create_ground(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    texture_handles: &Res<TextureHandles>,
+) {
+    if let Some(handle_texture) = texture_handles.image_handles.get(1) {
+        let material_handle = materials.add(StandardMaterial {
+            base_color_texture: Some(handle_texture.clone()),
+            alpha_mode: AlphaMode::Blend,
+            perceptual_roughness: WORLD_PERCIEVED_ROUGHNESS,
+            metallic: WORLD_METALLIC,
+            reflectance: WORLD_REFLECTANCE,
+            ..Default::default()
+        });
 
-    
-    let mut mesh: Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32 }.into();
-    let uvs = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
-
-    match uvs {
-        VertexAttributeValues::Float32x2(values) => {
+        let mut mesh: Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32 }.into();
+        if let VertexAttributeValues::Float32x2(values) = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap() {
             for uv in values.iter_mut() {
                 uv[0] *= WORLD_SIZE as f32;
                 uv[1] *= WORLD_SIZE as f32; 
             }
-        },
-        _ => (),
-    };
-    let mesh_handle = meshes.add(mesh);
+        }
+        let mesh_handle = meshes.add(mesh);
 
-    commands.spawn((
-        PbrBundle {
-            mesh: mesh_handle,
-            material: material_handle,
-            transform: Transform::from_translation(Vec3::new(0.5, WORLD_HEIGHT_OFFSET, 0.5)),
-            ..default()
-        },
-        Ground,
-    )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT_OFFSET, WORLD_SIZE as f32));
+        commands.spawn((
+            PbrBundle {
+                mesh: mesh_handle,
+                material: material_handle,
+                transform: Transform::from_translation(Vec3::new(0.5, WORLD_HEIGHT_OFFSET, 0.5)),
+                ..default()
+            },
+            Ground,
+        )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT_OFFSET, WORLD_SIZE as f32));
+    }
 }

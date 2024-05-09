@@ -204,8 +204,6 @@ pub fn voxel_interaction_system(
     let place_delay = Duration::from_millis(200);
     let remove_delay = Duration::from_millis(100);
 
-    println!("simulation speed: {}", speed_bar.speed_index);
-
     if keyboard_input.just_pressed(KeyCode::BracketRight) {
         speed_bar.speed_index = (speed_bar.speed_index + 1).clamp(1,5);
     }

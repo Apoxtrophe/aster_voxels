@@ -1,6 +1,7 @@
 use crate::v_config::VOXEL_ATLAS_SIZE;
+
 pub fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
-    let atlas_width = VOXEL_ATLAS_SIZE as f32; // Total number of textures in atlas horizontally
+    let atlas_width = VOXEL_ATLAS_SIZE as f32;
     let texture_size = 1.0 / atlas_width;
 
     let left = texture_index as f32 * texture_size;
@@ -8,118 +9,96 @@ pub fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
     let top = 0.0;
     let bottom = 1.0;
 
-    let plain_left = (texture_index + 9) as f32 * texture_size;
-    let plain_right = plain_left + texture_size;
+    let alternate_left = (texture_index + 9) as f32 * texture_size;
+    let alternate_right = alternate_left + texture_size;
 
-    // Assuming a simple cube where each face uses the same part of the texture
+    let mut uv_coordinates = Vec::with_capacity(24);
+    for _ in 0..6 {
+        uv_coordinates.extend_from_slice(&[
+            [left, top],
+            [right, top],
+            [right, bottom],
+            [left, bottom],
+        ]);
+        uv_coordinates.extend_from_slice(&[
+            [alternate_left, top],
+            [alternate_right, top],
+            [alternate_right, bottom],
+            [alternate_left, bottom],
+        ]);
+    }
+
+    uv_coordinates
+}
+
+pub fn calculate_positions() -> Vec<[f32; 3]> {
     vec![
-        // UVs for each face of the cube
-        [left, top],
-        [right, top],
-        [right, bottom],
-        [left, bottom],
-        // Repeat this for each of the 6 faces of the cube
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
-
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
-
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
-
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
-
-        [plain_left, top],
-        [plain_right, top],
-        [plain_right, bottom],
-        [plain_left, bottom],
+        // top (facing towards +y)
+        [-0.5, 0.5, -0.5],
+        [0.5, 0.5, -0.5],
+        [0.5, 0.5, 0.5],
+        [-0.5, 0.5, 0.5],
+        // bottom (-y)
+        [-0.5, -0.5, -0.5],
+        [0.5, -0.5, -0.5],
+        [0.5, -0.5, 0.5],
+        [-0.5, -0.5, 0.5],
+        // right (+x)
+        [0.5, -0.5, -0.5],
+        [0.5, -0.5, 0.5],
+        [0.5, 0.5, 0.5],
+        [0.5, 0.5, -0.5],
+        // left (-x)
+        [-0.5, -0.5, -0.5],
+        [-0.5, -0.5, 0.5],
+        [-0.5, 0.5, 0.5],
+        [-0.5, 0.5, -0.5],
+        // back (+z)
+        [-0.5, -0.5, 0.5],
+        [-0.5, 0.5, 0.5],
+        [0.5, 0.5, 0.5],
+        [0.5, -0.5, 0.5],
+        // forward (-z)
+        [-0.5, -0.5, -0.5],
+        [-0.5, 0.5, -0.5],
+        [0.5, 0.5, -0.5],
+        [0.5, -0.5, -0.5],
     ]
 }
 
-pub fn calculate_positions (
-
-) -> Vec<[f32; 3]>{
-    let positions = vec![
-            // top (facing towards +y)
-            [-0.5, 0.5, -0.5], // vertex with index 0
-            [0.5, 0.5, -0.5],  // vertex with index 1
-            [0.5, 0.5, 0.5],   // etc. until 23
-            [-0.5, 0.5, 0.5],
-            // bottom   (-y)
-            [-0.5, -0.5, -0.5],
-            [0.5, -0.5, -0.5],
-            [0.5, -0.5, 0.5],
-            [-0.5, -0.5, 0.5],
-            // right    (+x)
-            [0.5, -0.5, -0.5],
-            [0.5, -0.5, 0.5],
-            [0.5, 0.5, 0.5], // This vertex is at the same position as vertex with index 2, but they'll have different UV and normal
-            [0.5, 0.5, -0.5],
-            // left     (-x)
-            [-0.5, -0.5, -0.5],
-            [-0.5, -0.5, 0.5],
-            [-0.5, 0.5, 0.5],
-            [-0.5, 0.5, -0.5],
-            // back     (+z)
-            [-0.5, -0.5, 0.5],
-            [-0.5, 0.5, 0.5],
-            [0.5, 0.5, 0.5],
-            [0.5, -0.5, 0.5],
-            // forward  (-z)
-            [-0.5, -0.5, -0.5],
-            [-0.5, 0.5, -0.5],
-            [0.5, 0.5, -0.5],
-            [0.5, -0.5, -0.5],
-        ];
-        positions
-}
-
-pub fn calculate_normals (
-
-) -> Vec<[f32; 3]>{
-    let normals = vec![
-            // Normals for the top side (towards +y)
-            [0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0],
-            // Normals for the bottom side (towards -y)
-            [0.0, -1.0, 0.0],
-            [0.0, -1.0, 0.0],
-            [0.0, -1.0, 0.0],
-            [0.0, -1.0, 0.0],
-            // Normals for the right side (towards +x)
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            // Normals for the left side (towards -x)
-            [-1.0, 0.0, 0.0],
-            [-1.0, 0.0, 0.0],
-            [-1.0, 0.0, 0.0],
-            [-1.0, 0.0, 0.0],
-            // Normals for the back side (towards +z)
-            [0.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0],
-            [0.0, 0.0, 1.0],
-            // Normals for the forward side (towards -z)
-            [0.0, 0.0, -1.0],
-            [0.0, 0.0, -1.0],
-            [0.0, 0.0, -1.0],
-            [0.0, 0.0, -1.0],
-        ];
-        normals
+pub fn calculate_normals() -> Vec<[f32; 3]> {
+    vec![
+        // Normals for the top side (towards +y)
+        [0.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0],
+        // Normals for the bottom side (towards -y)
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        // Normals for the right side (towards +x)
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        // Normals for the left side (towards -x)
+        [-1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        // Normals for the back side (towards +z)
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        // Normals for the forward side (towards -z)
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+    ]
 }
 
 pub fn calculate_indices() -> Vec<u32> {

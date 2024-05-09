@@ -54,7 +54,6 @@ pub fn update_save_notification(
     } else if timer.0.tick(time.delta()).just_finished() {
         for mut visibility in query.iter_mut() {
             *visibility = Visibility::Hidden;
-            println!("I tried");
         }
     }
 }
@@ -87,9 +86,9 @@ pub fn simulation_speed_widget(
     let index = speed_bar.speed_index - 1;
 
 
-    let mut simulation_speed: u32 = 0;
+    let simulation_speed: u32;
     match index {
-        0 => simulation_speed = 0,
+        0 => simulation_speed = 500000,
         1 => simulation_speed = 500,
         2 => simulation_speed = 100,
         3 => simulation_speed = 10,

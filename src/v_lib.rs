@@ -3,7 +3,7 @@ use bevy_mod_raycast::immediate::Raycast;
 
 
 
-use bevy_math::Ray3d;
+use bevy_math::{Ray3d, Vec3A};
 
 
 use super::v_config::*;
@@ -22,7 +22,7 @@ pub struct VoxelInfo {
 
 impl VoxelInfo {
     pub fn new() -> Self {
-        VoxelInfo {
+        Self {
             position: IVec3::ZERO,
             adjacent: IVec3::ZERO,
             in_range: false,
@@ -47,26 +47,32 @@ pub fn raycasting(
             let distance = intersection_data.distance();
             let normal = intersection_data.normal().round();
             let triangle = intersection_data.triangle().unwrap();
-            let position =
-                ((Vec3::from(triangle[0]) + Vec3::from(triangle[1]) + Vec3::from(triangle[2]))
-                    / 3.0
-                    - normal * 0.5)
-                    .round()
-                    .as_ivec3();
+            let position = calculate_voxel_position(triangle, normal);
             let is_in_range = distance < PLAYER_INTERACTION_MAX;
             let adjacent_position = position + normal.as_ivec3();
 
-            // Neat lil gizmo
             if is_in_range {
-                gizmos.cuboid(
-                    Transform::from_translation(position.as_vec3()).with_scale(Vec3::splat(1.02)),
-                    Color::BLACK,
-                );
+                draw_voxel_gizmo(&mut gizmos, position);
             }
+
             return Ok((position, adjacent_position, is_in_range));
         }
     }
     Err(RaycastingError::NoIntersection)
+}
+
+fn calculate_voxel_position(triangle: [Vec3A; 3], normal: Vec3) -> IVec3 {
+    ((Vec3::from(triangle[0]) + Vec3::from(triangle[1]) + Vec3::from(triangle[2])) / 3.0
+        - normal * 0.5)
+        .round()
+        .as_ivec3()
+}
+
+fn draw_voxel_gizmo(gizmos: &mut Gizmos, position: IVec3) {
+    gizmos.cuboid(
+        Transform::from_translation(position.as_vec3()).with_scale(Vec3::splat(1.02)),
+        Color::BLACK,
+    );
 }
 
 pub fn update_info(
@@ -77,22 +83,26 @@ pub fn update_info(
     get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
     gizmos: Gizmos,
 ) {
-    if let Ok((position, adjacent_position, is_in_range)) = raycasting(raycast, query, gizmos) {
-        voxel_info.position = position;
-        voxel_info.adjacent = adjacent_position;
-        voxel_info.in_range = is_in_range;
-        if let Some((voxel_type, voxel_state)) = voxel.get(position, get_query) {
-            voxel_info.is_on = Some(voxel_state.0);
-            voxel_info.voxel_type = Some(voxel_type);
-        } else {
-            handle_no_voxel_found(&mut voxel_info);
+    match raycasting(raycast, query, gizmos) {
+        Ok((position, adjacent_position, is_in_range)) => {
+            voxel_info.position = position;
+            voxel_info.adjacent = adjacent_position;
+            voxel_info.in_range = is_in_range;
+
+            if let Some((voxel_type, voxel_state)) = voxel.get(position, get_query) {
+                voxel_info.is_on = Some(voxel_state.0);
+                voxel_info.voxel_type = Some(voxel_type);
+            } else {
+                reset_voxel_info(&mut voxel_info);
+            }
         }
-    } else {
-        handle_no_voxel_found(&mut voxel_info);
+        Err(RaycastingError::NoIntersection) => {
+            reset_voxel_info(&mut voxel_info);
+        }
     }
 }
-fn handle_no_voxel_found(voxel_info: &mut VoxelInfo) {
+
+fn reset_voxel_info(voxel_info: &mut VoxelInfo) {
     voxel_info.is_on = None;
     voxel_info.voxel_type = None;
 }
-

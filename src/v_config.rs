@@ -1,8 +1,8 @@
 
 use bevy::render::color::{self, Color};
 //Screen
-pub const SCREEN_WIDTH: f32 = 3440.0;
-pub const SCREEN_HEIGHT: f32 = 1440.0;
+pub const SCREEN_WIDTH: f32 = 1920.0;
+pub const SCREEN_HEIGHT: f32 = 1080.0;
 
 //Player
 pub const PLAYER_YAW_SPEED: f32 = 12.0;
