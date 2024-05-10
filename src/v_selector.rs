@@ -1,5 +1,4 @@
 use bevy::ecs::system::Resource;
-
 use crate::{v_components::TypeVoxel, v_config::HOTBAR_ELEMENT_NUMBER};
 
 #[derive(Resource, Clone, Copy)]
@@ -17,11 +16,7 @@ impl VoxelSelector {
     }
 
     pub fn previous(&mut self) {
-        if self.current_index == 0 {
-            self.current_index = HOTBAR_ELEMENT_NUMBER - 1;
-        } else {
-            self.current_index -= 1;
-        }
+        self.current_index = (self.current_index + HOTBAR_ELEMENT_NUMBER - 1) % HOTBAR_ELEMENT_NUMBER;
     }
 
     pub fn current_voxel_type(&self) -> TypeVoxel {

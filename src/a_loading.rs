@@ -1,6 +1,10 @@
+use crate::{
+    v_components::MainMenuEntity, v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo,
+    v_lighting::SunDirection, v_main_menu::clear_main_menu_entities, v_selector::VoxelSelector,
+    v_simulation::MyTimer, v_structure::Voxel, v_widgets::SpeedBar, AppState,
+};
 use bevy::prelude::*;
 use std::time::Duration;
-use crate::{v_components::MainMenuEntity, v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_main_menu::clear_main_menu_entities, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, v_widgets::SpeedBar, AppState};
 
 #[derive(Resource, Clone)]
 pub struct TextureHandles {
@@ -9,17 +13,16 @@ pub struct TextureHandles {
 
 impl TextureHandles {
     fn new(handles: Vec<Handle<Image>>) -> Self {
-        Self { image_handles: handles }
+        Self {
+            image_handles: handles,
+        }
     }
 }
 
 #[derive(Resource)]
 pub struct SaveNotificationTimer(pub Timer);
 
-pub fn voxel_loading(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
+pub fn voxel_loading(mut commands: Commands, asset_server: Res<AssetServer>) {
     println!("Beginning asset loading");
 
     let texture_handles = load_textures(&asset_server);
@@ -69,13 +72,11 @@ pub fn asset_check(
     }
 }
 
-fn all_assets_loaded(
-    texture_handles: &TextureHandles,
-    image_assets: &Assets<Image>,
-) -> bool {
-    texture_handles.image_handles.iter().all(|handle| {
-        image_assets.get(handle).is_some()
-    })
+fn all_assets_loaded(texture_handles: &TextureHandles, image_assets: &Assets<Image>) -> bool {
+    texture_handles
+        .image_handles
+        .iter()
+        .all(|handle| image_assets.get(handle).is_some())
 }
 
 #[derive(Resource, Clone)]

@@ -1,10 +1,32 @@
-use bevy::{asset::AssetServer, core_pipeline::core_2d::Camera2dBundle, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}}, hierarchy::BuildChildren, render::color::Color, text::{JustifyText, TextStyle}, transform::components::Transform, ui::{node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle}, widget::Button, AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent, JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex}, utils::default, window::{PrimaryWindow, Window, WindowResolution}};
-
+use bevy::{
+    asset::AssetServer,
+    core_pipeline::core_2d::Camera2dBundle,
+    ecs::{
+        entity::Entity,
+        query::With,
+        schedule::NextState,
+        system::{Commands, Query, Res, ResMut},
+    },
+    hierarchy::BuildChildren,
+    render::color::Color,
+    text::{JustifyText, TextStyle},
+    transform::components::Transform,
+    ui::{
+        node_bundles::{ButtonBundle, ImageBundle, NodeBundle, TextBundle},
+        widget::Button,
+        AlignContent, BackgroundColor, BorderColor, Display, Interaction, JustifyContent,
+        JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex,
+    },
+    utils::default,
+    window::{PrimaryWindow, Window, WindowResolution},
+};
 use crate::{v_components::MainMenuEntity, AppState};
-
-use bevy::prelude::*;
-use bevy_egui::{egui::{self, Color32}, EguiContexts};
 use bevy::prelude::Resource;
+use bevy::prelude::*;
+use bevy_egui::{
+    egui::{self, Color32},
+    EguiContexts,
+};
 
 #[derive(Component)]
 pub enum MenuButton {
@@ -18,51 +40,50 @@ pub fn setup_main_menu(
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
+    let mut window = windows.single_mut();
+    window.resolution = WindowResolution::new(1920.0, 1080.0);
+    window.cursor.visible = true;
 
-    windows.single_mut().resolution = WindowResolution::new(1920.0, 1080.0);
-    windows.single_mut().cursor.visible = true;
-    // UI CAMERA
-    commands.spawn(Camera2dBundle::default()).insert(MainMenuEntity);
-    
+    commands
+        .spawn(Camera2dBundle::default())
+        .insert(MainMenuEntity);
     let main_image_handle = asset_server.load("UserInterface/logicalogo2.png");
-    
     println!("Entering Main Menu");
 
-
-
-    let parent = NodeBundle {
-        style: Style {
-            display: Display::Flex,
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
-            align_content: AlignContent::Center,
-            overflow: Overflow::clip(),
-            justify_items: JustifyItems::Center,
-            ..default()  
-        },
+    let parent_style = Style {
+        display: Display::Flex,
+        width: Val::Percent(100.0),
+        height: Val::Percent(100.0),
+        align_content: AlignContent::Center,
+        overflow: Overflow::clip(),
+        justify_items: JustifyItems::Center,
         ..default()
     };
-    
-    let child_main = ImageBundle {
-        style: Style {
-            // Size of the image
-            width: Val::Px(1920.0),
-            height: Val::Px(1080.0),
-            
+
+    let child_main_style = Style {
+        width: Val::Px(1920.0),
+        height: Val::Px(1080.0),
+        ..default()
+    };
+
+    let parent_entity = commands
+        .spawn(NodeBundle {
+            style: parent_style,
             ..default()
-        },
-        z_index: ZIndex::Local(-5),
-        image: main_image_handle.into(),
-        // This makes the image non-interactive and ignores pointer events
-        ..default()
-    };
-    let parent_entity = commands.spawn(parent)
+        })
         .insert(MainMenuEntity)
         .id();
 
-    let child_main = commands.spawn(child_main)
+    let child_main = commands
+        .spawn(ImageBundle {
+            style: child_main_style,
+            z_index: ZIndex::Local(-5),
+            image: main_image_handle.into(),
+            ..default()
+        })
         .insert(MainMenuEntity)
         .id();
+
     let load_button_entity = create_load_button(&mut commands, &asset_server);
     let new_button_entity = create_new_button(&mut commands, &asset_server);
     let settings_button_entity = create_settings_button(&mut commands, &asset_server);
@@ -82,32 +103,24 @@ pub fn main_menu_buttons(
             &Interaction,
             &mut BackgroundColor,
             &mut BorderColor,
-            &MenuButton, // Add the MenuButton component to the query
+            &MenuButton,
         ),
-        With<Button>,
+        (With<Button>, With<MenuButton>),
     >,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
-    for (_, interaction, _, mut border_color, menu_button) in interaction_query.iter_mut() {   
+    for (_, interaction, _, mut border_color, menu_button) in interaction_query.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
                 border_color.0 = Color::RED;
                 match menu_button {
-                    MenuButton::Load => {
-                        next_state.set(AppState::LoadWorldMenu);
-                    }
-                    MenuButton::New => {
-                        next_state.set(AppState::WorldNaming);
-                    }
+                    MenuButton::Load => next_state.set(AppState::LoadWorldMenu),
+                    MenuButton::New => next_state.set(AppState::WorldNaming),
                     MenuButton::Settings => {}
                 }
-            },
-            Interaction::Hovered => {
-                border_color.0 = Color::WHITE;
-            },
-            Interaction::None => {
-                border_color.0 = Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) };
-            },
+            }
+            Interaction::Hovered => border_color.0 = Color::WHITE,
+            Interaction::None => border_color.0 = Color::rgba(0.0, 0.0, 0.0, 0.0),
         }
     }
 }
@@ -121,10 +134,68 @@ pub fn clear_main_menu_entities(
     }
 }
 
-fn create_load_button(
+#[derive(Resource, Default)]
+pub struct WorldName(pub String);
+
+#[derive(Component)]
+pub struct WorldNameInput {
+    pub name: String,
+}
+
+fn create_button(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
+    text: &str,
+    position: (Val, Val),
+    menu_button: MenuButton,
 ) -> Entity {
+    let button_style = Style {
+        min_width: Val::Px(200.0),
+        min_height: Val::Px(80.0),
+        max_height: Val::Px(80.0),
+        left: position.0,
+        top: position.1,
+        border: UiRect::all(Val::Px(5.0)),
+        align_content: AlignContent::Center,
+        justify_content: JustifyContent::Center,
+        ..default()
+    };
+
+    let button = ButtonBundle {
+        style: button_style,
+        z_index: ZIndex::Local(5),
+        background_color: Color::NONE.into(),
+        ..default()
+    };
+
+    let text_bundle = TextBundle::from_section(
+        text,
+        TextStyle {
+            font: asset_server.load("Fonts/Retro Gaming.ttf"),
+            font_size: 80.0,
+            color: Color::WHITE,
+        },
+    )
+    .with_text_justify(JustifyText::Center)
+    .with_style(Style::default());
+
+    commands
+        .spawn(button)
+        .insert(MainMenuEntity)
+        .insert(menu_button)
+        .with_children(|parent| {
+            parent.spawn(text_bundle).insert(MainMenuEntity);
+        })
+        .id()
+}
+
+pub fn setup_world_naming(mut commands: Commands) {
+    commands.spawn(WorldNameInput {
+        name: String::new(),
+    });
+}
+
+fn create_load_button(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
     let button_style = Style {
         min_width: Val::Px(200.0),
         min_height: Val::Px(80.0),
@@ -145,17 +216,15 @@ fn create_load_button(
     };
 
     let load_text = TextBundle::from_section(
-        "LOAD", 
+        "LOAD",
         TextStyle {
-            font: asset_server.load("Fonts/Retro Gaming.ttf"), 
+            font: asset_server.load("Fonts/Retro Gaming.ttf"),
             font_size: 80.0,
             color: Color::WHITE,
         },
     )
-    .with_text_justify(JustifyText::Center) 
-    .with_style(Style {
-        ..default()
-    });
+    .with_text_justify(JustifyText::Center)
+    .with_style(Style { ..default() });
 
     commands
         .spawn(button_load)
@@ -167,10 +236,7 @@ fn create_load_button(
         .id()
 }
 
-fn create_new_button(
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-) -> Entity {
+fn create_new_button(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
     let button_new = ButtonBundle {
         style: Style {
             position_type: PositionType::Absolute,
@@ -184,27 +250,29 @@ fn create_new_button(
             justify_content: JustifyContent::Center,
             ..default()
         },
-        
+
         z_index: ZIndex::Local(5),
-        background_color: Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) }.into(),
-        transform: Transform {
-            ..default()
-        },
+        background_color: Color::Rgba {
+            red: (0.0),
+            green: (0.0),
+            blue: (0.0),
+            alpha: (0.0),
+        }
+        .into(),
+        transform: Transform { ..default() },
         ..default()
     };
 
     let new_text = TextBundle::from_section(
-        "NEW", 
+        "NEW",
         TextStyle {
             font: asset_server.load("Fonts/Retro Gaming.ttf"),
-            font_size: 80.0, 
-            color: Color::WHITE, 
+            font_size: 80.0,
+            color: Color::WHITE,
         },
     )
-    .with_text_justify(JustifyText::Center) 
-    .with_style(Style {
-        ..default()
-    });
+    .with_text_justify(JustifyText::Center)
+    .with_style(Style { ..default() });
 
     commands
         .spawn(button_new)
@@ -216,10 +284,7 @@ fn create_new_button(
         .id()
 }
 
-fn create_settings_button(
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-) -> Entity {
+fn create_settings_button(commands: &mut Commands, asset_server: &Res<AssetServer>) -> Entity {
     let button_settings = ButtonBundle {
         style: Style {
             position_type: PositionType::Absolute,
@@ -233,24 +298,28 @@ fn create_settings_button(
             justify_content: JustifyContent::Center,
             ..default()
         },
-        
+
         z_index: ZIndex::Local(5),
-        background_color: Color::Rgba { red: (0.0), green: (0.0), blue: (0.0), alpha: (0.0) }.into(),
-        transform: Transform {
-            ..default()
-        },
+        background_color: Color::Rgba {
+            red: (0.0),
+            green: (0.0),
+            blue: (0.0),
+            alpha: (0.0),
+        }
+        .into(),
+        transform: Transform { ..default() },
         ..default()
     };
 
     let settings_text = TextBundle::from_section(
         "SETTINGS",
         TextStyle {
-            font: asset_server.load("Fonts/Retro Gaming.ttf"), 
+            font: asset_server.load("Fonts/Retro Gaming.ttf"),
             font_size: 80.0,
             color: Color::WHITE,
         },
     )
-    .with_text_justify(JustifyText::Center) 
+    .with_text_justify(JustifyText::Center)
     .with_style(Style {
         align_content: AlignContent::Center,
         ..default()
@@ -266,20 +335,6 @@ fn create_settings_button(
         .id()
 }
 
-#[derive(Resource, Default)]
-pub struct WorldName(pub String);
-
-#[derive(Component)]
-pub struct WorldNameInput {
-    pub name: String,
-}
-
-pub fn setup_world_naming(
-    mut commands: Commands,
-) {
-    commands.spawn(WorldNameInput {name: String::new()});
-}
-
 pub fn world_naming(
     mut contexts: EguiContexts,
     mut next_state: ResMut<NextState<AppState>>,
@@ -293,30 +348,13 @@ pub fn world_naming(
             .default_width(400.0)
             .show(contexts.ctx_mut(), |ui| {
                 ui.vertical_centered_justified(|ui| {
-                    ui.label(
-                        egui::RichText::new("Create World").color(Color32::WHITE).size(48.0)
-                            .text_style(egui::TextStyle::Heading),
-                    );
+                    ui.heading("Create World");
                     ui.separator();
                     ui.add_space(10.0);
-                    let _ = ui.add_sized(
-                        egui::vec2(64.0, 40.0),
-                        egui::TextEdit::singleline(&mut input.name)
-                            .font(egui::TextStyle::Heading)
-                            .text_color(egui::Color32::from_rgb(255, 255, 255))
-                            .frame(true)
-                            .hint_text(egui::RichText::new("World Name").color(Color32::DARK_GRAY).size(32.0)), 
-                    );
+                    ui.text_edit_singleline(&mut input.name);
                     ui.separator();
                     ui.add_space(20.0);
-                    let button = ui.add_sized(
-                        egui::vec2(64.0, 40.0),
-                        egui::Button::new(egui::RichText::new("Create").color(Color32::WHITE).size(36.0))
-                            .small()
-                            .fill(egui::Color32::from_rgb(48, 48, 48))
-                            .stroke(egui::Stroke::new(3.0, egui::Color32::from_rgb(255, 255, 255)))
-                    );
-                    if button.clicked() {
+                    if ui.button("Create").clicked() {
                         world_name.0 = input.name.clone();
                         next_state.set(AppState::AssetLoading);
                     }
@@ -342,79 +380,45 @@ pub fn load_world_menu(
         .resizable(false)
         .default_width(400.0)
         .show(contexts.ctx_mut(), |ui| {
-            ui.vertical_centered_justified(|ui| {
-                ui.heading(egui::RichText::new("Load World").color(Color32::WHITE).size(48.0))
-            });
+            ui.heading("Load World");
             ui.separator();
             ui.add_space(16.0);
 
-            let selected = None;
             if let Ok(entries) = std::fs::read_dir("assets/Saves") {
-                ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                    for entry in entries.flatten() {
-                        if let Some(file_name) = entry.file_name().to_str() {
-                            if let Some(world_name) = file_name.strip_suffix(".json") {
-                                let selected = selected_world.0 == Some(world_name.to_string());
-                                ui.add_space(8.0);
-                                if ui
-                                    .selectable_label(
-                                        selected,
-                                        egui::RichText::new(world_name)
-                                            .heading()
-                                            .color(Color32::GRAY)
-                                            .size(32.0),
-                                    )
-                                    .clicked()
-                                {
-                                    selected_world.0 = Some(world_name.to_string());
-                                }
-                            }
-                        }
+                for entry in entries.flatten() {
+                    if let Some(world_name) = entry
+                        .file_name()
+                        .to_str()
+                        .and_then(|s| s.strip_suffix(".json"))
+                    {
+                        let selected = selected_world.0 == Some(world_name.to_string());
+                        ui.selectable_label(selected, world_name)
+                            .clicked()
+                            .then(|| {
+                                selected_world.0 = Some(world_name.to_string());
+                            });
+                        ui.add_space(8.0);
                     }
-                });
-            }
-
-            if let Some(world) = selected {
-                selected_world.0 = Some(world)
+                }
             }
 
             ui.separator();
             ui.add_space(16.0);
 
-            ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                if ui
-                    .button(
-                        egui::RichText::new("Load")
-                            .heading()
-                            .color(Color32::WHITE)
-                            .size(48.0),
-                    )
-                    .clicked()
-                {
-                    if selected_world.0.is_some() {
-                        next_state.set(AppState::AssetLoading);
+            if ui.button("Load").clicked() && selected_world.0.is_some() {
+                next_state.set(AppState::AssetLoading);
+            }
+
+            ui.add_space(8.0);
+
+            if ui.button("Delete").clicked() {
+                if let Some(world) = &selected_world.0 {
+                    let file_path = format!("assets/Saves/{}.json", world);
+                    if std::fs::remove_file(&file_path).is_ok() {
+                        selected_world.0 = None;
                     }
                 }
-
-                ui.add_space(8.0);
-
-                if ui
-                    .button(
-                        egui::RichText::new("Delete")
-                            .heading()
-                            .color(Color32::WHITE)
-                            .size(48.0),
-                    )
-                    .clicked()
-                {
-                    if let Some(world) = &selected_world.0 {
-                        let file_path = format!("assets/Saves/{}.json", world);
-                        if std::fs::remove_file(&file_path).is_ok() {
-                            selected_world.0 = None;
-                        }
-                    }
-                }
-            });
+            }
         });
 
     if keyboard_input.just_pressed(KeyCode::Escape) {

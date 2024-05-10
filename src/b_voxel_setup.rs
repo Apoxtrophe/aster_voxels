@@ -1,9 +1,13 @@
-use bevy::{prelude::*, window::*, render::mesh::VertexAttributeValues};
-
-use bevy_rapier3d::geometry::Collider;
-use crate::{a_loading::TextureHandles, v_components::{Ground, Sun}, v_config::*, v_graphics::VoxelAssets};
-use bevy::render::mesh::shape;
+use bevy::{prelude::*, render::mesh::VertexAttributeValues, window::*};
 use crate::AppState;
+use crate::{
+    a_loading::TextureHandles,
+    v_components::{Ground, Sun},
+    v_config::*,
+    v_graphics::VoxelAssets,
+};
+use bevy::render::mesh::shape;
+use bevy_rapier3d::geometry::Collider;
 
 pub fn voxel_setup(
     mut commands: Commands,
@@ -12,7 +16,7 @@ pub fn voxel_setup(
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut ambient_light: ResMut<AmbientLight>,
     mut next_state: ResMut<NextState<AppState>>,
-    texture_handles: Res<TextureHandles>, 
+    texture_handles: Res<TextureHandles>,
 ) {
     println!("Beginning GameSetup");
     commands.insert_resource(VoxelAssets::new(&mut meshes, &texture_handles));
@@ -25,13 +29,15 @@ pub fn voxel_setup(
 }
 
 fn setup_lighting(commands: &mut Commands, ambient_light: &mut ResMut<AmbientLight>) {
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            shadows_enabled: true,
+    commands
+        .spawn(DirectionalLightBundle {
+            directional_light: DirectionalLight {
+                shadows_enabled: true,
+                ..Default::default()
+            },
             ..Default::default()
-        },
-        ..Default::default()
-    }).insert(Sun);
+        })
+        .insert(Sun);
 
     ambient_light.color = AMBIENT_COLOR;
     ambient_light.brightness = AMBIENT_INTENSITY;
@@ -59,7 +65,10 @@ fn setup_environment(
 }
 
 fn spawn_ui_elements(commands: &mut Commands, texture_handles: &Res<TextureHandles>) {
-    let crosshair_handle = texture_handles.image_handles.get(2).expect("Texture handle not found");
+    let crosshair_handle = texture_handles
+        .image_handles
+        .get(2)
+        .expect("Texture handle not found");
     commands.spawn(ImageBundle {
         image: UiImage {
             texture: (crosshair_handle.clone()),
@@ -93,23 +102,39 @@ fn create_ground(
             ..Default::default()
         });
 
-        let mut mesh: Mesh = shape::Plane { size: WORLD_SIZE as f32, subdivisions: WORLD_SIZE as u32 }.into();
-        if let VertexAttributeValues::Float32x2(values) = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap() {
+        let mut mesh: Mesh = shape::Plane {
+            size: WORLD_SIZE as f32,
+            subdivisions: WORLD_SIZE as u32,
+        }
+        .into();
+        if let VertexAttributeValues::Float32x2(values) =
+            mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap()
+        {
             for uv in values.iter_mut() {
                 uv[0] *= WORLD_SIZE as f32;
-                uv[1] *= WORLD_SIZE as f32; 
+                uv[1] *= WORLD_SIZE as f32;
             }
         }
         let mesh_handle = meshes.add(mesh);
 
-        commands.spawn((
-            PbrBundle {
-                mesh: mesh_handle,
-                material: material_handle,
-                transform: Transform::from_translation(Vec3::new(0.5, WORLD_HEIGHT_OFFSET, 0.5)),
-                ..default()
-            },
-            Ground,
-        )).insert(Collider::cuboid(WORLD_SIZE as f32, WORLD_HEIGHT_OFFSET, WORLD_SIZE as f32));
+        commands
+            .spawn((
+                PbrBundle {
+                    mesh: mesh_handle,
+                    material: material_handle,
+                    transform: Transform::from_translation(Vec3::new(
+                        0.5,
+                        WORLD_HEIGHT_OFFSET,
+                        0.5,
+                    )),
+                    ..default()
+                },
+                Ground,
+            ))
+            .insert(Collider::cuboid(
+                WORLD_SIZE as f32,
+                WORLD_HEIGHT_OFFSET,
+                WORLD_SIZE as f32,
+            ));
     }
 }

@@ -1,4 +1,3 @@
-
 use bevy::render::color::{self, Color};
 //Screen
 pub const SCREEN_WIDTH: f32 = 1920.0;
@@ -33,12 +32,12 @@ pub const SUN_INTENSITY: f32 = 10000.0;
 pub const SUN_ANGLE: f32 = 65.0;
 pub const SUN_DAY_NIGHT: bool = false;
 pub const SUN_DAY_LENGTH: f32 = 0.01;
-pub const SUN_TIMER_RATE: u64 = 100; 
+pub const SUN_TIMER_RATE: u64 = 100;
 pub const AMBIENT_INTENSITY: f32 = 500.0;
 pub const AMBIENT_COLOR: Color = Color::BEIGE;
 
 // Hotbar
-pub const HOTBAR_ELEMENT_NUMBER: usize = 9; 
+pub const HOTBAR_ELEMENT_NUMBER: usize = 9;
 pub const HOTBAR_SLOT_SIZE: f32 = 96.0;
 pub const HOTBAR_SPACING: f32 = 5.0;
 pub const HOTBAR_ABOVE_BOTTOM: f32 = 10.0;
@@ -50,7 +49,7 @@ pub const HOTBAR_BORDER_COLOR: Color = color::Color::ORANGE_RED;
 pub const DESCRIPTOR_FONT_SIZE: f32 = 64.0;
 pub const DESCRIPTOR_COLOR: Color = Color::SEA_GREEN;
 pub const DESCRIPTOR_BOTTOM: f32 = 8.0;
-pub const DESCRIPTOR_RIGHT: f32 = 50.0; 
-pub const DESCRIPTOR_FADE_TIMER: f32 = 1.0; 
+pub const DESCRIPTOR_RIGHT: f32 = 50.0;
+pub const DESCRIPTOR_FADE_TIMER: f32 = 1.0;
 
 // Main menu

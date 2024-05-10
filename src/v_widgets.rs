@@ -1,45 +1,67 @@
 use std::time::Duration;
-
-use bevy::{app::{App, Plugin, Update}, asset::Assets, ecs::{component::Component, event::EventReader, query::With, schedule::{common_conditions::in_state, IntoSystemConfigs, OnEnter}, system::{Commands, Query, Res, ResMut, Resource}}, hierarchy::BuildChildren, prelude::default, render::view::Visibility, sprite::{TextureAtlas, TextureAtlasLayout}, time::{Time, Timer, TimerMode}, ui::{node_bundles::{AtlasImageBundle, ImageBundle, NodeBundle}, AlignItems, FlexDirection, JustifyContent, Style, UiImage, Val}};
+use bevy::{
+    app::{App, Plugin, Update},
+    asset::Assets,
+    ecs::{
+        component::Component,
+        event::EventReader,
+        query::With,
+        schedule::{common_conditions::in_state, IntoSystemConfigs, OnEnter},
+        system::{Commands, Query, Res, ResMut, Resource},
+    },
+    hierarchy::BuildChildren,
+    prelude::default,
+    render::view::Visibility,
+    sprite::{TextureAtlas, TextureAtlasLayout},
+    time::{Time, Timer, TimerMode},
+    ui::{
+        node_bundles::{AtlasImageBundle, ImageBundle, NodeBundle},
+        AlignItems, FlexDirection, JustifyContent, Style, UiImage, Val,
+    },
+};
 use bevy_egui::egui::epaint::image;
 use bevy_math::Vec2;
 
-use crate::{a_loading::{SaveNotificationTimer, TextureHandles}, v_save::SaveEvent, v_simulation::MyTimer, AppState};
+use crate::{
+    a_loading::{SaveNotificationTimer, TextureHandles},
+    v_save::SaveEvent,
+    v_simulation::MyTimer,
+    AppState,
+};
 
 pub struct SaveNotificationPlugin;
 
 impl Plugin for SaveNotificationPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(SaveNotificationTimer(Timer::from_seconds(2.0, TimerMode::Once)))
-            .add_systems(OnEnter(AppState::InGame), setup_save_notification)
-            .add_systems(Update, (update_save_notification).run_if(in_state(AppState::InGame)));
+        app.insert_resource(SaveNotificationTimer(Timer::from_seconds(  2.0, TimerMode::Once,)))
+        .add_systems(OnEnter(AppState::InGame), setup_save_notification)
+        .add_systems(
+            Update, (update_save_notification).run_if(in_state(AppState::InGame)),
+        );
     }
 }
 
 #[derive(Component)]
 pub struct SaveNotification;
 
-pub fn setup_save_notification(
-    mut commands: Commands,
-    texture_handles: Res<TextureHandles>,
-) {
-    let image_handle = texture_handles.image_handles.get(4).unwrap_or_else(|| panic!("Texture handle not found"));
+pub fn setup_save_notification(mut commands: Commands, texture_handles: Res<TextureHandles>) {
+    let image_handle = texture_handles.image_handles.get(4).expect("Texture handle not found");
 
-    commands.spawn(ImageBundle {
-        style: Style {
-
-            width: Val::Px(64.0),
-            height: Val::Px(64.0),
+    commands.spawn((
+        ImageBundle {
+            style: Style {
+                width: Val::Px(64.0),
+                height: Val::Px(64.0),
+                ..default()
+            },
+            image: UiImage::new(image_handle.clone()),
+            visibility: Visibility::Hidden,
             ..default()
         },
-        image: UiImage::new(image_handle.clone()),
-        visibility: Visibility::Hidden,
-        ..Default::default()
-    })
-    .insert(SaveNotification);
+        SaveNotification,
+    ));
 }
 
- 
 pub fn update_save_notification(
     mut query: Query<&mut Visibility, With<SaveNotification>>,
     save_event_reader: EventReader<SaveEvent>,
@@ -47,29 +69,27 @@ pub fn update_save_notification(
     mut timer: ResMut<SaveNotificationTimer>,
 ) {
     if !save_event_reader.is_empty() {
-        for mut visibility in query.iter_mut() {
+        for mut visibility in &mut query {
             *visibility = Visibility::Visible;
         }
         timer.0.reset();
     } else if timer.0.tick(time.delta()).just_finished() {
-        for mut visibility in query.iter_mut() {
+        for mut visibility in &mut query {
             *visibility = Visibility::Hidden;
         }
     }
 }
 
-// Speed Controller 
+// Speed Controller
 
 #[derive(Resource)]
-pub struct SpeedBar{
+pub struct SpeedBar {
     pub speed_index: usize,
 }
 
 impl SpeedBar {
     pub fn new() -> Self {
-        SpeedBar {
-            speed_index: 1, 
-        }
+        SpeedBar { speed_index: 1 }
     }
 }
 

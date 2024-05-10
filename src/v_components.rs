@@ -26,8 +26,8 @@ pub struct StateVoxel(pub bool);
 #[derive(Component)]
 pub struct Sun;
 
-#[derive(Component)] 
+#[derive(Component)]
 pub struct MainMenuEntity;
 
-#[derive(Component)] 
+#[derive(Component)]
 pub struct MainCamera;

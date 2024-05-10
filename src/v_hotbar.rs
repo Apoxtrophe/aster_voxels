@@ -1,9 +1,15 @@
-
 use std::f32::consts::PI;
-
 use bevy::prelude::*;
-
-use crate::{a_loading::TextureHandles, v_config::{DESCRIPTOR_BOTTOM, DESCRIPTOR_COLOR, DESCRIPTOR_FADE_TIMER, DESCRIPTOR_FONT_SIZE, DESCRIPTOR_RIGHT, HOTBAR_ABOVE_BOTTOM, HOTBAR_BACKGROUND_COLOR, HOTBAR_BORDER_COLOR, HOTBAR_BORDER_SIZE, HOTBAR_ELEMENT_NUMBER, HOTBAR_SLOT_SIZE, HOTBAR_SPACING, SCREEN_HEIGHT, SCREEN_WIDTH}, v_selector::VoxelSelector};
+use crate::{
+    a_loading::TextureHandles,
+    v_config::{
+        DESCRIPTOR_BOTTOM, DESCRIPTOR_COLOR, DESCRIPTOR_FADE_TIMER, DESCRIPTOR_FONT_SIZE,
+        DESCRIPTOR_RIGHT, HOTBAR_ABOVE_BOTTOM, HOTBAR_BACKGROUND_COLOR, HOTBAR_BORDER_COLOR,
+        HOTBAR_BORDER_SIZE, HOTBAR_ELEMENT_NUMBER, HOTBAR_SLOT_SIZE, HOTBAR_SPACING, SCREEN_HEIGHT,
+        SCREEN_WIDTH,
+    },
+    v_selector::VoxelSelector,
+};
 
 pub fn hotbar_ui(
     mut commands: Commands,
@@ -23,7 +29,7 @@ pub fn hotbar_ui(
         for i in 0..HOTBAR_ELEMENT_NUMBER {
             spawn_hotbar_slot(
                 &mut commands,
-                i as u32, 
+                i as u32,
                 slot_size,
                 spacing,
                 side_space,
@@ -84,24 +90,22 @@ pub struct FadingText;
 
 pub fn voxel_descriptor(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
-        .spawn((
-            TextBundle::from_section(
-                "Welcome to Logica!",
-                TextStyle {
-                    font: asset_server.load("Fonts/Retro Gaming.ttf"),
-                    font_size: DESCRIPTOR_FONT_SIZE,
-                    color: DESCRIPTOR_COLOR,
-                    ..default()
-                },
-            )
-            .with_text_justify(JustifyText::Center)
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                bottom: Val::Percent(DESCRIPTOR_BOTTOM),
-                right: Val::Percent(DESCRIPTOR_RIGHT),
+        .spawn((TextBundle::from_section(
+            "Welcome to Logica!",
+            TextStyle {
+                font: asset_server.load("Fonts/Retro Gaming.ttf"),
+                font_size: DESCRIPTOR_FONT_SIZE,
+                color: DESCRIPTOR_COLOR,
                 ..default()
-            }),
-        ))
+            },
+        )
+        .with_text_justify(JustifyText::Center)
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            bottom: Val::Percent(DESCRIPTOR_BOTTOM),
+            right: Val::Percent(DESCRIPTOR_RIGHT),
+            ..default()
+        }),))
         .insert(FadingText);
 }
 

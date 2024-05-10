@@ -1,10 +1,12 @@
+use crate::a_loading::TextureHandles;
+use crate::v_components::{StateVoxel, TypeVoxel};
+use crate::v_config::{VOXEL_METALLIC, VOXEL_PERCIEVED_ROUGHNESS, VOXEL_REFLECTANCE};
+use crate::v_graphics_helper::{
+    calculate_indices, calculate_normals, calculate_positions, calculate_uv_coordinates,
+};
 use bevy::render::mesh::{Indices, Mesh};
 use bevy::render::render_asset::RenderAssetUsages;
 use bevy::{prelude::*, render::render_resource::PrimitiveTopology};
-use crate::a_loading::TextureHandles;
-use crate::v_components::{TypeVoxel, StateVoxel};
-use crate::v_config::{VOXEL_PERCIEVED_ROUGHNESS, VOXEL_METALLIC, VOXEL_REFLECTANCE};
-use crate::v_graphics_helper::{calculate_indices, calculate_normals, calculate_positions, calculate_uv_coordinates};
 
 #[derive(Resource)]
 pub struct VoxelAssets {
@@ -13,10 +15,7 @@ pub struct VoxelAssets {
 }
 
 impl VoxelAssets {
-    pub fn new(
-        meshes: &mut ResMut<Assets<Mesh>>,
-        texture_handles: &Res<TextureHandles>,
-    ) -> Self {
+    pub fn new(meshes: &mut ResMut<Assets<Mesh>>, texture_handles: &Res<TextureHandles>) -> Self {
         if let Some(texture_handle) = texture_handles.image_handles.get(0) {
             Self {
                 texture_atlas: texture_handle.clone(),
@@ -41,7 +40,6 @@ impl VoxelAssets {
         })
     }
 
-    
     pub fn create_voxel_mesh(
         &self,
         voxel_type: TypeVoxel,
@@ -52,10 +50,13 @@ impl VoxelAssets {
         let normals = calculate_normals();
         let indices = calculate_indices();
 
-        let mut mesh = Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
-            .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
-            .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
-            .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv_coordinates);
+        let mut mesh = Mesh::new(
+            PrimitiveTopology::TriangleList,
+            RenderAssetUsages::default(),
+        )
+        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv_coordinates);
 
         mesh.insert_indices(Some(Indices::U32(indices)).unwrap());
 

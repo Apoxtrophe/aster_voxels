@@ -1,14 +1,10 @@
 use bevy::prelude::*;
 use bevy_mod_raycast::immediate::Raycast;
-
-
-
 use bevy_math::{Ray3d, Vec3A};
-
-
 use super::v_config::*;
 use crate::{
-    v_components::{TypeVoxel, PositionVoxel, StateVoxel}, v_structure::Voxel,
+    v_components::{PositionVoxel, StateVoxel, TypeVoxel},
+    v_structure::Voxel,
 };
 
 #[derive(Resource)]
@@ -42,7 +38,10 @@ pub fn raycasting(
     mut gizmos: Gizmos,
 ) -> Result<(IVec3, IVec3, bool), RaycastingError> {
     if let Ok(camera_transform) = query.get_single() {
-        let ray = Ray3d::new(camera_transform.translation, camera_transform.forward().into());
+        let ray = Ray3d::new(
+            camera_transform.translation,
+            camera_transform.forward().into(),
+        );
         if let Some((_, intersection_data)) = raycast.cast_ray(ray, &default()).iter().next() {
             let distance = intersection_data.distance();
             let normal = intersection_data.normal().round();
@@ -80,7 +79,7 @@ pub fn update_info(
     query: Query<&Transform, With<Camera>>,
     mut voxel_info: ResMut<VoxelInfo>,
     voxel: ResMut<Voxel>,
-    get_query: Query<(Entity, &PositionVoxel, &TypeVoxel, &StateVoxel)>,
+    get_query: Query<(&PositionVoxel, &TypeVoxel, &StateVoxel)>,
     gizmos: Gizmos,
 ) {
     match raycasting(raycast, query, gizmos) {
