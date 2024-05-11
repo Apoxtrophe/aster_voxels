@@ -68,9 +68,13 @@ pub fn world_loader(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     selected_world: Res<SelectedWorld>,
+    mut world_name: ResMut<WorldName>,
 ) {
-    if let Some(world_name) = &selected_world.0 {
-        if let Ok(saved_world) = load_world(world_name) {
+    if let Some(world_name_str) = &selected_world.0 {
+        if let Ok(saved_world) = load_world(world_name_str) {
+            // Update the WorldName resource with the loaded world name
+            world_name.0 = world_name_str.clone();
+
             for (voxel_position, voxel_type, voxel_state) in saved_world.voxels {
                 voxel.lean_place(
                     &mut commands,
@@ -83,7 +87,7 @@ pub fn world_loader(
                 );
             }
         } else {
-            eprintln!("Failed to load world: {}", world_name);
+            eprintln!("Failed to load world: {}", world_name_str);
         }
     }
 }

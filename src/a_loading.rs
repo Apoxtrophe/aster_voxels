@@ -1,7 +1,7 @@
 use crate::{
     v_components::MainMenuEntity, v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo,
     v_lighting::SunDirection, v_main_menu::clear_main_menu_entities, v_selector::VoxelSelector,
-    v_simulation::MyTimer, v_structure::Voxel, v_widgets::SpeedBar, AppState,
+    v_simulation::MyTimer, v_structure::Voxel, v_plugins::SpeedBar, AppState,
 };
 use bevy::prelude::*;
 use std::time::Duration;

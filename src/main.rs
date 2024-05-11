@@ -23,7 +23,7 @@ mod v_save;
 mod v_selector;
 mod v_simulation;
 mod v_structure;
-mod v_widgets;
+mod v_plugins;
 use a_loading::{asset_check, voxel_loading};
 use b_voxel_setup::voxel_setup;
 use v_config::SUN_TIMER_RATE;
@@ -37,10 +37,10 @@ use v_main_menu::{
     SelectedWorld, WorldName,
 };
 use v_player2::{manage_cursor, player_setup, respawn, voxel_interaction_system};
+use v_plugins::WidgetPlugin;
 use v_pre_main_menu::pre_main_menu_cleanup;
 use v_save::{autosave_system, check_for_save_input, world_loader, SaveEvent};
 use v_simulation::logic_operation_system;
-use v_widgets::{simulation_speed_widget, SaveNotificationPlugin};
 
 // Application state definitions
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -86,8 +86,7 @@ fn main() {
         .add_plugins(FpsControllerPlugin)
         .add_plugins(AtmospherePlugin)
         .add_plugins(EguiPlugin)
-        .add_plugins(SaveNotificationPlugin)
-        .add_event::<SaveEvent>()
+        .add_plugins(WidgetPlugin).add_event::<SaveEvent>()
         .init_state::<AppState>()
         .add_systems(Startup, pre_main_menu_cleanup)
         .add_systems(OnEnter(AppState::MainMenu), setup_main_menu)
@@ -115,7 +114,6 @@ fn main() {
             Update,
             (
                 in_game_menu,
-                simulation_speed_widget,
                 update_info,
                 manage_cursor,
                 respawn,

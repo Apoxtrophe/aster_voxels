@@ -14,7 +14,7 @@ use crate::{
     v_lib::VoxelInfo,
     v_selector::VoxelSelector,
     v_structure::Voxel,
-    v_widgets::SpeedBar,
+    v_plugins::SpeedBar,
 };
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
 

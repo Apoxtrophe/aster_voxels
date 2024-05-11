@@ -29,14 +29,20 @@ use crate::{
     AppState,
 };
 
-pub struct SaveNotificationPlugin;
+pub struct WidgetPlugin;
 
-impl Plugin for SaveNotificationPlugin {
+impl Plugin for WidgetPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(SaveNotificationTimer(Timer::from_seconds(  2.0, TimerMode::Once,)))
-        .add_systems(OnEnter(AppState::InGame), setup_save_notification)
+        .add_systems(OnEnter(AppState::InGame), (
+            setup_save_notification,
+            setup_speed_widget, 
+        ))
         .add_systems(
-            Update, (update_save_notification).run_if(in_state(AppState::InGame)),
+            Update, (
+                update_save_notification,
+                update_speed_widget,
+            ).run_if(in_state(AppState::InGame)),
         );
     }
 }
@@ -47,8 +53,7 @@ pub struct SaveNotification;
 pub fn setup_save_notification(mut commands: Commands, texture_handles: Res<TextureHandles>) {
     let image_handle = texture_handles.image_handles.get(4).expect("Texture handle not found");
 
-    commands.spawn((
-        ImageBundle {
+    commands.spawn((ImageBundle {
             style: Style {
                 width: Val::Px(64.0),
                 height: Val::Px(64.0),
@@ -81,7 +86,6 @@ pub fn update_save_notification(
 }
 
 // Speed Controller
-
 #[derive(Resource)]
 pub struct SpeedBar {
     pub speed_index: usize,
@@ -96,15 +100,12 @@ impl SpeedBar {
 #[derive(Component)]
 pub struct SpeedWidget;
 
-pub fn simulation_speed_widget(
-    texture_handles: Res<TextureHandles>,
-    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
-    mut commands: Commands,
-    mut speed_bar: ResMut<SpeedBar>,
+pub fn update_speed_widget(
+    speed_bar: ResMut<SpeedBar>,
     mut simulation_timer: ResMut<MyTimer>,
+    mut query: Query<&mut TextureAtlas, With<SpeedWidget>>,
 ) {
     let index = speed_bar.speed_index - 1;
-
 
     let simulation_speed: u32;
     match index {
@@ -118,36 +119,30 @@ pub fn simulation_speed_widget(
 
     simulation_timer.0.set_duration(Duration::from_millis(simulation_speed.into()));
 
+    for mut texture_atlas in &mut query {
+        texture_atlas.index = index;
+    }
+}
+
+pub fn setup_speed_widget(
+    texture_handles: Res<TextureHandles>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
+    mut commands: Commands,
+) {
     let texture_handle = texture_handles.image_handles.get(5).unwrap_or_else(|| panic!("Texture handle not found"));
     let texture_atlas = TextureAtlasLayout::from_grid(Vec2::new(32.0, 16.0), 5, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
-    commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                bottom: Val::Percent(-46.0),
-                right: Val::Percent(-17.0),
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            
+    commands.spawn((AtlasImageBundle {
+        style: Style {
+            width: Val::Px(160.),
+            height: Val::Px(80.),
             ..default()
-        })
-        .with_children(|parent| {
-            parent.spawn(AtlasImageBundle {
-                style: Style {
-                    width: Val::Px(160.),
-                    height: Val::Px(80.),
-                    ..default()
-                },
-                texture_atlas: TextureAtlas{layout: texture_atlas_handle,index: (index)},
-                image: UiImage::new(texture_handle.clone()),
-                ..default()
-            });
-        })
-        .insert(SpeedWidget);
+        },
+        texture_atlas: TextureAtlas{layout: texture_atlas_handle,index: (0)},
+        image: UiImage::new(texture_handle.clone()),
+        ..default()
+        },
+        SpeedWidget,
+    ));
 }
