@@ -21,6 +21,7 @@ mod v_player2;
 mod v_pre_main_menu;
 mod v_save;
 mod v_selector;
+mod v_settings;
 mod v_simulation;
 mod v_structure;
 mod v_plugins;
@@ -29,7 +30,7 @@ use b_voxel_setup::voxel_setup;
 use v_config::SUN_TIMER_RATE;
 use v_graphics::update_voxel_emissive;
 use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
-use v_in_game_menu::in_game_menu;
+use v_in_game_menu::{in_game_menu, print_debug};
 use v_lib::update_info;
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_main_menu::{
@@ -48,8 +49,11 @@ pub enum AppState {
     #[default]
     PreMainMenu, //Cleaning up entities and preparing clean slate for main menu
     MainMenu,      // Main menu handling
+    
     WorldNaming,   // World creation
     LoadWorldMenu, // World Loading
+    MainSettingsMenu, // Main menu settings
+    
     AssetLoading,  // Loading Assets
     GameSetup,     // Adding assets to world
     InGame,        // In game loop
@@ -89,6 +93,10 @@ fn main() {
         .add_plugins(WidgetPlugin).add_event::<SaveEvent>()
         .init_state::<AppState>()
         .add_systems(Startup, pre_main_menu_cleanup)
+        .add_systems(OnEnter(AppState::PreMainMenu), pre_main_menu_cleanup)
+
+        .add_systems(Update, print_debug)
+
         .add_systems(OnEnter(AppState::MainMenu), setup_main_menu)
         .add_systems(
             Update,
@@ -96,10 +104,7 @@ fn main() {
         )
         .add_systems(OnEnter(AppState::WorldNaming), setup_world_naming)
         .add_systems(Update, world_naming.run_if(in_state(AppState::WorldNaming)))
-        .add_systems(
-            Update,
-            load_world_menu.run_if(in_state(AppState::LoadWorldMenu)),
-        )
+        .add_systems(Update,load_world_menu.run_if(in_state(AppState::LoadWorldMenu)))
         .add_systems(
             OnEnter(AppState::AssetLoading),
             (voxel_loading, player_setup),

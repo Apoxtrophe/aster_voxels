@@ -13,7 +13,7 @@ pub fn calculate_uv_coordinates(texture_index: u32) -> Vec<[f32; 2]> {
     let alternate_right = alternate_left + texture_size;
 
     let mut uv_coordinates = Vec::with_capacity(24);
-    for _ in 0..6 {
+    for _ in 0..3 {
         uv_coordinates.extend_from_slice(&[
             [left, top],
             [right, top],

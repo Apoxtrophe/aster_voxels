@@ -56,7 +56,7 @@ pub fn check_for_save_input(
         if let Err(e) = save_world(query, &world_name.0, save_event_writer) {
             eprintln!("Failed to save world: {}", e);
         } else {
-            println!("World saved successfully.");
+            println!("World saved to {}", world_name.0);
         }
     }
 }

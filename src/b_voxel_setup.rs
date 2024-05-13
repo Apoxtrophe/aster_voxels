@@ -13,14 +13,13 @@ pub fn voxel_setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut windows: Query<&mut Window, With<PrimaryWindow>>,
     mut ambient_light: ResMut<AmbientLight>,
     mut next_state: ResMut<NextState<AppState>>,
     texture_handles: Res<TextureHandles>,
 ) {
     println!("Beginning GameSetup");
     commands.insert_resource(VoxelAssets::new(&mut meshes, &texture_handles));
-    setup_environment(&mut commands, &mut ambient_light, windows.single_mut());
+    setup_lighting(&mut commands, &mut ambient_light);
     spawn_ui_elements(&mut commands, &texture_handles);
     create_ground(&mut commands, &mut meshes, &mut materials, &texture_handles);
 
@@ -41,27 +40,6 @@ fn setup_lighting(commands: &mut Commands, ambient_light: &mut ResMut<AmbientLig
 
     ambient_light.color = AMBIENT_COLOR;
     ambient_light.brightness = AMBIENT_INTENSITY;
-}
-
-fn configure_window(window: &mut Window) {
-    window.title = "Logica".to_string();
-    window.resolution = WindowResolution::new(SCREEN_WIDTH, SCREEN_HEIGHT);
-    window.present_mode = PresentMode::AutoVsync;
-    window.cursor.icon = CursorIcon::Crosshair;
-    window.cursor.grab_mode = CursorGrabMode::Locked;
-    window.window_theme = Some(WindowTheme::Dark);
-    window.mode = WindowMode::Windowed;
-    window.cursor.visible = false;
-    window.decorations = true;
-}
-
-fn setup_environment(
-    commands: &mut Commands,
-    ambient_light: &mut ResMut<AmbientLight>,
-    mut window: Mut<Window>,
-) {
-    setup_lighting(commands, ambient_light);
-    configure_window(&mut window);
 }
 
 fn spawn_ui_elements(commands: &mut Commands, texture_handles: &Res<TextureHandles>) {

@@ -18,9 +18,9 @@ use bevy::{
         JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex,
     },
     utils::default,
-    window::{PrimaryWindow, Window, WindowResolution},
+    window::{CursorGrabMode, PresentMode, PrimaryWindow, Window, WindowMode, WindowResolution, WindowTheme},
 };
-use crate::{v_components::MainMenuEntity, AppState};
+use crate::{v_components::{MainCamera, MainMenuEntity}, v_config::{SCREEN_HEIGHT, SCREEN_WIDTH}, v_in_game_menu::despawn_all, AppState};
 use bevy::prelude::Resource;
 use bevy::prelude::*;
 use bevy_egui::{
@@ -40,15 +40,9 @@ pub fn setup_main_menu(
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    let mut window = windows.single_mut();
-    window.resolution = WindowResolution::new(1920.0, 1080.0);
-    window.cursor.visible = true;
+    println!("Entering MainMenu");
 
-    commands
-        .spawn(Camera2dBundle::default())
-        .insert(MainMenuEntity);
     let main_image_handle = asset_server.load("UserInterface/logicalogo2.png");
-    println!("Entering Main Menu");
 
     let parent_style = Style {
         display: Display::Flex,
@@ -116,7 +110,7 @@ pub fn main_menu_buttons(
                 match menu_button {
                     MenuButton::Load => next_state.set(AppState::LoadWorldMenu),
                     MenuButton::New => next_state.set(AppState::WorldNaming),
-                    MenuButton::Settings => {}
+                    MenuButton::Settings => next_state.set(AppState::MainSettingsMenu),
                 }
             }
             Interaction::Hovered => border_color.0 = Color::WHITE,
@@ -140,53 +134,6 @@ pub struct WorldName(pub String);
 #[derive(Component)]
 pub struct WorldNameInput {
     pub name: String,
-}
-
-fn create_button(
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    text: &str,
-    position: (Val, Val),
-    menu_button: MenuButton,
-) -> Entity {
-    let button_style = Style {
-        min_width: Val::Px(200.0),
-        min_height: Val::Px(80.0),
-        max_height: Val::Px(80.0),
-        left: position.0,
-        top: position.1,
-        border: UiRect::all(Val::Px(5.0)),
-        align_content: AlignContent::Center,
-        justify_content: JustifyContent::Center,
-        ..default()
-    };
-
-    let button = ButtonBundle {
-        style: button_style,
-        z_index: ZIndex::Local(5),
-        background_color: Color::NONE.into(),
-        ..default()
-    };
-
-    let text_bundle = TextBundle::from_section(
-        text,
-        TextStyle {
-            font: asset_server.load("Fonts/Retro Gaming.ttf"),
-            font_size: 80.0,
-            color: Color::WHITE,
-        },
-    )
-    .with_text_justify(JustifyText::Center)
-    .with_style(Style::default());
-
-    commands
-        .spawn(button)
-        .insert(MainMenuEntity)
-        .insert(menu_button)
-        .with_children(|parent| {
-            parent.spawn(text_bundle).insert(MainMenuEntity);
-        })
-        .id()
 }
 
 pub fn setup_world_naming(mut commands: Commands) {
@@ -264,7 +211,7 @@ fn create_new_button(commands: &mut Commands, asset_server: &Res<AssetServer>) -
     };
 
     let new_text = TextBundle::from_section(
-        "NEW",
+        "CREATE",
         TextStyle {
             font: asset_server.load("Fonts/Retro Gaming.ttf"),
             font_size: 80.0,
@@ -348,14 +295,22 @@ pub fn world_naming(
             .default_width(400.0)
             .show(contexts.ctx_mut(), |ui| {
                 ui.vertical_centered_justified(|ui| {
-                    ui.heading("Create World");
+                    ui.heading(egui::RichText::new("World Creation").color(Color32::WHITE).size(36.0));
                     ui.separator();
                     ui.add_space(10.0);
-                    ui.text_edit_singleline(&mut input.name);
+                    ui.add_sized(
+                        egui::vec2(64.0, 40.0),
+                        egui::TextEdit::singleline(&mut input.name)
+                        .font(egui::TextStyle::Heading)
+                        .text_color(Color32::KHAKI)
+                    );
+                    ui.add_space(10.0);
                     ui.separator();
-                    ui.add_space(20.0);
-                    if ui.button("Create").clicked() {
+                    if ui.button(egui::RichText::new("Create").color(Color32::WHITE).size(24.0)).clicked() {
                         world_name.0 = input.name.clone();
+
+                        println!("World Name: {}", world_name.0);
+
                         next_state.set(AppState::AssetLoading);
                     }
                 });
@@ -363,7 +318,7 @@ pub fn world_naming(
     }
 
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        next_state.set(AppState::MainMenu);
+        next_state.set(AppState::PreMainMenu);
     }
 }
 
@@ -380,48 +335,58 @@ pub fn load_world_menu(
         .resizable(false)
         .default_width(400.0)
         .show(contexts.ctx_mut(), |ui| {
-            ui.heading("Load World");
-            ui.separator();
-            ui.add_space(16.0);
+            ui.vertical_centered_justified(|ui| {
+                ui.heading(egui::RichText::new("Load World").color(Color32::WHITE).size(36.0));
+                ui.separator();
+                ui.add_space(16.0);
 
-            if let Ok(entries) = std::fs::read_dir("assets/Saves") {
-                for entry in entries.flatten() {
-                    if let Some(world_name) = entry
-                        .file_name()
-                        .to_str()
-                        .and_then(|s| s.strip_suffix(".json"))
-                    {
-                        let selected = selected_world.0 == Some(world_name.to_string());
-                        ui.selectable_label(selected, world_name)
-                            .clicked()
-                            .then(|| {
-                                selected_world.0 = Some(world_name.to_string());
-                            });
-                        ui.add_space(8.0);
+                if let Ok(entries) = std::fs::read_dir("assets/Saves") {
+                    for entry in entries.flatten() {
+                        if let Some(world_name) = entry
+                            .file_name()
+                            .to_str()
+                            .and_then(|s| s.strip_suffix(".json"))
+                        {
+                            let selected = selected_world.0 == Some(world_name.to_string());
+                            ui.selectable_label(selected, egui::RichText::new(world_name).color(Color32::WHITE).size(24.0))
+                                .clicked()
+                                .then(|| {
+                                    selected_world.0 = Some(world_name.to_string());
+                                });
+                            ui.add_space(8.0);
+                        }
                     }
                 }
-            }
+                ui.separator();
+                ui.add_space(16.0);
 
-            ui.separator();
-            ui.add_space(16.0);
+                if ui.button(egui::RichText::new("Load World").color(Color32::WHITE).size(24.0)).clicked() && selected_world.0.is_some() {
+                    next_state.set(AppState::AssetLoading);
+                }
 
-            if ui.button("Load").clicked() && selected_world.0.is_some() {
-                next_state.set(AppState::AssetLoading);
-            }
+                ui.add_space(8.0);
 
-            ui.add_space(8.0);
-
-            if ui.button("Delete").clicked() {
-                if let Some(world) = &selected_world.0 {
-                    let file_path = format!("assets/Saves/{}.json", world);
-                    if std::fs::remove_file(&file_path).is_ok() {
-                        selected_world.0 = None;
+                if ui.button(egui::RichText::new("Delete World").color(Color32::WHITE).size(24.0)).clicked() {
+                    if let Some(world) = &selected_world.0 {
+                        let file_path = format!("assets/Saves/{}.json", world);
+                        if std::fs::remove_file(&file_path).is_ok() {
+                            selected_world.0 = None;
+                        }
                     }
                 }
-            }
+            });
         });
 
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        next_state.set(AppState::MainMenu);
+        next_state.set(AppState::PreMainMenu);
     }
+}
+
+pub fn settings_menu(
+    mut contexts: EguiContexts,
+
+) {
+    egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
+        ui.label("Hello World!");
+     });
 }

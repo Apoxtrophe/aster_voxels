@@ -78,8 +78,7 @@ fn show_in_game_menu(
                     )
                     .clicked()
                 {
-                    despawn_all(commands, entities, camera_query);
-                    next_state.set(AppState::MainMenu);
+                    next_state.set(AppState::PreMainMenu);
                     *menu_visible = false;
                 }
             });
@@ -91,13 +90,28 @@ pub fn despawn_all(
     entities: Query<(Entity, Option<&Name>)>,
     camera_query: Query<Entity, With<MainCamera>>,
 ) {
+    
     for camera_entity in camera_query.iter() {
         commands.entity(camera_entity).despawn_recursive();
     }
-
+    
+    
     for (entity, _) in entities.iter().skip(1) {
         if commands.get_entity(entity).is_some() {
             commands.entity(entity).despawn_recursive();
         }
     }
+    println!("Entities Despawned");
+}
+
+pub fn print_debug(
+    query: Query<Entity>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::F1) {
+        println!("Entities in the game:");
+        for entity in query.iter() {
+            println!("{:?}", entity);
+        }
+    }  
 }

@@ -42,7 +42,7 @@ Logica is an innovative, realtime voxel-based boolean logic simulation game deve
 
 **Json file for configuration settings**
 
-**In-Game menu**
+**In-Game menu** DONE
 
 **Home screen** DONE
 
@@ -67,4 +67,4 @@ Logica is an innovative, realtime voxel-based boolean logic simulation game deve
   
   **Ambient lighting** DONE
 
-  **Better visualization of state for voxel components**
+  **Better visualization of state for voxel components** DONE

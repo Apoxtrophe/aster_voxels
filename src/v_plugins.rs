@@ -43,7 +43,8 @@ impl Plugin for WidgetPlugin {
                 update_save_notification,
                 update_speed_widget,
             ).run_if(in_state(AppState::InGame)),
-        );
+           
+        ); 
     }
 }
 
