@@ -30,17 +30,17 @@ use b_voxel_setup::voxel_setup;
 use v_config::SUN_TIMER_RATE;
 use v_graphics::update_voxel_emissive;
 use v_hotbar::{hotbar_ui, timer_update_system, voxel_descriptor};
-use v_in_game_menu::{in_game_menu, print_debug};
+use v_in_game_menu::{in_game_menu};
 use v_lib::update_info;
 use v_lighting::{daylight_cycle, CycleTimer};
 use v_main_menu::{
-    load_world_menu, main_menu_buttons, setup_main_menu, setup_world_naming, world_naming,
-    SelectedWorld, WorldName,
+    load_world_menu, main_menu_buttons, settings_menu, setup_main_menu, setup_world_naming, world_naming, SelectedWorld, WorldName
 };
 use v_player2::{manage_cursor, player_setup, respawn, voxel_interaction_system};
 use v_plugins::WidgetPlugin;
-use v_pre_main_menu::pre_main_menu_cleanup;
+use v_pre_main_menu::{pre_main_menu_cleanup, print_debug};
 use v_save::{autosave_system, check_for_save_input, world_loader, SaveEvent};
+use v_settings::GlobalSettings;
 use v_simulation::logic_operation_system;
 
 // Application state definitions
@@ -63,6 +63,7 @@ fn main() {
     App::new()
         .insert_resource(WorldName::default())
         .insert_resource(SelectedWorld::default())
+        .insert_resource(GlobalSettings::default())
         .insert_resource(RapierConfiguration::default())
         .insert_resource(Msaa::Sample2)
         .insert_resource(AtmosphereModel::default())
@@ -105,6 +106,9 @@ fn main() {
         .add_systems(OnEnter(AppState::WorldNaming), setup_world_naming)
         .add_systems(Update, world_naming.run_if(in_state(AppState::WorldNaming)))
         .add_systems(Update,load_world_menu.run_if(in_state(AppState::LoadWorldMenu)))
+        .add_systems(Update, settings_menu.run_if(in_state(AppState::MainSettingsMenu)))
+
+
         .add_systems(
             OnEnter(AppState::AssetLoading),
             (voxel_loading, player_setup),

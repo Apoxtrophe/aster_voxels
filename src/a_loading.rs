@@ -1,9 +1,8 @@
+use bevy::{asset::{AssetServer, Assets, Handle}, audio::AudioSource, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut, Resource}}, render::texture::Image, time::{Timer, TimerMode}};
+
 use crate::{
-    v_components::MainMenuEntity, v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo,
-    v_lighting::SunDirection, v_main_menu::clear_main_menu_entities, v_selector::VoxelSelector,
-    v_simulation::MyTimer, v_structure::Voxel, v_plugins::SpeedBar, AppState,
+    v_components::MainMenuEntity, v_config::SIMULATION_RATE, v_hotbar::FadeTimer, v_lib::VoxelInfo, v_lighting::SunDirection, v_main_menu::{clear_main_menu_entities}, v_plugins::SpeedBar, v_selector::VoxelSelector, v_simulation::MyTimer, v_structure::Voxel, AppState
 };
-use bevy::prelude::*;
 use std::time::Duration;
 
 #[derive(Resource, Clone)]
@@ -77,9 +76,4 @@ fn all_assets_loaded(texture_handles: &TextureHandles, image_assets: &Assets<Ima
         .image_handles
         .iter()
         .all(|handle| image_assets.get(handle).is_some())
-}
-
-#[derive(Resource, Clone)]
-pub struct AudioAssets {
-    pub click_sound: Handle<AudioSource>,
 }

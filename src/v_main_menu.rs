@@ -20,7 +20,7 @@ use bevy::{
     utils::default,
     window::{CursorGrabMode, PresentMode, PrimaryWindow, Window, WindowMode, WindowResolution, WindowTheme},
 };
-use crate::{v_components::{MainCamera, MainMenuEntity}, v_config::{SCREEN_HEIGHT, SCREEN_WIDTH}, v_in_game_menu::despawn_all, AppState};
+use crate::{v_components::MainMenuEntity, v_settings::{load_settings, reset_settings, save_settings, GlobalSettings}, AppState};
 use bevy::prelude::Resource;
 use bevy::prelude::*;
 use bevy_egui::{
@@ -39,8 +39,12 @@ pub fn setup_main_menu(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
+
+    mut settings: ResMut<GlobalSettings>,
 ) {
     println!("Entering MainMenu");
+
+    load_settings(settings);
 
     let main_image_handle = asset_server.load("UserInterface/logicalogo2.png");
 
@@ -296,6 +300,7 @@ pub fn world_naming(
             .show(contexts.ctx_mut(), |ui| {
                 ui.vertical_centered_justified(|ui| {
                     ui.heading(egui::RichText::new("World Creation").color(Color32::WHITE).size(36.0));
+                    ui.heading(egui::RichText::new("ESC to exit").color(Color32::GRAY).size(24.0));
                     ui.separator();
                     ui.add_space(10.0);
                     ui.add_sized(
@@ -337,6 +342,7 @@ pub fn load_world_menu(
         .show(contexts.ctx_mut(), |ui| {
             ui.vertical_centered_justified(|ui| {
                 ui.heading(egui::RichText::new("Load World").color(Color32::WHITE).size(36.0));
+                ui.heading(egui::RichText::new("ESC to exit").color(Color32::GRAY).size(24.0));
                 ui.separator();
                 ui.add_space(16.0);
 
@@ -384,9 +390,33 @@ pub fn load_world_menu(
 
 pub fn settings_menu(
     mut contexts: EguiContexts,
+    mut next_state: ResMut<NextState<AppState>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut settings: ResMut<GlobalSettings>,
 
+    mut commands: Commands
 ) {
-    egui::CentralPanel::default().show(contexts.ctx_mut(), |ui| {
-        ui.label("Hello World!");
-     });
+    egui::SidePanel::right("load_world_panel")
+        .resizable(false)
+        .default_width(400.0)
+        .show(contexts.ctx_mut(), |ui| {
+            ui.vertical_centered_justified(|ui| {
+                ui.heading(egui::RichText::new("Global Settings").color(Color32::WHITE).size(36.0));
+                ui.heading(egui::RichText::new("ESC to exit").color(Color32::GRAY).size(24.0));
+                ui.separator();
+                ui.add_space(16.0);
+                println!("UI Scale: {}", settings.ui_scale);
+                ui.add(egui::Slider::new(&mut settings.ui_scale, 0.0..=2.0).text(egui::RichText::new("UI Scale").color(Color32::WHITE).size(24.0)));
+                if ui.button(egui::RichText::new("Apply").color(Color32::WHITE).size(24.0)).clicked() {
+                    save_settings(settings);
+                }
+                if ui.button(egui::RichText::new("Defaults").color(Color32::WHITE).size(24.0)).clicked() {
+                    reset_settings(commands);
+                }
+            });
+        });
+
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        next_state.set(AppState::PreMainMenu);
+    }
 }
