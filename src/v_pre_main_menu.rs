@@ -1,7 +1,8 @@
 use std::os::windows;
 
-use bevy::{asset::AssetServer, core::Name, core_pipeline::core_2d::Camera2dBundle, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Query, Res, ResMut}, world::Mut}, hierarchy::DespawnRecursiveExt, input::{keyboard::KeyCode, ButtonInput}, window::{CursorGrabMode, CursorIcon, PresentMode, PrimaryWindow, Window, WindowMode, WindowResolution, WindowTheme}};
-use crate::{v_components::{MainCamera, MainMenuEntity}, v_config::{SCREEN_HEIGHT, SCREEN_WIDTH}, v_settings::{load_settings, GlobalSettings}, AppState};
+use bevy::{app::App, asset::AssetServer, core::Name, core_pipeline::core_2d::Camera2dBundle, ecs::{entity::Entity, query::With, schedule::NextState, system::{Commands, Local, NonSend, Query, Res, ResMut}, world::Mut}, hierarchy::DespawnRecursiveExt, input::{keyboard::KeyCode, ButtonInput}, window::{CursorGrabMode, CursorIcon, PresentMode, PrimaryWindow, Window, WindowMode, WindowResolution, WindowTheme}, winit::WinitWindows};
+use bevy_egui::EguiSettings;
+use crate::{v_components::{MainCamera, MainMenuEntity}, v_config::{SCREEN_HEIGHT, SCREEN_WIDTH}, v_settings::{load_settings, update_global_screen, GlobalSettings}, AppState};
 
 pub fn pre_main_menu_cleanup(
     mut next_state: ResMut<NextState<AppState>>,
@@ -11,13 +12,18 @@ pub fn pre_main_menu_cleanup(
     camera_query: Query<Entity, With<MainCamera>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
 
-    mut settings: ResMut<GlobalSettings>,
+    mut egui_settings: ResMut<EguiSettings>,
+    mut global_settings: ResMut<GlobalSettings>,
 ) {
     println!("Entering PreMainMenuCleanup");
+
     commands
         .spawn(Camera2dBundle::default())
         .insert(MainMenuEntity);
+
     setup_window(windows.single_mut());
+
+    update_egui_scale_factor(egui_settings, windows, global_settings);
 
     despawn_all(commands, entities, camera_query);
     next_state.set(AppState::MainMenu);
@@ -72,6 +78,17 @@ pub fn print_debug(
     } 
     if keyboard_input.just_pressed(KeyCode::F2) {
         println!("UI Scale: {}", global_settings.ui_scale);
+        println!("Screen Dimensions: {:?}", global_settings.screen_dimensions);
     }
 
+}
+
+fn update_egui_scale_factor(
+    mut egui_settings: ResMut<EguiSettings>,
+    mut windows: Query<&mut Window, With<PrimaryWindow>>,
+    mut settings: ResMut<GlobalSettings>,
+) {
+    if let Ok(window) = windows.get_single() {
+        egui_settings.scale_factor = settings.ui_scale;
+    }
 }

@@ -5,7 +5,7 @@ use bevy::{
         entity::Entity,
         query::With,
         schedule::NextState,
-        system::{Commands, Query, Res, ResMut},
+        system::{Commands, Local, Query, Res, ResMut},
     },
     hierarchy::BuildChildren,
     render::color::Color,
@@ -18,9 +18,9 @@ use bevy::{
         JustifyItems, Overflow, PositionType, Style, UiRect, Val, ZIndex,
     },
     utils::default,
-    window::{CursorGrabMode, PresentMode, PrimaryWindow, Window, WindowMode, WindowResolution, WindowTheme},
+    window::{CursorGrabMode, PresentMode, PrimaryWindow, Window, WindowMode, WindowResolution, WindowTheme}, winit::WinitWindows,
 };
-use crate::{v_components::MainMenuEntity, v_settings::{load_settings, reset_settings, save_settings, GlobalSettings}, AppState};
+use crate::{v_components::MainMenuEntity, v_settings::{ load_settings, save_settings, update_global_screen, GlobalSettings}, AppState};
 use bevy::prelude::Resource;
 use bevy::prelude::*;
 use bevy_egui::{
@@ -388,14 +388,23 @@ pub fn load_world_menu(
     }
 }
 
+struct EditedSettings {
+    width: String,
+    height: String,
+}
+
 pub fn settings_menu(
     mut contexts: EguiContexts,
     mut next_state: ResMut<NextState<AppState>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut settings: ResMut<GlobalSettings>,
 
-    mut commands: Commands
+    mut commands: Commands,
+
+    winit_windows: NonSend<WinitWindows>, 
+    window_query: Query<Entity, With<PrimaryWindow>>
 ) {
+
     egui::SidePanel::right("load_world_panel")
         .resizable(false)
         .default_width(400.0)
@@ -405,17 +414,42 @@ pub fn settings_menu(
                 ui.heading(egui::RichText::new("ESC to exit").color(Color32::GRAY).size(24.0));
                 ui.separator();
                 ui.add_space(16.0);
-                println!("UI Scale: {}", settings.ui_scale);
                 ui.add(egui::Slider::new(&mut settings.ui_scale, 0.0..=2.0).text(egui::RichText::new("UI Scale").color(Color32::WHITE).size(24.0)));
+                ui.heading(egui::RichText::new("Window Settings").color(Color32::WHITE).size(24.0));
+                ui.horizontal(|ui| {
+                    ui.label("Width:");
+                    let mut value = settings.screen_dimensions.0.to_string();
+                    if ui.add(egui::TextEdit::singleline(&mut value).desired_width(80.0)).changed() {
+                        if let Ok(parsed_value) = value.parse::<u32>() {
+                            settings.screen_dimensions.0 = parsed_value
+                        }
+                    }
+                    ui.add_space(8.0);
+                    ui.separator();
+                    ui.add_space(8.0);
+                    ui.label("Height");
+                    let mut value = settings.screen_dimensions.1.to_string();
+                    if ui.add(egui::TextEdit::singleline(&mut value).desired_width(80.0)).changed() {
+                        if let Ok(parsed_value) = value.parse::<u32>() {
+                            settings.screen_dimensions.1 = parsed_value
+                        }
+                    }
+                    
+                });
+                ui.add_space(8.0);
+                ui.separator();
+                ui.add_space(8.0);
                 if ui.button(egui::RichText::new("Apply").color(Color32::WHITE).size(24.0)).clicked() {
                     save_settings(settings);
+                    return;
                 }
+                ui.add_space(16.0);
                 if ui.button(egui::RichText::new("Defaults").color(Color32::WHITE).size(24.0)).clicked() {
-                    reset_settings(commands);
+
+                    update_global_screen(winit_windows, window_query, commands);
                 }
             });
         });
-
     if keyboard_input.just_pressed(KeyCode::Escape) {
         next_state.set(AppState::PreMainMenu);
     }

@@ -40,7 +40,7 @@ use v_player2::{manage_cursor, player_setup, respawn, voxel_interaction_system};
 use v_plugins::WidgetPlugin;
 use v_pre_main_menu::{pre_main_menu_cleanup, print_debug};
 use v_save::{autosave_system, check_for_save_input, world_loader, SaveEvent};
-use v_settings::GlobalSettings;
+use v_settings::{print_monitor_size, update_global_screen, GlobalSettings};
 use v_simulation::logic_operation_system;
 
 // Application state definitions
@@ -63,10 +63,10 @@ fn main() {
     App::new()
         .insert_resource(WorldName::default())
         .insert_resource(SelectedWorld::default())
-        .insert_resource(GlobalSettings::default())
         .insert_resource(RapierConfiguration::default())
         .insert_resource(Msaa::Sample2)
         .insert_resource(AtmosphereModel::default())
+        .insert_resource(GlobalSettings::default())
         .insert_resource(CycleTimer(Timer::new(
             bevy::utils::Duration::from_millis(SUN_TIMER_RATE),
             TimerMode::Repeating,
@@ -93,6 +93,7 @@ fn main() {
         .add_plugins(EguiPlugin)
         .add_plugins(WidgetPlugin).add_event::<SaveEvent>()
         .init_state::<AppState>()
+        .add_systems(Startup, update_global_screen)
         .add_systems(Startup, pre_main_menu_cleanup)
         .add_systems(OnEnter(AppState::PreMainMenu), pre_main_menu_cleanup)
 

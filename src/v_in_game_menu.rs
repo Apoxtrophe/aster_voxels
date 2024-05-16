@@ -67,7 +67,7 @@ fn show_in_game_menu(
                 )
             });
             ui.separator();
-            ui.add_space(800.0);
+            ui.add_space(200.0);
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 if ui
                     .button(
